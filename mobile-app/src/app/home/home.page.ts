@@ -16,8 +16,8 @@ import html2pdf from 'html2pdf.js';
 export class HomePage {
   // Datos dinámicos del usuario actual
   userName = 'Usuario';
-  userInitials = 'US';
-  userId = '1';
+  userInitials: string = 'US';
+  userId: string = '';
 
   // Variables para Modales Premium
   isFoodModalOpen = false;
@@ -60,8 +60,7 @@ export class HomePage {
   ) {}
 
   ngOnInit() {
-    this.loadDailyHistory();
-    this.loadProfile();
+    // Esperamos a ionViewWillEnter para tener el userId
   }
 
   ionViewWillEnter() {
@@ -237,7 +236,15 @@ export class HomePage {
       },
       error: async (err) => {
         await loading.dismiss();
-        alert('Hubo un error al conectar con la IA.');
+        let errorMsg = 'Error desconocido';
+        if (err.error && err.error.error) {
+           errorMsg = err.error.error;
+        } else if (err.error) {
+           errorMsg = JSON.stringify(err.error);
+        } else {
+           errorMsg = err.message;
+        }
+        alert('Hubo un error al conectar con la IA: ' + errorMsg);
         this.isRequestInProgress = false;
       }
     });

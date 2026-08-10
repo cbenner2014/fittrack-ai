@@ -39,12 +39,16 @@ public class AiCoachController {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+            String weight = user.getCurrentWeight() != null ? user.getCurrentWeight().toString() : "75.0";
+            String height = user.getHeight() != null ? user.getHeight().toString() : "175.0";
+            String goal = user.getGoal() != null ? user.getGoal().name() : "Mantenimiento";
+
             // 2. Armar el Prompt Inteligente
             String prompt = "Actúa como un Nutricionista y Entrenador Personal de Élite. " +
                     "Tengo un cliente con el siguiente perfil: " +
                     "Nombre: " + user.getFullName() + ", " +
-                    "Peso: " + user.getCurrentWeight() + " kg, Altura: " + user.getHeight() + " cm, " +
-                    "Objetivo principal: " + user.getGoal().name() + ". " +
+                    "Peso: " + weight + " kg, Altura: " + height + " cm, " +
+                    "Objetivo principal: " + goal + ". " +
                     "Génerale un plan de alimentación y entrenamiento inicial. " +
                     "Devuelve el resultado ESTRICTAMENTE en formato JSON plano sin Markdown. " +
                     "La estructura exacta debe ser: " +
@@ -55,6 +59,13 @@ public class AiCoachController {
 
             // 3. Enviarle el texto a Gemini (sin imagen, por eso Base64 está vacío)
             String aiJsonResponse = aiVisionService.analyzeImage("", prompt);
+
+            // Limpiar cualquier basura extra o texto antes/después del JSON real
+            int start = aiJsonResponse.indexOf('{');
+            int end = aiJsonResponse.lastIndexOf('}');
+            if (start != -1 && end != -1 && start < end) {
+                aiJsonResponse = aiJsonResponse.substring(start, end + 1);
+            }
 
             return ResponseEntity.ok(aiJsonResponse);
 
