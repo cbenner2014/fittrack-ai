@@ -53,7 +53,7 @@ public class MachineController {
                 "{\"imageUrl\": \"" + imageUrl + "\", " +
                 "\"name\": \"Nombre común de la máquina\", " +
                 "\"targetMuscles\": \"Músculos principales y secundarios que trabaja\", " +
-                "\"usageInstructions\": \"Instrucciones paso a paso breves de cómo usarla correctamente\", " +
+                "\"usageInstructions\": \"Instrucciones paso a paso. Usa etiquetas HTML <br><br> para separar cada paso y <b> para destacar números o palabras clave\", " +
                 "\"safetyTips\": \"1 consejo clave de seguridad o postura\"}";
 
             // 4. Analizar con Gemini

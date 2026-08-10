@@ -10,6 +10,7 @@ backend/*.class
 backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
+backend/src/main/resources/application-secrets.yml
 
 # IntelliJ IDEA
 .idea/

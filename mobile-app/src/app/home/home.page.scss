@@ -163,3 +163,165 @@
     opacity: 0.8;
   }
 }
+
+/* ==================================
+   ESTILOS PREMIUM PARA LOS MODALES
+   ================================== */
+ion-modal.custom-modal {
+  --height: 85%;
+  --max-height: 85%;
+  --width: 90%;
+  --border-radius: 20px;
+  --background: transparent;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-ion-content {
+  --background: transparent;
+}
+
+.modal-content {
+  background: rgba(25, 25, 30, 0.95) !important;
+  border: 1px solid rgba(0, 255, 136, 0.3) !important;
+  padding: 30px 20px;
+  text-align: center;
+  height: 100%;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+
+  .modal-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+    &.food-icon { color: #ff9d00; }
+    &.gym-icon { color: #9d00ff; }
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px;
+    color: #888;
+    cursor: pointer;
+    transition: 0.3s;
+    &:active { color: #ff4444; }
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .food-name {
+    color: #ccc;
+    font-size: 1rem;
+    margin-bottom: 25px;
+  }
+
+  /* Círculos de Macros */
+  .modal-macros {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 30px;
+
+    .macro-circle {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid;
+      background: rgba(0,0,0,0.5);
+
+      span { font-weight: bold; font-size: 1.1rem; color: #fff; }
+      small { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+
+      &.protein { border-color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+      &.cal { border-color: #ff9d00; box-shadow: 0 0 10px rgba(255,157,0,0.3); width: 90px; height: 90px; }
+      &.carbs { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3); }
+    }
+  }
+
+  /* Instrucciones Máquina */
+  .detail-badge {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .instructions-box {
+    background: rgba(0,0,0,0.4);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 3px solid #9d00ff;
+    color: #ddd;
+    font-size: 0.95rem;
+    text-align: left;
+    margin-bottom: 25px;
+    width: 100%;
+  }
+
+  /* Coach Plan */
+  .coach-msg {
+    font-style: italic;
+    color: #00ff88;
+    margin-bottom: 20px;
+  }
+
+  .plan-section {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 15px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 10px;
+
+    h3 {
+      font-size: 1.1rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+      ion-icon { color: #00ff88; }
+    }
+    p { color: #ccc; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+  }
+}
+
+/* Botón Neón Universal */
+.btn-neon {
+  background: transparent;
+  color: #00ff88;
+  border: 2px solid #00ff88;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,255,136,0.2), inset 0 0 10px rgba(0,255,136,0.1);
+  transition: 0.3s;
+  width: 80%;
+  margin-top: 15px;
+  display: inline-block;
+
+  &:active {
+    background: #00ff88;
+    color: #000;
+  }
+}

@@ -1,12 +1,12 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-header">
     <div class="user-info">
-      <h1>Hola, <span class="neon-text">{{ userProfile.name }}</span></h1>
+      <h1>Hola, <span class="neon-text">{{ userName }}</span></h1>
       <p>Objetivo: {{ userProfile.goal }}</p>
     </div>
-    <ion-avatar>
-      <img src="https://ui-avatars.com/api/?name=Juan+Perez&background=00ff88&color=000" />
-    </ion-avatar>
+    <div class="logout-btn" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+    </div>
   </div>
 
   <div class="main-content">
@@ -58,4 +58,148 @@
       <ion-icon name="hardware-chip-outline" class="coach-icon"></ion-icon>
     </div>
   </div>
+
+  <!-- SECCIÓN DE HISTORIAL DE HOY -->
+  <div class="history-section" *ngIf="todaysMeals && todaysMeals.length > 0">
+    <h3 style="color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+      <ion-icon name="time-outline"></ion-icon> Lo que has comido hoy
+    </h3>
+    
+    <div class="glass-card meal-item" *ngFor="let meal of todaysMeals" (click)="viewPastFood(meal)" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 15px; align-items: center; cursor: pointer;">
+      <img [src]="meal.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-green);" />
+      <div style="flex: 1;">
+        <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ meal.mealType }}</h4>
+        <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">{{ meal.totalCalories }} Kcal • {{ meal.totalProtein }}g Proteína</p>
+      </div>
+      <ion-icon name="checkmark-circle" style="color: var(--neon-green); font-size: 24px;"></ion-icon>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE HISTORIAL DE MÁQUINAS -->
+  <div class="history-section" *ngIf="machineHistory && machineHistory.length > 0">
+    <h3 style="color: white; margin-top: 25px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+      <ion-icon name="calendar-outline"></ion-icon> Tu Semana de Entrenamiento
+    </h3>
+    
+    <div *ngFor="let day of getUniqueDays()" style="margin-bottom: 15px;">
+      <h4 style="color: var(--neon-purple); margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px;">{{ day }}</h4>
+      <div class="glass-card meal-item" *ngFor="let machine of getMachinesByDay(day)" (click)="viewPastMachine(machine)" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 15px; align-items: center; cursor: pointer;">
+        <img [src]="machine.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-purple);" />
+        <div style="flex: 1;">
+          <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ machine.name }}</h4>
+          <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">Músculos: {{ machine.targetMuscles }}</p>
+        </div>
+        <ion-icon name="barbell" style="color: var(--neon-purple); font-size: 24px;"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE COMIDA -->
+  <ion-modal [isOpen]="isFoodModalOpen" (didDismiss)="isFoodModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.95); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isFoodModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent; text-align: center;">
+          <ion-icon name="restaurant-outline" class="modal-icon food-icon" style="font-size: 60px; margin-bottom: 10px; margin-top: 20px; color: #ff9d00;"></ion-icon>
+          <h2 class="neon-text" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">Análisis Completado</h2>
+          <h4 class="food-name" style="color: #ccc; font-size: 1rem; margin-bottom: 25px;">{{ foodResult?.foodItems }}</h4>
+          
+          <div class="modal-macros" style="display: flex; justify-content: space-around; width: 100%; margin-bottom: 30px;">
+            <div class="macro-circle protein" style="width: 75px; height: 75px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.3); background: rgba(0,0,0,0.5);">
+              <span style="font-weight: bold; font-size: 1.1rem; color: #fff;">{{ foodResult?.totalProtein }}g</span>
+              <small style="font-size: 0.7rem; color: #aaa; text-transform: uppercase;">Proteína</small>
+            </div>
+            <div class="macro-circle cal" style="width: 90px; height: 90px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #ff9d00; box-shadow: 0 0 10px rgba(255,157,0,0.3); background: rgba(0,0,0,0.5);">
+              <span style="font-weight: bold; font-size: 1.1rem; color: #fff;">{{ foodResult?.totalCalories }}</span>
+              <small style="font-size: 0.7rem; color: #aaa; text-transform: uppercase;">Kcal</small>
+            </div>
+            <div class="macro-circle carbs" style="width: 75px; height: 75px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3); background: rgba(0,0,0,0.5);">
+              <span style="font-weight: bold; font-size: 1.1rem; color: #fff;">{{ foodResult?.totalCarbs }}g</span>
+              <small style="font-size: 0.7rem; color: #aaa; text-transform: uppercase;">Carbos</small>
+            </div>
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px 20px 25px;">
+          <div style="display: flex; gap: 10px; width: 100%;" *ngIf="!isViewingHistory">
+            <button class="btn-neon outline" (click)="isFoodModalOpen = false" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); border-radius: 25px;">Descartar</button>
+            <button class="btn-neon" (click)="saveFoodToHistory()" style="flex: 2; padding: 12px;"><ion-icon name="add-circle-outline"></ion-icon> Guardar Comida</button>
+          </div>
+          <div style="display: flex; gap: 10px; width: 100%;" *ngIf="isViewingHistory">
+            <button class="btn-neon" (click)="isFoodModalOpen = false" style="width: 100%;">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL DE MÁQUINA -->
+  <ion-modal [isOpen]="isMachineModalOpen" (didDismiss)="isMachineModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.95); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isMachineModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent; text-align: center;">
+          <ion-icon name="fitness-outline" class="modal-icon gym-icon" style="font-size: 60px; margin-bottom: 10px; margin-top: 20px; color: #9d00ff;"></ion-icon>
+          <h2 class="neon-text" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">{{ machineResult?.name }}</h2>
+          
+          <div class="machine-details" style="margin-bottom: 15px;">
+            <div class="detail-badge" style="background: rgba(0, 255, 136, 0.15); color: #00ff88; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;">
+              <ion-icon name="body-outline"></ion-icon> {{ machineResult?.targetMuscles }}
+            </div>
+          </div>
+          
+          <div class="instructions-box" style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border-left: 3px solid #9d00ff; color: #ddd; font-size: 0.95rem; text-align: left; margin-bottom: 25px;">
+            <p [innerHTML]="machineResult?.usageInstructions" style="margin: 0;"></p>
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px 20px 25px;">
+          <div style="display: flex; gap: 10px; width: 100%;" *ngIf="!isViewingHistory">
+            <button class="btn-neon outline" (click)="isMachineModalOpen = false" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); border-radius: 25px;">Descartar</button>
+            <button class="btn-neon" (click)="saveMachineToHistory()" style="flex: 2; padding: 12px; background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); border-color: var(--neon-purple);"><ion-icon name="save-outline"></ion-icon> Guardar Máquina</button>
+          </div>
+          <div style="display: flex; gap: 10px; width: 100%;" *ngIf="isViewingHistory">
+            <button class="btn-neon" (click)="isMachineModalOpen = false" style="width: 100%; background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); border-color: var(--neon-purple);">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL DE COACH (PLAN SEMANAL) -->
+  <ion-modal [isOpen]="isCoachModalOpen" (didDismiss)="isCoachModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass coach-modal" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.95); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isCoachModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div id="coach-plan-pdf" style="width: 100%; text-align: left; padding-top: 20px;">
+            <ion-icon name="flash-outline" class="modal-icon neon-text" style="font-size: 40px; text-align: center; display: block; margin: 0 auto; color: #00ff88;"></ion-icon>
+            <h2 style="text-align: center; color: #fff; margin-bottom: 10px;">Plan Semanal Creado</h2>
+            <p class="coach-msg" style="text-align: center; font-style: italic; color: #00ff88; margin-bottom: 20px;">"{{ coachResult?.message }}"</p>
+            
+            <div class="plan-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+              <h3 style="font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 5px; margin-bottom: 10px;"><ion-icon name="barbell-outline" style="color: #00ff88;"></ion-icon> Rutina</h3>
+              <p [innerHTML]="coachResult?.workoutPlan" style="color: #ccc; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; margin: 0;"></p>
+            </div>
+
+            <div class="plan-section" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+              <h3 style="font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 5px; margin-bottom: 10px;"><ion-icon name="nutrition-outline" style="color: #00ff88;"></ion-icon> Nutrición</h3>
+              <p [innerHTML]="coachResult?.nutritionPlan" style="color: #ccc; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; margin: 0;"></p>
+            </div>
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px 20px 25px;">
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button class="btn-neon outline" (click)="downloadPDF()" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; background: transparent; border: 1px solid #00ff88; border-radius: 25px; color: #00ff88;"><ion-icon name="download-outline"></ion-icon> PDF</button>
+            <button class="btn-neon" (click)="isCoachModalOpen = false" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; border-radius: 25px;">Aceptar</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

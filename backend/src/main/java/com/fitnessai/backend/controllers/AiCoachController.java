@@ -50,8 +50,8 @@ public class AiCoachController {
                     "La estructura exacta debe ser: " +
                     "{\"recommendationType\": \"WEEKLY_PLAN\", " +
                     "\"message\": \"Mensaje motivacional corto\", " +
-                    "\"nutritionPlan\": \"Resumen de macros y 3 comidas clave\", " +
-                    "\"workoutPlan\": \"Resumen de días de entrenamiento y músculos\"}";
+                    "\"nutritionPlan\": \"Usa etiquetas HTML <br><br> para separar comidas y <b> para negritas en los títulos.\", " +
+                    "\"workoutPlan\": \"Usa etiquetas HTML <br><br> para separar cada día y <b> para destacar el nombre del día.\"}";
 
             // 3. Enviarle el texto a Gemini (sin imagen, por eso Base64 está vacío)
             String aiJsonResponse = aiVisionService.analyzeImage("", prompt);

@@ -1,8 +1,11 @@
 package com.fitnessai.backend.controllers;
 
 import com.fitnessai.backend.dtos.request.UserRequestDto;
+import com.fitnessai.backend.dtos.request.LoginRequestDto;
 import com.fitnessai.backend.dtos.response.UserResponseDto;
 import com.fitnessai.backend.services.UserService;
+import com.fitnessai.backend.repositories.UserRepository;
+import com.fitnessai.backend.entities.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,10 +20,32 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequestDto loginDto) {
+        User user = userRepository.findByEmail(loginDto.getEmail())
+                .orElse(null);
+                
+        if (user == null || !user.getPasswordHash().equals(loginDto.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "success", false,
+                    "message", "Credenciales incorrectas"
+            ));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Login exitoso",
+                "userId", user.getId(),
+                "fullName", user.getFullName()
+        ));
     }
 
     @PostMapping
