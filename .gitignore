@@ -1,0 +1,47 @@
+# ==============================
+# Java / Spring Boot (Backend)
+# ==============================
+backend/target/
+backend/bin/
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/*.class
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# ==============================
+# Ionic / Angular (Frontend)
+# ==============================
+mobile-app/node_modules/
+mobile-app/dist/
+mobile-app/www/
+mobile-app/.angular/
+mobile-app/coverage/
+mobile-app/.npm
+mobile-app/.cache
+
+# ==============================
+# OS & Misc
+# ==============================
+.DS_Store
+Thumbs.db
+*.log
+*.sqlite
