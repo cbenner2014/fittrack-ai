@@ -1,0 +1,29 @@
+<ion-content [fullscreen]="true" class="login-bg">
+  <div class="login-container">
+    <div class="logo-section">
+      <div class="glow-circle">
+        <ion-icon name="fitness-outline" class="logo-icon"></ion-icon>
+      </div>
+      <h1 class="brand-title">FIT<span class="neon">TRACK</span> AI</h1>
+      <p class="brand-subtitle">Tu entrenador personal de bolsillo</p>
+    </div>
+
+    <div class="glass-card login-form">
+      <h2>Iniciar Sesión</h2>
+      
+      <div class="input-group">
+        <ion-icon name="mail-outline"></ion-icon>
+        <input type="email" placeholder="Correo Electrónico" [(ngModel)]="email" />
+      </div>
+
+      <div class="input-group">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        <input type="password" placeholder="Contraseña" [(ngModel)]="password" />
+      </div>
+
+      <button class="neon-btn" (click)="login()">INGRESAR</button>
+      
+      <p class="register-link">¿No tienes cuenta? <span class="neon">Regístrate</span></p>
+    </div>
+  </div>
+</ion-content>

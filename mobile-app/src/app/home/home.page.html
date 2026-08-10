@@ -1,0 +1,61 @@
+<ion-content [fullscreen]="true">
+  <div class="dashboard-header">
+    <div class="user-info">
+      <h1>Hola, <span class="neon-text">{{ userProfile.name }}</span></h1>
+      <p>Objetivo: {{ userProfile.goal }}</p>
+    </div>
+    <ion-avatar>
+      <img src="https://ui-avatars.com/api/?name=Juan+Perez&background=00ff88&color=000" />
+    </ion-avatar>
+  </div>
+
+  <div class="main-content">
+    <!-- Resumen de Macros -->
+    <div class="glass-card macros-card">
+      <h2>Calorías de Hoy</h2>
+      <div class="calories-circle">
+        <div class="cal-number">{{ userProfile.calories }}</div>
+        <div class="cal-label">/ {{ userProfile.caloriesGoal }} kcal</div>
+      </div>
+      <div class="macros-row">
+        <div class="macro-item">
+          <div class="dot protein-dot"></div>
+          <p>Proteína</p>
+          <strong>{{ userProfile.protein }}g</strong>
+        </div>
+        <div class="macro-item">
+          <div class="dot carbs-dot"></div>
+          <p>Carbos</p>
+          <strong>{{ userProfile.carbs }}g</strong>
+        </div>
+        <div class="macro-item">
+          <div class="dot fats-dot"></div>
+          <p>Grasas</p>
+          <strong>{{ userProfile.fats }}g</strong>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">IA Scanner 👁️</h2>
+    
+    <div class="action-grid">
+      <div class="glass-card action-card" (click)="scanFood()">
+        <ion-icon name="fast-food-outline" class="action-icon food-icon"></ion-icon>
+        <h3>Escanear<br>Comida</h3>
+      </div>
+      
+      <div class="glass-card action-card" (click)="scanMachine()">
+        <ion-icon name="barbell-outline" class="action-icon gym-icon"></ion-icon>
+        <h3>Analizar<br>Máquina</h3>
+      </div>
+    </div>
+
+    <div class="glass-card coach-card" (click)="askCoach()">
+      <div class="coach-info">
+        <h3>Tu Entrenador Virtual</h3>
+        <p>Genera tu plan semanal personalizado en segundos con IA.</p>
+      </div>
+      <ion-icon name="hardware-chip-outline" class="coach-icon"></ion-icon>
+    </div>
+  </div>
+</ion-content>
