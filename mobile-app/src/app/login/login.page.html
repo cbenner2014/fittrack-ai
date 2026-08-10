@@ -9,8 +9,14 @@
     </div>
 
     <div class="glass-card login-form">
-      <h2>Iniciar Sesión</h2>
+      <h2 *ngIf="!isRegistering">Iniciar Sesión</h2>
+      <h2 *ngIf="isRegistering">Crear Cuenta</h2>
       
+      <div class="input-group" *ngIf="isRegistering">
+        <ion-icon name="person-outline"></ion-icon>
+        <input type="text" placeholder="Nombre Completo" [(ngModel)]="fullName" />
+      </div>
+
       <div class="input-group">
         <ion-icon name="mail-outline"></ion-icon>
         <input type="email" placeholder="Correo Electrónico" [(ngModel)]="email" />
@@ -21,9 +27,11 @@
         <input type="password" placeholder="Contraseña" [(ngModel)]="password" />
       </div>
 
-      <button class="neon-btn" (click)="login()">INGRESAR</button>
+      <button class="neon-btn" (click)="login()" *ngIf="!isRegistering">INGRESAR</button>
+      <button class="neon-btn" (click)="register()" *ngIf="isRegistering" style="background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); border-color: var(--neon-purple);">REGISTRARSE</button>
       
-      <p class="register-link">¿No tienes cuenta? <span class="neon">Regístrate</span></p>
+      <p class="register-link" *ngIf="!isRegistering">¿No tienes cuenta? <span class="neon" (click)="toggleRegister()">Regístrate</span></p>
+      <p class="register-link" *ngIf="isRegistering">¿Ya tienes cuenta? <span class="neon" (click)="toggleRegister()">Inicia Sesión</span></p>
     </div>
   </div>
 </ion-content>

@@ -1,0 +1,67 @@
+<ion-content [fullscreen]="true" class="ion-padding" style="--background: #121214;">
+  <div class="profile-header">
+    <ion-icon name="person-circle-outline" class="profile-icon neon-text"></ion-icon>
+    <h1 class="neon-text">Tu Perfil</h1>
+    <p>Personaliza tu metabolismo base</p>
+  </div>
+
+  <div class="glass-card form-container">
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Nombre Completo</ion-label>
+      <ion-input type="text" [(ngModel)]="userProfile.name" placeholder="Ej. Juan Pérez"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Género</ion-label>
+      <ion-select [(ngModel)]="userProfile.gender" interface="action-sheet">
+        <ion-select-option value="male">Masculino</ion-select-option>
+        <ion-select-option value="female">Femenino</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <div style="display: flex; gap: 10px;">
+      <ion-item class="custom-input" style="flex: 1;">
+        <ion-label position="stacked">Edad</ion-label>
+        <ion-input type="number" [(ngModel)]="userProfile.age" placeholder="Años"></ion-input>
+      </ion-item>
+
+      <ion-item class="custom-input" style="flex: 1;">
+        <ion-label position="stacked">Peso (kg)</ion-label>
+        <ion-input type="number" [(ngModel)]="userProfile.weight" placeholder="Ej. 75"></ion-input>
+      </ion-item>
+    </div>
+
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Altura (cm)</ion-label>
+      <ion-input type="number" [(ngModel)]="userProfile.height" placeholder="Ej. 175"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Nivel de Actividad</ion-label>
+      <ion-select [(ngModel)]="userProfile.activityLevel" interface="action-sheet">
+        <ion-select-option [value]="1.2">Sedentario (Poco/ningún ejercicio)</ion-select-option>
+        <ion-select-option [value]="1.375">Ligero (Ejercicio 1-3 días)</ion-select-option>
+        <ion-select-option [value]="1.55">Moderado (Ejercicio 3-5 días)</ion-select-option>
+        <ion-select-option [value]="1.725">Activo (Ejercicio 6-7 días)</ion-select-option>
+        <ion-select-option [value]="1.9">Muy Activo (Atleta)</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Tu Objetivo</ion-label>
+      <ion-select [(ngModel)]="userProfile.goal" interface="action-sheet">
+        <ion-select-option value="lose_fat">Quemar Grasa (Déficit Calórico)</ion-select-option>
+        <ion-select-option value="maintain">Mantenimiento (Recomposición)</ion-select-option>
+        <ion-select-option value="build_muscle">Ganar Masa Muscular</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <button class="btn-neon" (click)="saveProfile()" style="width: 100%; margin-top: 30px;">
+    <ion-icon name="hardware-chip-outline"></ion-icon> Calcular Macros y Guardar
+  </button>
+  
+  <div style="text-align: center; margin-top: 15px;">
+    <a (click)="router.navigate(['/home'])" style="color: #888; text-decoration: underline;">Volver al Dashboard</a>
+  </div>
+</ion-content>

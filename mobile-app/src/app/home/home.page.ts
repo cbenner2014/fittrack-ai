@@ -34,14 +34,21 @@ export class HomePage {
   isCoachModalOpen = false;
   coachResult: any = null;
 
-  userProfile = {
-    name: 'Juan',
-    goal: 'Perder Grasa',
-    calories: 1450,
-    caloriesGoal: 2000,
-    protein: 110,
-    carbs: 120,
-    fats: 45
+  userProfile: any = {
+    name: 'Atleta',
+    age: 25,
+    weight: 75,
+    height: 175,
+    goal: 'maintain',
+    baseCalories: 2500,
+    dailyCaloriesTarget: 2000,
+    dailyProteinTarget: 150,
+    dailyCarbsTarget: 200,
+    dailyFatsTarget: 65,
+    totalCaloriesConsumed: 0,
+    totalProteinConsumed: 0,
+    totalCarbsConsumed: 0,
+    totalFatsConsumed: 0
   };
 
   constructor(
@@ -49,8 +56,13 @@ export class HomePage {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
-    private router: Router
+    public router: Router
   ) {}
+
+  ngOnInit() {
+    this.loadDailyHistory();
+    this.loadProfile();
+  }
 
   ionViewWillEnter() {
     // Al entrar a la pantalla, cargar los datos de la sesión actual
@@ -66,7 +78,21 @@ export class HomePage {
     }
     
     this.loadDailyHistory();
+    this.loadProfile();
     this.loadMachineHistory();
+  }
+
+  loadProfile() {
+    const savedProfile = localStorage.getItem('btrack_user_profile');
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile);
+      // Mantener los macros consumidos intactos
+      this.userProfile = {
+        ...this.userProfile,
+        ...parsedProfile
+      };
+      this.userName = this.userProfile.name || 'Atleta';
+    }
   }
 
   loadMachineHistory() {

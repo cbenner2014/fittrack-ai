@@ -1,8 +1,13 @@
 <ion-content [fullscreen]="true">
-  <div class="dashboard-header">
-    <div class="user-info">
-      <h1>Hola, <span class="neon-text">{{ userName }}</span></h1>
-      <p>Objetivo: {{ userProfile.goal }}</p>
+  <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px;">
+    <div class="user-info" (click)="router.navigate(['/profile'])" style="cursor: pointer;">
+      <h1 style="margin: 0;">Hola, <span class="neon-text">{{ userName }}</span> <ion-icon name="pencil-outline" style="font-size: 1rem; color: #888;"></ion-icon></h1>
+      <p style="margin: 5px 0 0; color: #aaa;">Objetivo: 
+        <span *ngIf="userProfile.goal === 'lose_fat'">Perder Grasa</span>
+        <span *ngIf="userProfile.goal === 'maintain'">Mantener</span>
+        <span *ngIf="userProfile.goal === 'build_muscle'">Ganar Masa</span>
+        <span *ngIf="userProfile.goal !== 'lose_fat' && userProfile.goal !== 'maintain' && userProfile.goal !== 'build_muscle'">{{ userProfile.goal }}</span>
+      </p>
     </div>
     <div class="logout-btn" (click)="logout()">
       <ion-icon name="log-out-outline"></ion-icon>
@@ -12,26 +17,25 @@
   <div class="main-content">
     <!-- Resumen de Macros -->
     <div class="glass-card macros-card">
-      <h2>Calorías de Hoy</h2>
-      <div class="calories-circle">
-        <div class="cal-number">{{ userProfile.calories }}</div>
-        <div class="cal-label">/ {{ userProfile.caloriesGoal }} kcal</div>
+      <div class="calorie-text">
+        <p>Calorías de Hoy</p>
+        <h2 class="neon-text">{{ userProfile.totalCaloriesConsumed }} <span style="font-size: 0.5em; color: #aaa;">/ {{ userProfile.dailyCaloriesTarget }} kcal</span></h2>
       </div>
       <div class="macros-row">
         <div class="macro-item">
           <div class="dot protein-dot"></div>
           <p>Proteína</p>
-          <strong>{{ userProfile.protein }}g</strong>
+          <strong>{{ userProfile.totalProteinConsumed }}g / {{ userProfile.dailyProteinTarget }}g</strong>
         </div>
         <div class="macro-item">
           <div class="dot carbs-dot"></div>
           <p>Carbos</p>
-          <strong>{{ userProfile.carbs }}g</strong>
+          <strong>{{ userProfile.totalCarbsConsumed }}g / {{ userProfile.dailyCarbsTarget }}g</strong>
         </div>
         <div class="macro-item">
           <div class="dot fats-dot"></div>
           <p>Grasas</p>
-          <strong>{{ userProfile.fats }}g</strong>
+          <strong>{{ userProfile.totalFatsConsumed }}g / {{ userProfile.dailyFatsTarget }}g</strong>
         </div>
       </div>
     </div>
