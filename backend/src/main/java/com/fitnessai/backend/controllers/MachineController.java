@@ -59,6 +59,12 @@ public class MachineController {
             // 4. Analizar con Gemini
             String aiJsonResponse = aiVisionService.analyzeImage(base64Image, prompt);
 
+            int start = aiJsonResponse.indexOf('{');
+            int end = aiJsonResponse.lastIndexOf('}');
+            if (start != -1 && end != -1 && start < end) {
+                aiJsonResponse = aiJsonResponse.substring(start, end + 1);
+            }
+
             // 5. Devolver al celular
             return ResponseEntity.ok(aiJsonResponse);
 

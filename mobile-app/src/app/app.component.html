@@ -1,3 +1,19 @@
 <ion-app>
   <ion-router-outlet></ion-router-outlet>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <div *ngIf="showTabs" class="floating-nav-bar">
+    <div class="nav-item" [class.active]="router.url.includes('/home')" (click)="router.navigate(['/home'])">
+      <ion-icon name="home"></ion-icon>
+      <span>Inicio</span>
+    </div>
+    <div class="nav-item" [class.active]="router.url.includes('/history')" (click)="router.navigate(['/history'])">
+      <ion-icon name="calendar"></ion-icon>
+      <span>Historial</span>
+    </div>
+    <div class="nav-item" [class.active]="router.url.includes('/profile')" (click)="router.navigate(['/profile'])">
+      <ion-icon name="person"></ion-icon>
+      <span>Perfil</span>
+    </div>
+  </div>
 </ion-app>

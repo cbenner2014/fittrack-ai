@@ -1,0 +1,82 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar style="--background: transparent;">
+    <ion-title style="color: white; font-weight: bold;">Historial</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div style="padding: 15px;">
+    <!-- Calendario Semanal Horizontal -->
+    <div class="calendar-strip" style="display: flex; justify-content: space-between; padding: 15px 10px; margin-bottom: 20px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+      <div class="day-item" *ngFor="let day of weekDays" (click)="selectDate(day)" 
+           style="display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1;">
+        <div [ngStyle]="{'background': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#00ff88' : 'transparent', 'color': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#000' : '#aaa', 'border-radius': '50%', 'width': '32px', 'height': '32px', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center', 'font-weight': 'bold', 'font-size': '0.85rem', 'margin-bottom': '8px'}">
+          {{ day.dayName }}
+        </div>
+        <span style="color: white; font-weight: 600; font-size: 1rem; margin-bottom: 8px;">{{ day.dayNumber }}</span>
+        <div class="dot" [ngStyle]="{'background': day.hasData ? '#00ff88' : 'transparent', 'width': '6px', 'height': '6px', 'border-radius': '50%'}"></div>
+      </div>
+    </div>
+
+    <!-- Pestañas internas -->
+    <ion-segment [(ngModel)]="currentTab" style="margin-bottom: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; --background: rgba(0,0,0,0.2);">
+      <ion-segment-button value="diet" style="--color-checked: #ff9d00; --indicator-color: transparent; color: white;">
+        <ion-label>Dieta</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="gym" style="--color-checked: #9d00ff; --indicator-color: transparent; color: white;">
+        <ion-label>Entrenamiento</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- TAB: DIETA -->
+    <div *ngIf="currentTab === 'diet'">
+      <div *ngIf="!todaysMeals || todaysMeals.length === 0" style="text-align: center; color: #888; margin-top: 40px;">
+        <ion-icon name="restaurant-outline" style="font-size: 40px; margin-bottom: 10px;"></ion-icon>
+        <p>No hay comidas registradas este día.</p>
+      </div>
+
+      <div *ngIf="todaysMeals && todaysMeals.length > 0">
+        <div *ngFor="let category of [{id:'BREAKFAST', name:'Desayuno'}, {id:'LUNCH', name:'Almuerzo'}, {id:'DINNER', name:'Cena'}, {id:'SNACK', name:'Snacks'}]">
+          <div *ngIf="getMealsByType(category.id).length > 0" class="meal-category-group" style="margin-bottom: 25px;">
+            <div class="category-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <h3 style="color: white; margin: 0 0 5px 0; font-weight: bold; font-size: 1.2rem;">{{ category.name }}</h3>
+              <p style="margin: 0; color: #aaa; font-size: 0.85rem;">
+                {{ getMealTypeMacros(category.id).cals }} kcal | {{ getMealTypeMacros(category.id).p }}P | {{ getMealTypeMacros(category.id).c }}C | {{ getMealTypeMacros(category.id).f }}G
+              </p>
+            </div>
+            <div class="glass-card meal-item" *ngFor="let meal of getMealsByType(category.id)" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 12px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
+              <div class="meal-img-container" style="width: 55px; height: 55px; border-radius: 50%; overflow: hidden; border: 2px solid #333; flex-shrink: 0;">
+                 <img [src]="meal.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              <div style="flex: 1; overflow: hidden;">
+                <h4 style="margin: 0 0 4px 0; color: white; font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ formatFoodName(meal.detectedFoods) }}</h4>
+                <p style="margin: 0; color: #888; font-size: 0.85rem;">
+                  {{ meal.totalCalories }} kcal | {{ meal.totalProtein }}P | {{ meal.totalCarbs }}C | {{ meal.totalFats }}G
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ENTRENAMIENTO -->
+    <div *ngIf="currentTab === 'gym'">
+      <div *ngIf="!machineHistory || machineHistory.length === 0" style="text-align: center; color: #888; margin-top: 40px;">
+        <ion-icon name="barbell-outline" style="font-size: 40px; margin-bottom: 10px;"></ion-icon>
+        <p>No hay entrenamientos este día.</p>
+      </div>
+
+      <div *ngIf="machineHistory && machineHistory.length > 0">
+        <div class="glass-card meal-item" *ngFor="let machine of machineHistory" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 15px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
+          <img [src]="machine.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-purple);" />
+          <div style="flex: 1;">
+            <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ machine.name }}</h4>
+            <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">Músculos: {{ machine.targetMuscles }}</p>
+          </div>
+          <ion-icon name="barbell" style="color: var(--neon-purple); font-size: 24px;"></ion-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

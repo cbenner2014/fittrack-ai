@@ -36,6 +36,12 @@ public class MealLogController {
         return ResponseEntity.ok(mealLogService.getMealLogsByUser(userId));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMealLog(@PathVariable Long id) {
+        mealLogService.deleteMealLog(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> analyzeAndUploadMeal(@RequestParam("file") MultipartFile file) {
         try {
@@ -59,6 +65,12 @@ public class MealLogController {
 
             // 4. Pedirle a Gemini que haga su magia
             String aiJsonResponse = aiVisionService.analyzeImage(base64Image, prompt);
+
+            int start = aiJsonResponse.indexOf('{');
+            int end = aiJsonResponse.lastIndexOf('}');
+            if (start != -1 && end != -1 && start < end) {
+                aiJsonResponse = aiJsonResponse.substring(start, end + 1);
+            }
 
             // 5. Devolvemos el JSON de Gemini (que ya incluye el link de Cloudinary incrustado) al celular
             return ResponseEntity.ok(aiJsonResponse);

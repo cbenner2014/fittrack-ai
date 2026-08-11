@@ -7,4 +7,5 @@ import java.util.List;
 public interface MealLogService {
     MealLogResponseDto createMealLog(MealLogRequestDto dto);
     List<MealLogResponseDto> getMealLogsByUser(Long userId);
+    void deleteMealLog(Long id);
 }

@@ -61,7 +61,21 @@
     <ion-icon name="hardware-chip-outline"></ion-icon> Calcular Macros y Guardar
   </button>
   
-  <div style="text-align: center; margin-top: 15px;">
+  <!-- GRÁFICO DE PESO -->
+  <div class="glass-card" style="margin-top: 25px; padding: 20px; border-radius: 15px; border-left: 4px solid var(--neon-purple);">
+    <h3 style="color: white; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+      <ion-icon name="trending-down-outline" style="color: var(--neon-purple);"></ion-icon> Progreso de Peso
+    </h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <ion-input type="number" [(ngModel)]="newWeightLog" placeholder="Nuevo peso (kg)" style="background: rgba(255,255,255,0.1); border-radius: 8px; color: white; padding-left: 10px;"></ion-input>
+      <button class="btn-neon outline" (click)="logWeight()" style="padding: 0 20px; font-size: 0.9rem; border-color: var(--neon-purple); color: var(--neon-purple);"><ion-icon name="add"></ion-icon> Registrar</button>
+    </div>
+    <div style="position: relative; height: 220px; width: 100%;">
+      <canvas id="weightChart"></canvas>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 25px; margin-bottom: 20px;">
     <a (click)="router.navigate(['/home'])" style="color: #888; text-decoration: underline;">Volver al Dashboard</a>
   </div>
 </ion-content>

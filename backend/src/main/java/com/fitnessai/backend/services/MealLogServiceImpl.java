@@ -30,4 +30,8 @@ public class MealLogServiceImpl implements MealLogService {
     public List<MealLogResponseDto> getMealLogsByUser(Long userId) {
         return repository.findByUserId(userId).stream().map(MealLogMapper::toResponseDto).collect(Collectors.toList());
     }
+    @Override
+    public void deleteMealLog(Long id) {
+        repository.deleteById(id);
+    }
 }
