@@ -45,7 +45,7 @@ export class LoginPage {
 
     const loginData = { email: this.email, password: this.password };
 
-    this.http.post('http://192.168.10.198:8080/api/v1/users/login', loginData).subscribe({
+    this.http.post('http://localhost:8080/api/v1/users/login', loginData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
@@ -90,7 +90,7 @@ export class LoginPage {
       password: this.password 
     };
 
-    this.http.post('http://192.168.10.198:8080/api/v1/users', registerData).subscribe({
+    this.http.post('http://localhost:8080/api/v1/users', registerData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {

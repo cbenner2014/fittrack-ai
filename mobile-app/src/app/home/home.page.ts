@@ -113,7 +113,7 @@ export class HomePage {
     }
     
     // 2. Traer del servidor silenciosamente para mantener actualizado (XP, Nivel, etc)
-    this.http.get(`http://192.168.10.198:8080/api/v1/users/${this.userId}`).subscribe({
+    this.http.get(`http://localhost:8080/api/v1/users/${this.userId}`).subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
           const dbUser = res.data;
@@ -136,7 +136,7 @@ export class HomePage {
   }
 
   loadMachineHistory() {
-    this.http.get(`http://192.168.10.198:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (machines: any) => {
         this.machineHistory = machines.map((m: any) => {
           // Obtener nombre del día
@@ -185,7 +185,7 @@ export class HomePage {
   loadDailyHistory(targetDateString?: string) {
     const target = targetDateString || this.selectedDate.toISOString().split('T')[0];
 
-    this.http.get(`http://192.168.10.198:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
       next: (meals: any) => {
         // Iluminar puntos verdes si hay datos en ese día
         this.weekDays.forEach(day => {
@@ -400,7 +400,7 @@ export class HomePage {
       const formData = new FormData();
       formData.append('file', blob, fileName);
 
-      this.http.post(`http://192.168.10.198:8080/api/v1/${endpoint}`, formData).subscribe({
+      this.http.post(`http://localhost:8080/api/v1/${endpoint}`, formData).subscribe({
         next: async (res: any) => {
           await loading.dismiss();
           this.isViewingHistory = false; // Modo escaneo nuevo
@@ -437,7 +437,7 @@ export class HomePage {
     await loading.present();
 
     // Llamar a la IA con el ID del usuario actual dinámicamente
-    this.http.post(`http://192.168.10.198:8080/api/v1/coach-recommendations/generate-plan/${this.userId}`, {}).subscribe({
+    this.http.post(`http://localhost:8080/api/v1/coach-recommendations/generate-plan/${this.userId}`, {}).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         this.coachResult = res;
@@ -481,7 +481,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://192.168.10.198:8080/api/v1/meals', request).subscribe({
+    this.http.post('http://localhost:8080/api/v1/meals', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -504,7 +504,7 @@ export class HomePage {
     });
     await loading.present();
 
-    this.http.delete(`http://192.168.10.198:8080/api/v1/meals/${this.foodResult.id}`).subscribe({
+    this.http.delete(`http://localhost:8080/api/v1/meals/${this.foodResult.id}`).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -560,7 +560,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://192.168.10.198:8080/api/v1/machine-logs', request).subscribe({
+    this.http.post('http://localhost:8080/api/v1/machine-logs', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isMachineModalOpen = false;

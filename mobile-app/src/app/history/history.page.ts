@@ -56,7 +56,7 @@ export class HistoryPage implements OnInit {
   }
 
   loadHistory() {
-    this.http.get<any[]>(`http://192.168.10.198:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMeals = data;
         this.updateCalendarDots();
@@ -65,7 +65,7 @@ export class HistoryPage implements OnInit {
       error: (e) => console.error('Error cargando comidas', e)
     });
 
-    this.http.get<any[]>(`http://192.168.10.198:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMachines = data;
         this.updateCalendarDots();

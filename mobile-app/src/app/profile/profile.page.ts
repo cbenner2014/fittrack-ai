@@ -55,7 +55,7 @@ export class ProfilePage implements OnInit {
   }
 
   loadProfileFromBackend() {
-    this.http.get(`http://192.168.10.198:8080/api/v1/users/${this.userId}`).subscribe({
+    this.http.get(`http://localhost:8080/api/v1/users/${this.userId}`).subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
           const dbUser = res.data;
@@ -231,7 +231,7 @@ export class ProfilePage implements OnInit {
       dailyFatsTarget: completeProfile.dailyFatsTarget
     };
     
-    this.http.put(`http://192.168.10.198:8080/api/v1/users/${this.userId}`, updateDto).subscribe({
+    this.http.put(`http://localhost:8080/api/v1/users/${this.userId}`, updateDto).subscribe({
       next: async (res: any) => {
         if (!silent) {
           const toast = await this.toastCtrl.create({
