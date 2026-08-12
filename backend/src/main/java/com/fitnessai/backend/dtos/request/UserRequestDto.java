@@ -20,4 +20,17 @@ public class UserRequestDto {
     private Double currentWeight;
     private Double height;
     private String goal; // LOSE_WEIGHT, GAIN_MUSCLE, MAINTAIN
+    
+    private Integer age;
+    private String gender;
+    private Double activityLevel;
+    
+    private Integer baseCalories;
+    private Integer dailyCaloriesTarget;
+    private Integer dailyProteinTarget;
+    private Integer dailyCarbsTarget;
+    private Integer dailyFatsTarget;
+    
+    private Integer xp;
+    private Integer level;
 }

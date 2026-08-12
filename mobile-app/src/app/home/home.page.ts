@@ -78,20 +78,20 @@ export class HomePage {
   ) {}
 
   ngOnInit() {
+    this.userId = localStorage.getItem('userId') || '2';
     this.generateWeek();
+    this.loadDailyHistory();
+    this.loadProfile();
   }
 
   ionViewWillEnter() {
     // Al entrar a la pantalla, cargar los datos de la sesión actual
+    this.userId = localStorage.getItem('userId') || '2';
     const storedName = localStorage.getItem('userName');
-    const storedId = localStorage.getItem('userId');
     
     if (storedName) {
       this.userName = storedName.split(' ')[0]; // Solo el primer nombre
       this.userInitials = this.userName.substring(0, 2).toUpperCase();
-    }
-    if (storedId) {
-      this.userId = storedId;
     }
     
     this.loadDailyHistory();
@@ -100,20 +100,43 @@ export class HomePage {
   }
 
   loadProfile() {
+    // 1. Cargar rápido de memoria local
     const savedProfile = localStorage.getItem('btrack_user_profile');
     if (savedProfile) {
       const parsedProfile = JSON.parse(savedProfile);
-      // Mantener los macros consumidos intactos
       this.userProfile = {
         ...this.userProfile,
         ...parsedProfile
       };
       this.userName = this.userProfile.name ? this.userProfile.name.split(' ')[0] : 'Atleta';
+      this.userInitials = this.userName.substring(0, 2).toUpperCase();
     }
+    
+    // 2. Traer del servidor silenciosamente para mantener actualizado (XP, Nivel, etc)
+    this.http.get(`http://192.168.10.198:8080/api/v1/users/${this.userId}`).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          const dbUser = res.data;
+          this.userName = dbUser.fullName ? dbUser.fullName.split(' ')[0] : 'Atleta';
+          this.userInitials = this.userName.substring(0, 2).toUpperCase();
+          this.userProfile.dailyCaloriesTarget = dbUser.dailyCaloriesTarget || 2000;
+          this.userProfile.dailyProteinTarget = dbUser.dailyProteinTarget || 150;
+          this.userProfile.dailyCarbsTarget = dbUser.dailyCarbsTarget || 200;
+          this.userProfile.dailyFatsTarget = dbUser.dailyFatsTarget || 60;
+          this.userProfile.level = dbUser.level || 1;
+          this.userProfile.xp = dbUser.xp || 0;
+          
+          if (dbUser.goal) {
+            this.userProfile.goalText = dbUser.goal === 'LOSE_WEIGHT' ? 'Perder Peso' : dbUser.goal === 'GAIN_MUSCLE' ? 'Ganar Masa' : 'Mantener Peso';
+          }
+        }
+      },
+      error: (err) => console.error(err)
+    });
   }
 
   loadMachineHistory() {
-    this.http.get(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get(`http://192.168.10.198:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (machines: any) => {
         this.machineHistory = machines.map((m: any) => {
           // Obtener nombre del día
@@ -162,7 +185,7 @@ export class HomePage {
   loadDailyHistory(targetDateString?: string) {
     const target = targetDateString || this.selectedDate.toISOString().split('T')[0];
 
-    this.http.get(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get(`http://192.168.10.198:8080/api/v1/meals/user/${this.userId}`).subscribe({
       next: (meals: any) => {
         // Iluminar puntos verdes si hay datos en ese día
         this.weekDays.forEach(day => {
@@ -377,7 +400,7 @@ export class HomePage {
       const formData = new FormData();
       formData.append('file', blob, fileName);
 
-      this.http.post(`http://localhost:8080/api/v1/${endpoint}`, formData).subscribe({
+      this.http.post(`http://192.168.10.198:8080/api/v1/${endpoint}`, formData).subscribe({
         next: async (res: any) => {
           await loading.dismiss();
           this.isViewingHistory = false; // Modo escaneo nuevo
@@ -414,7 +437,7 @@ export class HomePage {
     await loading.present();
 
     // Llamar a la IA con el ID del usuario actual dinámicamente
-    this.http.post(`http://localhost:8080/api/v1/coach-recommendations/generate-plan/${this.userId}`, {}).subscribe({
+    this.http.post(`http://192.168.10.198:8080/api/v1/coach-recommendations/generate-plan/${this.userId}`, {}).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         this.coachResult = res;
@@ -458,7 +481,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://localhost:8080/api/v1/meals', request).subscribe({
+    this.http.post('http://192.168.10.198:8080/api/v1/meals', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -481,7 +504,7 @@ export class HomePage {
     });
     await loading.present();
 
-    this.http.delete(`http://localhost:8080/api/v1/meals/${this.foodResult.id}`).subscribe({
+    this.http.delete(`http://192.168.10.198:8080/api/v1/meals/${this.foodResult.id}`).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -537,7 +560,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://localhost:8080/api/v1/machine-logs', request).subscribe({
+    this.http.post('http://192.168.10.198:8080/api/v1/machine-logs', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isMachineModalOpen = false;

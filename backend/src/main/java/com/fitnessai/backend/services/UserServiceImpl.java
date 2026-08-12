@@ -45,4 +45,31 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public UserResponseDto updateUser(Long id, UserRequestDto dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        if (dto.getFullName() != null) user.setFullName(dto.getFullName());
+        if (dto.getCurrentWeight() != null) user.setCurrentWeight(dto.getCurrentWeight());
+        if (dto.getHeight() != null) user.setHeight(dto.getHeight());
+        if (dto.getAge() != null) user.setAge(dto.getAge());
+        if (dto.getGender() != null) user.setGender(dto.getGender());
+        if (dto.getActivityLevel() != null) user.setActivityLevel(dto.getActivityLevel());
+        if (dto.getBaseCalories() != null) user.setBaseCalories(dto.getBaseCalories());
+        if (dto.getDailyCaloriesTarget() != null) user.setDailyCaloriesTarget(dto.getDailyCaloriesTarget());
+        if (dto.getDailyProteinTarget() != null) user.setDailyProteinTarget(dto.getDailyProteinTarget());
+        if (dto.getDailyCarbsTarget() != null) user.setDailyCarbsTarget(dto.getDailyCarbsTarget());
+        if (dto.getDailyFatsTarget() != null) user.setDailyFatsTarget(dto.getDailyFatsTarget());
+        if (dto.getXp() != null) user.setXp(dto.getXp());
+        if (dto.getLevel() != null) user.setLevel(dto.getLevel());
+        
+        if (dto.getGoal() != null) {
+            user.setGoal(User.Goal.valueOf(dto.getGoal().toUpperCase()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return UserMapper.toResponseDto(updatedUser);
+    }
 }

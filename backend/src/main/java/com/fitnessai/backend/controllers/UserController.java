@@ -76,4 +76,14 @@ public class UserController {
                 "data", users
         ));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> updateUser(@PathVariable Long id, @RequestBody UserRequestDto userRequestDto) {
+        UserResponseDto updatedUser = userService.updateUser(id, userRequestDto);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Perfil actualizado correctamente",
+                "data", updatedUser
+        ));
+    }
 }

@@ -75,7 +75,9 @@
     </div>
   </div>
 
-  <div style="text-align: center; margin-top: 25px; margin-bottom: 20px;">
-    <a (click)="router.navigate(['/home'])" style="color: #888; text-decoration: underline;">Volver al Dashboard</a>
+  <div style="text-align: center; margin-top: 25px; margin-bottom: 100px; display: flex; flex-direction: column; gap: 15px;">
+    <button class="btn-neon outline" (click)="logout()" style="width: 100%; border-color: #ff2a2a; color: #ff2a2a;">
+      <ion-icon name="log-out-outline"></ion-icon> Cerrar Sesión
+    </button>
   </div>
 </ion-content>

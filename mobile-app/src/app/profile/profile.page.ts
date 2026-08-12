@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ToastController, AlertController } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -24,58 +25,59 @@ export class ProfilePage implements OnInit {
   weightHistory: any[] = [];
   newWeightLog: number | null = null;
   chart: any = null;
+  newGoalLog: string = '';
+  userId: string = '';
 
   constructor(
     public router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
-    const saved = localStorage.getItem('btrack_user_profile');
-    if (saved) {
-      this.userProfile = JSON.parse(saved);
-      this.newWeightLog = this.userProfile.weight;
-    }
+    this.userId = localStorage.getItem('userId') || '2';
+    this.loadProfileFromBackend();
     
+    // Cargar historial de peso localmente por ahora (hasta migrarlo si se desea)
     const savedHistory = localStorage.getItem('weightHistory');
     if (savedHistory) {
       this.weightHistory = JSON.parse(savedHistory);
-      // Para propósitos de demostración: Si solo hay 1 registro, inyectamos historial falso hacia atrás
-      if (this.weightHistory.length === 1) {
-        this.injectDummyData(this.weightHistory[0].weight);
-      }
+      // Para propósitos de demostración: Si solo hay 1 registro, ya no inyectamos historial falso
+      // (Eliminamos la inyección para que solo muestre datos reales)
     } else if (this.userProfile.weight) {
-      // Si no hay historial, agregar el peso actual e inyectar historial falso
+      // Si no hay historial, agregar el peso actual
       this.weightHistory.push({
         date: new Date().toISOString().split('T')[0],
         weight: this.userProfile.weight
       });
-      this.injectDummyData(this.userProfile.weight);
     }
   }
 
-  // Método temporal para simular que el usuario ha usado la app por 5 días
-  injectDummyData(currentWeight: number) {
-    const today = new Date();
-    this.weightHistory = [];
-    
-    // Generar 5 días hacia atrás con pesos más altos (simulando pérdida de peso)
-    for (let i = 5; i > 0; i--) {
-      const d = new Date();
-      d.setDate(today.getDate() - i);
-      this.weightHistory.push({
-        date: d.toISOString().split('T')[0],
-        weight: currentWeight + (i * 0.8) // Cada día pesaba 800g más
-      });
-    }
-    
-    // Agregar el día de hoy
-    this.weightHistory.push({
-      date: today.toISOString().split('T')[0],
-      weight: currentWeight
+  loadProfileFromBackend() {
+    this.http.get(`http://192.168.10.198:8080/api/v1/users/${this.userId}`).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          const dbUser = res.data;
+          this.userProfile.name = dbUser.fullName || '';
+          this.userProfile.gender = dbUser.gender || 'male';
+          this.userProfile.age = dbUser.age || null;
+          this.userProfile.weight = dbUser.currentWeight || null;
+          this.userProfile.height = dbUser.height || null;
+          this.userProfile.activityLevel = dbUser.activityLevel || 1.2;
+          
+          if (dbUser.goal) {
+            if (dbUser.goal === 'LOSE_WEIGHT') this.userProfile.goal = 'lose_fat';
+            else if (dbUser.goal === 'GAIN_MUSCLE') this.userProfile.goal = 'build_muscle';
+            else this.userProfile.goal = 'maintain';
+          }
+          
+          this.newWeightLog = this.userProfile.weight;
+          localStorage.setItem('btrack_user_profile', JSON.stringify(this.userProfile));
+        }
+      },
+      error: (err) => console.error("Error cargando perfil:", err)
     });
-    
-    localStorage.setItem('weightHistory', JSON.stringify(this.weightHistory));
   }
 
   ionViewDidEnter() {
@@ -209,14 +211,80 @@ export class ProfilePage implements OnInit {
 
     localStorage.setItem('btrack_user_profile', JSON.stringify(completeProfile));
     
-    if (!silent) {
-      const toast = await this.toastCtrl.create({
-        message: '¡Perfil y Metas guardadas exitosamente!',
-        duration: 2000,
-        color: 'success'
+    // Enviar al Backend
+    let backendGoal = 'MAINTAIN';
+    if (this.userProfile.goal === 'lose_fat') backendGoal = 'LOSE_WEIGHT';
+    else if (this.userProfile.goal === 'build_muscle') backendGoal = 'GAIN_MUSCLE';
+    
+    const updateDto = {
+      fullName: this.userProfile.name,
+      currentWeight: this.userProfile.weight,
+      height: this.userProfile.height,
+      age: this.userProfile.age,
+      gender: this.userProfile.gender,
+      activityLevel: this.userProfile.activityLevel,
+      goal: backendGoal,
+      baseCalories: completeProfile.baseCalories,
+      dailyCaloriesTarget: completeProfile.dailyCaloriesTarget,
+      dailyProteinTarget: completeProfile.dailyProteinTarget,
+      dailyCarbsTarget: completeProfile.dailyCarbsTarget,
+      dailyFatsTarget: completeProfile.dailyFatsTarget
+    };
+    
+    this.http.put(`http://192.168.10.198:8080/api/v1/users/${this.userId}`, updateDto).subscribe({
+      next: async (res: any) => {
+        if (!silent) {
+          const toast = await this.toastCtrl.create({
+            message: '¡Perfil guardado en la nube exitosamente!',
+            duration: 2000,
+            color: 'success'
+          });
+          toast.present();
+          this.router.navigate(['/home']);
+        }
+      },
+      error: async (err) => {
+        console.error(err);
+        if (!silent) {
+          const toast = await this.toastCtrl.create({
+            message: 'Error al guardar en el servidor',
+            duration: 2000,
+            color: 'danger'
+          });
+          toast.present();
+        }
+      }
+    });
+
+    // Si no hay historial de peso, usar el peso guardado para iniciarlo
+    if (this.weightHistory.length === 0 && this.userProfile.weight) {
+      this.weightHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        weight: this.userProfile.weight
       });
-      toast.present();
-      this.router.navigate(['/home']);
+      localStorage.setItem('weightHistory', JSON.stringify(this.weightHistory));
+      this.createChart();
     }
+  }
+
+  async logout() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro que deseas salir?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí, Salir',
+          handler: () => {
+            localStorage.clear();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

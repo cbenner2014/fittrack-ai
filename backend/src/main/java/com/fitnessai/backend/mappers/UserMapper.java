@@ -16,6 +16,17 @@ public class UserMapper {
         user.setInitialWeight(dto.getInitialWeight());
         user.setCurrentWeight(dto.getCurrentWeight());
         user.setHeight(dto.getHeight());
+        user.setAge(dto.getAge());
+        user.setGender(dto.getGender());
+        user.setActivityLevel(dto.getActivityLevel());
+        user.setBaseCalories(dto.getBaseCalories());
+        user.setDailyCaloriesTarget(dto.getDailyCaloriesTarget());
+        user.setDailyProteinTarget(dto.getDailyProteinTarget());
+        user.setDailyCarbsTarget(dto.getDailyCarbsTarget());
+        user.setDailyFatsTarget(dto.getDailyFatsTarget());
+        
+        if (dto.getXp() != null) user.setXp(dto.getXp());
+        if (dto.getLevel() != null) user.setLevel(dto.getLevel());
         
         if (dto.getGoal() != null) {
             user.setGoal(User.Goal.valueOf(dto.getGoal().toUpperCase()));
@@ -32,6 +43,16 @@ public class UserMapper {
         dto.setFullName(user.getFullName());
         dto.setCurrentWeight(user.getCurrentWeight());
         dto.setHeight(user.getHeight());
+        dto.setAge(user.getAge());
+        dto.setGender(user.getGender());
+        dto.setActivityLevel(user.getActivityLevel());
+        dto.setBaseCalories(user.getBaseCalories());
+        dto.setDailyCaloriesTarget(user.getDailyCaloriesTarget());
+        dto.setDailyProteinTarget(user.getDailyProteinTarget());
+        dto.setDailyCarbsTarget(user.getDailyCarbsTarget());
+        dto.setDailyFatsTarget(user.getDailyFatsTarget());
+        dto.setXp(user.getXp());
+        dto.setLevel(user.getLevel());
         
         if (user.getGoal() != null) {
             dto.setGoal(user.getGoal().name());

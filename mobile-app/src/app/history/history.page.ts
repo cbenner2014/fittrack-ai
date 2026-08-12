@@ -9,7 +9,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class HistoryPage implements OnInit {
   currentTab: string = 'diet';
-  userId: string = '2';
+  userId: string = '';
   
   weekDays: any[] = [];
   selectedDate: Date = new Date();
@@ -23,11 +23,13 @@ export class HistoryPage implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
+    this.userId = localStorage.getItem('userId') || '2';
     this.generateWeek();
     this.loadHistory();
   }
   
   ionViewWillEnter() {
+    this.userId = localStorage.getItem('userId') || '2';
     this.loadHistory();
   }
 
@@ -54,7 +56,7 @@ export class HistoryPage implements OnInit {
   }
 
   loadHistory() {
-    this.http.get<any[]>(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`http://192.168.10.198:8080/api/v1/meals/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMeals = data;
         this.updateCalendarDots();
@@ -63,7 +65,7 @@ export class HistoryPage implements OnInit {
       error: (e) => console.error('Error cargando comidas', e)
     });
 
-    this.http.get<any[]>(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`http://192.168.10.198:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMachines = data;
         this.updateCalendarDots();
