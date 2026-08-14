@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-history',
@@ -20,7 +21,10 @@ export class HistoryPage implements OnInit {
   allMachines: any[] = [];
   machineHistory: any[] = [];
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private toastCtrl: ToastController
+  ) { }
 
   ngOnInit() {
     this.userId = localStorage.getItem('userId') || '2';
@@ -109,5 +113,24 @@ export class HistoryPage implements OnInit {
     if (!foods) return 'Comida Desconocida';
     const firstPart = foods.split(',')[0];
     return firstPart.charAt(0).toUpperCase() + firstPart.slice(1).toLowerCase();
+  }
+
+  async saveMachineWeight(index: number, machine: any) {
+    if (!machine.weightLog) return;
+
+    // Actualizamos localmente el arreglo completo
+    const globalIndex = this.allMachines.findIndex(m => m.id === machine.id || m.createdAt === machine.createdAt);
+    if (globalIndex > -1) {
+      this.allMachines[globalIndex].weightLog = machine.weightLog;
+      localStorage.setItem(`machine_history_${this.userId}`, JSON.stringify(this.allMachines));
+      
+      const toast = await this.toastCtrl.create({
+        message: '¡Series guardadas!',
+        duration: 2000,
+        color: 'success',
+        icon: 'barbell-outline'
+      });
+      toast.present();
+    }
   }
 }

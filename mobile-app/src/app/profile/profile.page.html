@@ -61,6 +61,11 @@
     <ion-icon name="hardware-chip-outline"></ion-icon> Calcular Macros y Guardar
   </button>
   
+  <!-- BOTÓN DE ESCÁNER CORPORAL -->
+  <button class="btn-neon outline" (click)="scanBody()" style="width: 100%; margin-top: 15px; border-color: #00d2ff; color: #00d2ff; background: rgba(0,210,255,0.05);">
+    <ion-icon name="body-outline"></ion-icon> Escáner Corporal IA
+  </button>
+  
   <!-- RESULTADO DE MACROS CALCULADOS -->
   <div class="glass-card" *ngIf="userProfile.dailyCaloriesTarget" style="margin-top: 25px; padding: 20px; border-radius: 15px; border-left: 4px solid var(--neon-green); text-align: center;">
     <h3 style="color: white; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -106,4 +111,29 @@
       <ion-icon name="log-out-outline"></ion-icon> Cerrar Sesión
     </button>
   </div>
+
+  <!-- MODAL DE ESCÁNER CORPORAL -->
+  <ion-modal [isOpen]="isBodyModalOpen" (didDismiss)="isBodyModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.95); border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isBodyModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent; text-align: center;">
+          <ion-icon name="scan-circle-outline" class="modal-icon" style="font-size: 60px; margin-bottom: 10px; margin-top: 20px; color: #00d2ff;"></ion-icon>
+          <h2 class="neon-text" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.5);">Análisis Físico</h2>
+          
+          <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px; border-left: 3px solid #00d2ff; margin-top: 20px; text-align: left;">
+            <p style="color: #ccc; margin: 0 0 10px 0;"><strong style="color: white;">Grasa Estimada:</strong> {{ bodyResult?.estimatedBodyFat }}</p>
+            <p style="color: #ccc; margin: 0 0 10px 0;"><strong style="color: white;">Masa Muscular:</strong> {{ bodyResult?.muscleMass }}</p>
+            <p style="color: #00ff88; margin: 0; font-style: italic;">"{{ bodyResult?.feedback }}"</p>
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px 20px 25px;">
+          <button class="btn-neon" (click)="isBodyModalOpen = false" style="width: 100%; background: #00d2ff; box-shadow: 0 0 15px rgba(0,210,255,0.5); border-color: #00d2ff; color: black;">Cerrar Análisis</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

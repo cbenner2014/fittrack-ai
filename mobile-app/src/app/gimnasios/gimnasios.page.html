@@ -1,0 +1,65 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar style="--background: transparent;">
+    <ion-title style="color: white; font-weight: bold;">Explorar Gimnasios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- MAPA REAL DE GOOGLE MAPS -->
+  <div style="position: relative; width: 100%; height: 60vh; background: #121212; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+    
+    <!-- MENSAJE DE CARGA GPS -->
+    <div *ngIf="loadingLocation" style="color: #00ff88; text-align: center; font-weight: bold; font-size: 1.1rem; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <ion-spinner name="crescent" color="success"></ion-spinner>
+      <p>Rastreando tu GPS...</p>
+    </div>
+
+    <!-- IFRAME GOOGLE MAPS DINÁMICO CON FILTRO DARK MODE -->
+    <iframe *ngIf="!loadingLocation"
+      [src]="mapUrl" 
+      width="100%" 
+      height="120%" 
+      style="border:0; position: absolute; top: -10%; left: 0; filter: invert(90%) hue-rotate(180deg) brightness(80%) contrast(120%);" 
+      allowfullscreen="" 
+      loading="lazy" 
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+
+    <!-- OVERLAY CON GRADIENTE -->
+    <div style="position: absolute; bottom: 0; width: 100%; height: 150px; background: linear-gradient(to top, #121212 10%, transparent); pointer-events: none;"></div>
+    
+    <!-- PINES DE GIMNASIOS DE MUESTRA -->
+    <div style="position: absolute; top: 40%; left: 30%; text-align: center; pointer-events: none;">
+      <ion-icon name="location" style="font-size: 40px; color: #00ff88; filter: drop-shadow(0 0 10px #00ff88);"></ion-icon>
+      <div style="background: rgba(0,0,0,0.8); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; border: 1px solid #00ff88;">Smart Fit</div>
+    </div>
+    
+    <div style="position: absolute; top: 25%; right: 20%; text-align: center; pointer-events: none;">
+      <ion-icon name="location" style="font-size: 35px; color: #00d2ff; filter: drop-shadow(0 0 10px #00d2ff);"></ion-icon>
+      <div style="background: rgba(0,0,0,0.8); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; border: 1px solid #00d2ff;">Bodytech</div>
+    </div>
+  </div>
+
+  <div style="padding: 20px; text-align: center; margin-top: -30px; position: relative; z-index: 10;">
+    <h2 style="color: white; font-weight: bold; font-size: 1.3rem; margin-bottom: 10px;">Gimnasios cerca de ti</h2>
+    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 25px;">Hemos encontrado <strong style="color: #00ff88;">12 gimnasios</strong> en un radio de 5km gracias a Google Maps.</p>
+    
+    <!-- BOTÓN PARA REGISTRAR GIMNASIO -->
+    <button class="btn-neon outline" style="width: 100%; border-color: #9d00ff; color: #9d00ff; background: rgba(157, 0, 255, 0.05); margin-bottom: 15px;">
+      <ion-icon name="add-circle-outline"></ion-icon> Registrar Mi Gimnasio
+    </button>
+
+    <!-- LISTA DE GYMS CERCANOS (Placeholder) -->
+    <div class="glass-card" style="padding: 15px; margin-bottom: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+      <div style="width: 50px; height: 50px; background: #222; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #00ff88;">
+        <ion-icon name="barbell" style="color: #00ff88; font-size: 24px;"></ion-icon>
+      </div>
+      <div style="flex: 1;">
+        <h3 style="margin: 0; color: white; font-size: 1.1rem; font-weight: bold;">Smart Fit Miraflores</h3>
+        <p style="margin: 5px 0 0 0; color: #aaa; font-size: 0.85rem;"><ion-icon name="walk-outline"></ion-icon> A 500m de ti</p>
+      </div>
+      <button style="background: #00ff88; color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;">Check-in</button>
+    </div>
+    
+  </div>
+</ion-content>

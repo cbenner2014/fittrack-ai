@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
-import { ToastController, AlertController } from '@ionic/angular';
+import { ToastController, AlertController, LoadingController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import Chart from 'chart.js/auto';
+
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 @Component({
   selector: 'app-profile',
@@ -28,11 +30,15 @@ export class ProfilePage implements OnInit {
   newGoalLog: string = '';
   userId: string = '';
 
+  isBodyModalOpen = false;
+  bodyResult: any = null;
+
   constructor(
     public router: Router,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private http: HttpClient
+    private http: HttpClient,
+    private loadingCtrl: LoadingController
   ) { }
 
   ngOnInit() {
@@ -315,5 +321,45 @@ export class ProfilePage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  async scanBody() {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt
+      });
+
+      const loading = await this.loadingCtrl.create({
+        message: 'La IA está analizando tu físico...',
+        spinner: 'crescent'
+      });
+      await loading.present();
+
+      const payload = {
+        base64Image: image.base64String
+      };
+
+      this.http.post('http://localhost:8080/api/v1/ai/analyze-body', payload).subscribe({
+        next: (res: any) => {
+          loading.dismiss();
+          this.bodyResult = res;
+          this.isBodyModalOpen = true;
+        },
+        error: async (err) => {
+          loading.dismiss();
+          const toast = await this.toastCtrl.create({
+            message: 'Error al analizar la imagen',
+            duration: 2000,
+            color: 'danger'
+          });
+          toast.present();
+        }
+      });
+    } catch (e) {
+      console.log('User cancelled photo', e);
+    }
   }
 }

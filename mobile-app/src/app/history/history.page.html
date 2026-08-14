@@ -68,13 +68,23 @@
       </div>
 
       <div *ngIf="machineHistory && machineHistory.length > 0">
-        <div class="glass-card meal-item" *ngFor="let machine of machineHistory" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 15px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
-          <img [src]="machine.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-purple);" />
-          <div style="flex: 1;">
-            <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ machine.name }}</h4>
-            <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">Músculos: {{ machine.targetMuscles }}</p>
+        <div class="glass-card meal-item" *ngFor="let machine of machineHistory; let i = index" style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
+          
+          <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+            <img [src]="machine.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-purple);" />
+            <div style="flex: 1;">
+              <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ machine.name }}</h4>
+              <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">Músculos: {{ machine.targetMuscles }}</p>
+            </div>
+            <ion-icon name="barbell" style="color: var(--neon-purple); font-size: 24px;"></ion-icon>
           </div>
-          <ion-icon name="barbell" style="color: var(--neon-purple); font-size: 24px;"></ion-icon>
+
+          <!-- SECCIÓN PARA ANOTAR PESO -->
+          <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+            <ion-input [(ngModel)]="machine.weightLog" placeholder="Ej: 4 series x 15kg" style="color: white; --padding-start: 10px; font-size: 0.9rem; border-bottom: 1px solid rgba(157, 0, 255, 0.5);"></ion-input>
+            <button class="btn-neon outline" (click)="saveMachineWeight(i, machine)" style="padding: 5px 15px; font-size: 0.8rem; border-color: var(--neon-purple); color: var(--neon-purple); border-radius: 15px;">Guardar</button>
+          </div>
+
         </div>
       </div>
     </div>

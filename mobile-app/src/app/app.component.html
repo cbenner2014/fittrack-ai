@@ -7,6 +7,10 @@
       <ion-icon name="home"></ion-icon>
       <span>Inicio</span>
     </div>
+    <div class="nav-item" [class.active]="router.url.includes('/gimnasios')" (click)="router.navigate(['/gimnasios'])">
+      <ion-icon name="map"></ion-icon>
+      <span>Gimnasios</span>
+    </div>
     <div class="nav-item" [class.active]="router.url.includes('/history')" (click)="router.navigate(['/history'])">
       <ion-icon name="calendar"></ion-icon>
       <span>Historial</span>

@@ -42,6 +42,19 @@ public class AiAnalysisController {
         return ResponseEntity.ok(aiJsonResponse);
     }
 
+    @PostMapping("/analyze-body")
+    public ResponseEntity<String> analyzeBody(@Valid @RequestBody ImageAnalysisRequestDto requestDto) {
+        String prompt = "Actúa como un entrenador personal experto en recomposición corporal. Analiza la imagen proporcionada de un físico y detecta cambios o da una estimación aproximada. " +
+                "Devuelve el resultado ESTRICTAMENTE en formato JSON plano sin bloques de código Markdown (```json). " +
+                "La estructura exacta debe ser: " +
+                "{\"estimatedBodyFat\": \"Porcentaje estimado (ej. 15-18%)\", " +
+                "\"muscleMass\": \"Breve análisis de la masa muscular visible\", " +
+                "\"feedback\": \"Feedback constructivo y motivacional sobre el progreso físico.\"}";
+
+        String aiJsonResponse = aiVisionService.analyzeImage(requestDto.getBase64Image(), prompt);
+        return ResponseEntity.ok(aiJsonResponse);
+    }
+
     @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> uploadImageTest(@RequestParam("file") MultipartFile file) {
         // Subimos el archivo a Cloudinary
