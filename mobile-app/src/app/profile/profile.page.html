@@ -55,6 +55,20 @@
         <ion-select-option value="build_muscle">Ganar Masa Muscular</ion-select-option>
       </ion-select>
     </ion-item>
+    
+    <ion-item class="custom-input">
+      <ion-label position="stacked">Estilo de Alimentación (Opcional)</ion-label>
+      <ion-select [(ngModel)]="userProfile.dietPreference" interface="action-sheet">
+        <ion-select-option value="Tradicional (3 a 5 comidas)">Tradicional (3 a 5 comidas diarias)</ion-select-option>
+        <ion-select-option value="Ayuno Intermitente 16/8">Ayuno Intermitente 16/8 (Solo almuerzo y cena)</ion-select-option>
+        <ion-select-option value="Dieta Cetogénica (Keto)">Dieta Cetogénica (Keto - Altas grasas, casi 0 carbos)</ion-select-option>
+        <ion-select-option value="Dieta Paleo">Dieta Paleo (Comida real, cero procesados)</ion-select-option>
+        <ion-select-option value="Vegano">Vegano (Sin origen animal)</ion-select-option>
+        <ion-select-option value="Vegetariano">Vegetariano (Permite huevo/lácteos)</ion-select-option>
+        <ion-select-option value="Dieta Carnívora">Dieta Carnívora (Solo carne y origen animal)</ion-select-option>
+        <ion-select-option value="Dieta Mediterránea">Dieta Mediterránea (Aceite de oliva, pescado, granos enteros)</ion-select-option>
+      </ion-select>
+    </ion-item>
   </div>
 
   <button class="btn-neon" (click)="saveProfile()" style="width: 100%; margin-top: 30px;">

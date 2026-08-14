@@ -21,7 +21,8 @@ export class ProfilePage implements OnInit {
     weight: null,
     height: null,
     activityLevel: 1.2,
-    goal: 'maintain'
+    goal: 'maintain',
+    dietPreference: 'Tradicional (3 a 5 comidas)'
   };
 
   weightHistory: any[] = [];
@@ -56,7 +57,8 @@ export class ProfilePage implements OnInit {
       weight: null,
       height: null,
       activityLevel: 1.2,
-      goal: 'maintain'
+      goal: 'maintain',
+      dietPreference: 'Tradicional (3 a 5 comidas)'
     };
     
     this.loadProfileFromBackend();

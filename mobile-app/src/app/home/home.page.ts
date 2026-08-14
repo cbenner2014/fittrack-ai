@@ -69,6 +69,15 @@ export class HomePage {
   ];
   claimedQuests: string[] = [];
 
+  // CHAT
+  isChatModalOpen = false;
+  chatMessage = '';
+  chatHistory: {role: string, text: string}[] = [];
+
+  // ETIQUETAS
+  isLabelModalOpen = false;
+  labelResult: any = null;
+
   constructor(
     private http: HttpClient,
     private loadingCtrl: LoadingController,
@@ -154,6 +163,7 @@ export class HomePage {
             dayOfWeek: dayName
           };
         });
+        this.updateHydrationTarget();
       },
       error: (err) => console.error('Error cargando historial de máquinas', err)
     });
@@ -214,6 +224,10 @@ export class HomePage {
         this.userProfile.totalCarbsConsumed = Math.round(totalCarbs);
         this.userProfile.totalFatsConsumed = Math.round(totalFats);
         
+        
+        this.updateHydrationTarget();
+        
+        this.updateHydrationTarget();
         this.evaluateQuests();
       },
       error: (err) => console.error('Error cargando historial', err)
@@ -282,6 +296,82 @@ export class HomePage {
     return { name: 'Diamante', icon: 'diamond', color: '#00ffff', title: 'Imparable' };
   }
   // ---------------------------------
+
+  // --- HIDRATACIÓN ---
+  updateHydrationTarget() {
+    let weight = this.userProfile.weight || 70; // 70kg por defecto
+    let base = weight * 35; // 35ml por kg
+    
+    // Sumar 500ml si ha entrenado este día
+    const targetDate = this.selectedDate.toISOString().split('T')[0];
+    const workedOut = this.machineHistory.some(m => m.date === targetDate);
+    if (workedOut) {
+      base += 500;
+    }
+    
+    this.waterTarget = base;
+  }
+
+  // --- COMPRAS ---
+  async generateShoppingList() {
+    if (!this.coachResult || !this.coachResult.nutritionPlan) {
+      alert("Primero genera tu plan semanal.");
+      return;
+    }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Creando lista de mercado...',
+      spinner: 'dots'
+    });
+    await loading.present();
+
+    const payload = {
+      nutritionPlan: this.coachResult.nutritionPlan
+    };
+
+    this.http.post('http://localhost:8080/api/v1/coach-recommendations/generate-shopping-list', payload).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        
+        // El AI devuelve JSON. Lo parseamos
+        let parsedList: any;
+        if (typeof res === 'string') {
+           try { parsedList = JSON.parse(res); } catch(e) { parsedList = res; }
+        } else {
+           parsedList = res;
+        }
+
+        if (parsedList && parsedList.shoppingList) {
+          // Guardarlo en coachResult para mostrar en UI
+          this.coachResult.shoppingList = parsedList.shoppingList;
+        } else {
+          alert('No se pudo estructurar la lista.');
+        }
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        
+        if (err.error && typeof err.error === 'string') {
+          try {
+             const p = JSON.parse(err.error);
+             if (p.shoppingList) {
+               this.coachResult.shoppingList = p.shoppingList;
+               return;
+             }
+             if (p.error) {
+               alert('Error de IA: ' + p.error);
+               return;
+             }
+          } catch(e) {}
+        } else if (err.error && err.error.error) {
+           alert('Error de IA: ' + err.error.error);
+           return;
+        }
+        
+        alert('Hubo un error al crear la lista de compras: ' + JSON.stringify(err));
+      }
+    });
+  }
 
   addWater(amount: number) {
     this.waterConsumed += amount;
@@ -425,6 +515,70 @@ export class HomePage {
     }
   }
 
+  async scanLabel() {
+    if (this.isRequestInProgress) return;
+    this.isRequestInProgress = true;
+
+    try {
+      // Capacitor Camera handles both Web and Native gracefully
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt,
+        quality: 90
+      });
+      let base64Image = photo.base64String;
+
+      if (!base64Image) {
+        this.isRequestInProgress = false;
+        return;
+      }
+
+      const loading = await this.loadingCtrl.create({
+        message: 'Buscando engaños...',
+        spinner: 'bubbles',
+        backdropDismiss: false
+      });
+      await loading.present();
+
+      const profileStr = localStorage.getItem('btrack_user_profile');
+      let dietPref = 'Ninguna';
+      if (profileStr) {
+        const p = JSON.parse(profileStr);
+        if (p.dietPreference) dietPref = p.dietPreference;
+      }
+
+      const url = `http://localhost:8080/api/v1/ai/analyze-label?dietPreference=${encodeURIComponent(dietPref)}`;
+      this.http.post(url, {
+        base64Image: base64Image
+      }).subscribe({
+        next: async (res: any) => {
+          await loading.dismiss();
+          // parse JSON string to Object
+          this.labelResult = typeof res === 'string' ? JSON.parse(res) : res;
+          this.isLabelModalOpen = true;
+          this.isRequestInProgress = false;
+        },
+        error: async (err) => {
+          await loading.dismiss();
+          
+          if (err.error && typeof err.error === 'string') {
+            try {
+              this.labelResult = JSON.parse(err.error);
+              this.isLabelModalOpen = true;
+              this.isRequestInProgress = false;
+              return;
+            } catch (e) {}
+          }
+          
+          alert('Hubo un error al leer la etiqueta.');
+          this.isRequestInProgress = false;
+        }
+      });
+    } catch (e) {
+      this.isRequestInProgress = false;
+    }
+  }
+
   async askCoach() {
     if (this.isRequestInProgress) return;
     this.isRequestInProgress = true;
@@ -436,8 +590,16 @@ export class HomePage {
     });
     await loading.present();
 
-    // Llamar a la IA con el ID del usuario actual dinámicamente
-    this.http.post(`http://localhost:8080/api/v1/coach-recommendations/generate-plan/${this.userId}`, {}).subscribe({
+    const profileStr = localStorage.getItem('btrack_user_profile');
+    let dietPref = 'Tradicional (3 a 5 comidas)';
+    if (profileStr) {
+      const p = JSON.parse(profileStr);
+      if (p.dietPreference) dietPref = p.dietPreference;
+    }
+
+    // Llamar a la IA con el ID del usuario actual dinámicamente y la dieta elegida
+    const url = `http://localhost:8080/api/v1/coach-recommendations/generate-plan/${this.userId}?dietPreference=${encodeURIComponent(dietPref)}`;
+    this.http.post(url, {}).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         this.coachResult = res;
@@ -644,5 +806,69 @@ export class HomePage {
 
   toggleQuests() {
     this.showQuests = !this.showQuests;
+  }
+
+  // CHAT SOS
+  async sendChatMessage() {
+    if (!this.chatMessage.trim()) return;
+
+    // Agregar mensaje del usuario a la UI
+    const userMsg = this.chatMessage;
+    this.chatHistory.push({ role: 'user', text: userMsg });
+    this.chatMessage = '';
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Escribiendo...',
+      spinner: 'dots'
+    });
+    await loading.present();
+
+    const profileStr = localStorage.getItem('btrack_user_profile');
+    let dietPref = 'Ninguna';
+    if (profileStr) {
+      const p = JSON.parse(profileStr);
+      if (p.dietPreference) dietPref = p.dietPreference;
+    }
+
+    const payload = {
+      message: userMsg,
+      dietPreference: dietPref
+    };
+
+    this.http.post('http://localhost:8080/api/v1/ai/chat', payload).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        if (res.reply) {
+          this.chatHistory.push({ role: 'ai', text: res.reply });
+        } else if (res.text) {
+          this.chatHistory.push({ role: 'ai', text: res.text });
+        } else {
+          // Si el JSON viene parseado diferente o como texto plano
+          let parsed;
+          try {
+             parsed = JSON.parse(res);
+             if (parsed.reply) this.chatHistory.push({ role: 'ai', text: parsed.reply });
+          } catch(e) {
+             this.chatHistory.push({ role: 'ai', text: res });
+          }
+        }
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        
+        // El servidor devuelve un string que a veces httpClient no sabe parsear como JSON si viene texto directo.
+        if (err.error && typeof err.error === 'string') {
+          try {
+            const parsed = JSON.parse(err.error);
+            if (parsed.reply) {
+              this.chatHistory.push({ role: 'ai', text: parsed.reply });
+              return;
+            }
+          } catch (e) {}
+        }
+        
+        alert('Hubo un error de conexión con la IA.');
+      }
+    });
   }
 }

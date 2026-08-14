@@ -66,4 +66,39 @@ public class AiAnalysisController {
             "url", imageUrl
         ));
     }
+
+    @PostMapping("/analyze-label")
+    public ResponseEntity<String> analyzeLabel(@Valid @RequestBody ImageAnalysisRequestDto requestDto, 
+                                               @RequestParam(required = false, defaultValue = "Ninguna") String dietPreference) {
+        String prompt = "Actúa como un experto en nutrición y detector de engaños de la industria alimentaria. " +
+                "Analiza la foto de esta etiqueta nutricional o lista de ingredientes. " +
+                "El usuario tiene esta dieta o preferencia: " + dietPreference + ". " +
+                "Dime si el producto es bueno, malo o un engaño. " +
+                "Devuelve el resultado ESTRICTAMENTE en formato JSON plano sin bloques de código Markdown (```json). " +
+                "La estructura exacta debe ser: " +
+                "{\"verdict\": \"Bueno / Regular / Malo / Engaño\", " +
+                "\"hiddenBadIngredients\": \"Lista de ingredientes malos detectados (azúcares ocultos, aceites vegetales malos, etc.)\", " +
+                "\"dietCompatibility\": \"¿Encaja con su dieta (" + dietPreference + ")? Sí o No y por qué brevemente\", " +
+                "\"advice\": \"Tu consejo final sobre si comprarlo o no.\"}";
+
+        String aiJsonResponse = aiVisionService.analyzeImage(requestDto.getBase64Image(), prompt);
+        return ResponseEntity.ok(aiJsonResponse);
+    }
+
+    @PostMapping("/chat")
+    public ResponseEntity<String> chatWithAi(@RequestBody Map<String, String> payload) {
+        String userMessage = payload.get("message");
+        String dietPref = payload.getOrDefault("dietPreference", "Ninguna");
+        
+        String prompt = "Actúa como un nutricionista y entrenador personal de élite de bolsillo. " +
+                "El usuario sigue la dieta o estilo: " + dietPref + ". " +
+                "Pregunta/Emergencia del usuario: \"" + userMessage + "\". " +
+                "Da una respuesta directa, muy rápida, útil, salvavidas y amigable (con emojis). " +
+                "Devuelve el resultado ESTRICTAMENTE en formato JSON plano sin Markdown. " +
+                "La estructura debe ser: " +
+                "{\"reply\": \"tu respuesta aquí usando etiquetas html <br> si necesitas separar párrafos.\"}";
+
+        String aiJsonResponse = aiVisionService.analyzeImage("", prompt);
+        return ResponseEntity.ok(aiJsonResponse);
+    }
 }

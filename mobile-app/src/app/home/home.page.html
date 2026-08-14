@@ -114,15 +114,20 @@
 
     <h2 class="section-title">IA Scanner 👁️</h2>
     
-    <div class="action-grid">
-      <div class="glass-card action-card" (click)="scanFood()">
+    <div class="action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+      <div class="glass-card action-card" (click)="scanFood()" style="padding: 10px;">
         <ion-icon name="fast-food-outline" class="action-icon food-icon"></ion-icon>
-        <h3>Escanear<br>Comida</h3>
+        <h3 style="font-size: 0.8rem;">Comida</h3>
       </div>
       
-      <div class="glass-card action-card" (click)="scanMachine()">
+      <div class="glass-card action-card" (click)="scanMachine()" style="padding: 10px;">
         <ion-icon name="barbell-outline" class="action-icon gym-icon"></ion-icon>
-        <h3>Analizar<br>Máquina</h3>
+        <h3 style="font-size: 0.8rem;">Máquina</h3>
+      </div>
+
+      <div class="glass-card action-card" (click)="scanLabel()" style="padding: 10px; border-color: rgba(255,157,0,0.4);">
+        <ion-icon name="barcode-outline" class="action-icon" style="color: #ff9d00; text-shadow: 0 0 10px rgba(255,157,0,0.5);"></ion-icon>
+        <h3 style="font-size: 0.8rem;">Etiqueta</h3>
       </div>
     </div>
 
@@ -136,6 +141,54 @@
   </div>
 
   <!-- El historial fue movido a su propia pestaña -->
+  
+  <!-- BOTÓN FLOTANTE CHAT DE EMERGENCIA -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 70px; margin-right: 10px;">
+    <ion-fab-button (click)="isChatModalOpen = true" style="--background: #ff0055; --box-shadow: 0 0 20px rgba(255,0,85,0.6);">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- MODAL DE CHAT DE EMERGENCIA -->
+  <ion-modal [isOpen]="isChatModalOpen" (didDismiss)="isChatModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.98); border: 1px solid rgba(255, 0, 85, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isChatModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <ion-icon name="fitness-outline" class="modal-icon neon-text" style="font-size: 40px; text-align: center; display: block; margin: 0 auto; color: #ff0055; margin-top: 20px;"></ion-icon>
+          <h2 style="text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold;">SOS Nutricional</h2>
+          
+          <div *ngIf="chatHistory.length > 0" style="margin-bottom: 20px; max-height: 50vh; overflow-y: auto;">
+            <div *ngFor="let msg of chatHistory" [ngStyle]="{'text-align': msg.role === 'user' ? 'right' : 'left', 'margin-bottom': '15px'}">
+              <div [ngStyle]="{
+                'display': 'inline-block',
+                'padding': '10px 15px',
+                'border-radius': '15px',
+                'background': msg.role === 'user' ? 'rgba(255, 0, 85, 0.2)' : 'rgba(0, 255, 136, 0.1)',
+                'border': msg.role === 'user' ? '1px solid #ff0055' : '1px solid #00ff88',
+                'color': '#fff',
+                'max-width': '85%',
+                'text-align': 'left',
+                'font-size': '0.9rem'
+              }" [innerHTML]="msg.text"></div>
+            </div>
+          </div>
+          
+          <div *ngIf="chatHistory.length === 0" style="text-align: center; color: #aaa; font-style: italic; margin-top: 20px;">
+            "¿Estás en el súper o en un restaurante y no sabes qué pedir? ¡Pregúntame!"
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px; background: rgba(0,0,0,0.5); border-top: 1px solid #333; display: flex; gap: 10px;">
+          <ion-input [(ngModel)]="chatMessage" placeholder="Ej: Quiero comer dulce..." style="background: #222; color: white; --padding-start: 15px; border-radius: 20px; border: 1px solid #444; flex: 1;"></ion-input>
+          <ion-button (click)="sendChatMessage()" style="--background: #ff0055; --border-radius: 50%; width: 45px; height: 45px; margin: 0;">
+            <ion-icon name="send" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
 
   <!-- MODAL DE COMIDA -->
   <ion-modal [isOpen]="isFoodModalOpen" (didDismiss)="isFoodModalOpen = false" class="custom-modal">
@@ -233,13 +286,67 @@
               <h3 style="font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 5px; margin-bottom: 10px;"><ion-icon name="nutrition-outline" style="color: #00ff88;"></ion-icon> Nutrición</h3>
               <p [innerHTML]="coachResult?.nutritionPlan" style="color: #ccc; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; margin: 0;"></p>
             </div>
+
+            <!-- LISTA DE COMPRAS -->
+            <div *ngIf="coachResult?.shoppingList" class="plan-section" style="background: rgba(255,215,0,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 3px solid #ffd700;">
+              <h3 style="font-size: 1.1rem; color: #ffd700; display: flex; align-items: center; gap: 5px; margin-bottom: 10px;"><ion-icon name="cart-outline"></ion-icon> Lista de Compras</h3>
+              <div *ngFor="let cat of coachResult.shoppingList" style="margin-bottom: 10px;">
+                <strong style="color: #fff; font-size: 0.95rem;">{{ cat.category }}</strong>
+                <ul style="color: #ccc; font-size: 0.85rem; padding-left: 0; margin-top: 5px; list-style-type: none;">
+                  <li *ngFor="let item of cat.items" style="margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><ion-icon name="checkmark-circle" style="color: #00ff88; font-size: 16px;"></ion-icon> {{ item }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ion-content>
+        
+        <div style="padding: 15px 20px 25px;">
+          <div style="display: flex; gap: 10px; width: 100%; flex-direction: column;">
+            <button *ngIf="!coachResult?.shoppingList" class="btn-neon" (click)="generateShoppingList()" style="width: 100%; background: #ffd700; color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); border-color: #ffd700; margin-bottom: 5px;">
+              <ion-icon name="cart-outline"></ion-icon> Generar Lista de Mercado
+            </button>
+            <div style="display: flex; gap: 10px; width: 100%;">
+              <button class="btn-neon outline" (click)="downloadPDF()" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; background: transparent; border: 1px solid #00ff88; border-radius: 25px; color: #00ff88;"><ion-icon name="download-outline"></ion-icon> PDF</button>
+              <button class="btn-neon" (click)="isCoachModalOpen = false" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; border-radius: 25px;">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL DE ETIQUETA NUTRICIONAL -->
+  <ion-modal [isOpen]="isLabelModalOpen" (didDismiss)="isLabelModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.95); border: 1px solid rgba(255, 157, 0, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isLabelModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent; text-align: center;">
+          <ion-icon name="warning-outline" *ngIf="labelResult?.verdict === 'Malo' || labelResult?.verdict === 'Engaño'" style="font-size: 60px; margin-bottom: 10px; margin-top: 20px; color: #ff2a2a;"></ion-icon>
+          <ion-icon name="checkmark-circle-outline" *ngIf="labelResult?.verdict === 'Bueno' || labelResult?.verdict === 'Regular'" style="font-size: 60px; margin-bottom: 10px; margin-top: 20px; color: #00ff88;"></ion-icon>
+          
+          <h2 class="neon-text" [ngStyle]="{'color': (labelResult?.verdict === 'Malo' || labelResult?.verdict === 'Engaño') ? '#ff2a2a' : '#00ff88'}" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">{{ labelResult?.verdict }}</h2>
+          
+          <div class="machine-details" style="margin-bottom: 15px;">
+            <div class="detail-badge" style="background: rgba(255, 157, 0, 0.15); color: #ff9d00; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;">
+              <ion-icon name="restaurant-outline"></ion-icon> Compatible: {{ labelResult?.dietCompatibility }}
+            </div>
+          </div>
+          
+          <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border-left: 3px solid #ff2a2a; color: #ddd; font-size: 0.95rem; text-align: left; margin-bottom: 15px;">
+            <strong>Ingredientes Peligrosos:</strong><br>
+            {{ labelResult?.hiddenBadIngredients }}
+          </div>
+
+          <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border-left: 3px solid #00ff88; color: #ddd; font-size: 0.95rem; text-align: left; margin-bottom: 25px;">
+            <strong>Veredicto IA:</strong><br>
+            {{ labelResult?.advice }}
           </div>
         </ion-content>
         
         <div style="padding: 15px 20px 25px;">
           <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="btn-neon outline" (click)="downloadPDF()" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; background: transparent; border: 1px solid #00ff88; border-radius: 25px; color: #00ff88;"><ion-icon name="download-outline"></ion-icon> PDF</button>
-            <button class="btn-neon" (click)="isCoachModalOpen = false" style="flex: 1; font-size: 0.9rem; padding: 12px 10px; border-radius: 25px;">Aceptar</button>
+            <button class="btn-neon" (click)="isLabelModalOpen = false" style="width: 100%; background: #ff9d00; box-shadow: 0 0 15px #ff9d00; border-color: #ff9d00;">Entendido</button>
           </div>
         </div>
       </div>
