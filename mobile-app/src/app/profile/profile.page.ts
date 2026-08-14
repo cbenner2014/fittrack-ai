@@ -36,7 +36,23 @@ export class ProfilePage implements OnInit {
   ) { }
 
   ngOnInit() {
+    // La inicialización ahora se hace en ionViewWillEnter
+  }
+
+  ionViewWillEnter() {
     this.userId = localStorage.getItem('userId') || '2';
+    
+    // Limpiamos los datos del usuario anterior por seguridad
+    this.userProfile = {
+      name: localStorage.getItem('userName') || '',
+      gender: 'male',
+      age: null,
+      weight: null,
+      height: null,
+      activityLevel: 1.2,
+      goal: 'maintain'
+    };
+    
     this.loadProfileFromBackend();
     
     // Cargar historial de peso localmente por ahora (hasta migrarlo si se desea)
@@ -188,9 +204,21 @@ export class ProfilePage implements OnInit {
       targetCalories += 300; // Superávit calórico
     }
 
-    // Cálculos de Macros
-    // Proteína: 2.2g por kg de peso
-    const targetProtein = Math.round(this.userProfile.weight * 2.2);
+    // Cálculos de Macros: Proteína según objetivo y actividad
+    let proteinMultiplier = 1.0;
+    
+    if (this.userProfile.goal === 'lose_fat') {
+      proteinMultiplier = 2.2; // Pérdida de Peso: 2.0 - 2.4g para proteger músculo
+    } else if (this.userProfile.goal === 'build_muscle') {
+      proteinMultiplier = 2.0; // Ganancia muscular: 1.6 - 2.2g
+    } else {
+      // Mantenimiento
+      if (this.userProfile.activityLevel <= 1.2) proteinMultiplier = 1.0; // Sedentario
+      else if (this.userProfile.activityLevel <= 1.55) proteinMultiplier = 1.4; // Activo moderado
+      else proteinMultiplier = 1.8; // Muy activo
+    }
+
+    const targetProtein = Math.round(this.userProfile.weight * proteinMultiplier);
     const proteinCalories = targetProtein * 4;
 
     // Grasas: 25% de las calorías totales
@@ -209,6 +237,7 @@ export class ProfilePage implements OnInit {
       dailyFatsTarget: targetFats
     };
 
+    this.userProfile = completeProfile; // <--- Actualizamos la variable local para que se muestre en el HTML
     localStorage.setItem('btrack_user_profile', JSON.stringify(completeProfile));
     
     // Enviar al Backend
@@ -235,12 +264,12 @@ export class ProfilePage implements OnInit {
       next: async (res: any) => {
         if (!silent) {
           const toast = await this.toastCtrl.create({
-            message: '¡Perfil guardado en la nube exitosamente!',
-            duration: 2000,
+            message: '¡Macros calculados y guardados en la nube!',
+            duration: 2500,
             color: 'success'
           });
           toast.present();
-          this.router.navigate(['/home']);
+          // Ya no redirigimos al home, para que el usuario pueda ver sus macros en pantalla
         }
       },
       error: async (err) => {
