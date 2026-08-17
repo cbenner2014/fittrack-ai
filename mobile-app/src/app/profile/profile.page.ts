@@ -47,7 +47,11 @@ export class ProfilePage implements OnInit {
   }
 
   ionViewWillEnter() {
-    this.userId = localStorage.getItem('userId') || '2';
+    this.userId = localStorage.getItem('userId') || '';
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
     
     // Limpiamos los datos del usuario anterior por seguridad
     this.userProfile = {

@@ -33,7 +33,11 @@ export class HistoryPage implements OnInit {
   }
   
   ionViewWillEnter() {
-    this.userId = localStorage.getItem('userId') || '2';
+    this.userId = localStorage.getItem('userId') || '';
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.loadHistory();
   }
 
