@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: fitness_ai_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: fitness_ai_app
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root1234}
+    # No exponemos el 3306 al servidor externo para evitar choques con otros MySQL.
+    # El backend igual podrá conectarse internamente.
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitness_ai_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/fitness_ai_app?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root1234}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    # No exponemos el 8080 al exterior. 
+    # El frontend (nginx) se comunicará internamente.
+
+  frontend:
+    build:
+      context: ./mobile-app
+      dockerfile: Dockerfile
+    container_name: fitness_ai_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

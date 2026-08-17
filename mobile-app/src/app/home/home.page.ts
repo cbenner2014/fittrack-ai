@@ -329,7 +329,7 @@ export class HomePage {
       nutritionPlan: this.coachResult.nutritionPlan
     };
 
-    this.http.post('http://localhost:8080/api/v1/coach-recommendations/generate-shopping-list', payload).subscribe({
+    this.http.post('/api/v1/coach-recommendations/generate-shopping-list', payload).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         
@@ -547,7 +547,7 @@ export class HomePage {
         if (p.dietPreference) dietPref = p.dietPreference;
       }
 
-      const url = `http://localhost:8080/api/v1/ai/analyze-label?dietPreference=${encodeURIComponent(dietPref)}`;
+      const url = `/api/v1/ai/analyze-label?dietPreference=${encodeURIComponent(dietPref)}`;
       this.http.post(url, {
         base64Image: base64Image
       }).subscribe({
