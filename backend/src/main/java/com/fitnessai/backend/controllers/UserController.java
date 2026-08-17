@@ -76,15 +76,7 @@ public class UserController {
         ));
     }
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllUsers() {
-        List<UserResponseDto> users = userService.getAllUsers();
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Usuarios obtenidos correctamente",
-                "data", users
-        ));
-    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateUser(@PathVariable Long id, @RequestBody UserRequestDto userRequestDto) {
