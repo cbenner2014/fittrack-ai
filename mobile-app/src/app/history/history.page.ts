@@ -60,7 +60,7 @@ export class HistoryPage implements OnInit {
   }
 
   loadHistory() {
-    this.http.get<any[]>(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`/api/v1/meals/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMeals = data;
         this.updateCalendarDots();
@@ -69,13 +69,13 @@ export class HistoryPage implements OnInit {
       error: (e) => console.error('Error cargando comidas', e)
     });
 
-    this.http.get<any[]>(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get<any[]>(`/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (data) => {
         this.allMachines = data;
         this.updateCalendarDots();
         this.filterDataByDate();
       },
-      error: (e) => console.error('Error cargando máquinas', e)
+      error: (e) => console.error('Error cargando mÃ¡quinas', e)
     });
   }
 
@@ -125,7 +125,7 @@ export class HistoryPage implements OnInit {
       localStorage.setItem(`machine_history_${this.userId}`, JSON.stringify(this.allMachines));
       
       const toast = await this.toastCtrl.create({
-        message: '¡Series guardadas!',
+        message: 'Â¡Series guardadas!',
         duration: 2000,
         color: 'success',
         icon: 'barbell-outline'

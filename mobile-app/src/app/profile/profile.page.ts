@@ -43,7 +43,7 @@ export class ProfilePage implements OnInit {
   ) { }
 
   ngOnInit() {
-    // La inicialización ahora se hace en ionViewWillEnter
+    // La inicializaciÃ³n ahora se hace en ionViewWillEnter
   }
 
   ionViewWillEnter() {
@@ -67,8 +67,8 @@ export class ProfilePage implements OnInit {
     const savedHistory = localStorage.getItem('weightHistory');
     if (savedHistory) {
       this.weightHistory = JSON.parse(savedHistory);
-      // Para propósitos de demostración: Si solo hay 1 registro, ya no inyectamos historial falso
-      // (Eliminamos la inyección para que solo muestre datos reales)
+      // Para propÃ³sitos de demostraciÃ³n: Si solo hay 1 registro, ya no inyectamos historial falso
+      // (Eliminamos la inyecciÃ³n para que solo muestre datos reales)
     } else if (this.userProfile.weight) {
       // Si no hay historial, agregar el peso actual
       this.weightHistory.push({
@@ -79,7 +79,7 @@ export class ProfilePage implements OnInit {
   }
 
   loadProfileFromBackend() {
-    this.http.get(`http://localhost:8080/api/v1/users/${this.userId}`).subscribe({
+    this.http.get(`/api/v1/users/${this.userId}`).subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
           const dbUser = res.data;
@@ -129,7 +129,7 @@ export class ProfilePage implements OnInit {
         datasets: [{
           label: 'Peso (kg)',
           data: data,
-          borderColor: '#9d00ff', // Neón purple
+          borderColor: '#9d00ff', // NeÃ³n purple
           backgroundColor: 'rgba(157, 0, 255, 0.2)',
           borderWidth: 3,
           pointBackgroundColor: '#00ff88',
@@ -193,7 +193,7 @@ export class ProfilePage implements OnInit {
       return;
     }
 
-    // Cálculo de TMB (Tasa Metabólica Basal) - Ecuación Mifflin-St Jeor
+    // CÃ¡lculo de TMB (Tasa MetabÃ³lica Basal) - EcuaciÃ³n Mifflin-St Jeor
     let bmr = 0;
     if (this.userProfile.gender === 'male') {
       bmr = (10 * this.userProfile.weight) + (6.25 * this.userProfile.height) - (5 * this.userProfile.age) + 5;
@@ -201,22 +201,22 @@ export class ProfilePage implements OnInit {
       bmr = (10 * this.userProfile.weight) + (6.25 * this.userProfile.height) - (5 * this.userProfile.age) - 161;
     }
 
-    // TDEE (Gasto Energético Diario Total)
+    // TDEE (Gasto EnergÃ©tico Diario Total)
     let tdee = bmr * this.userProfile.activityLevel;
 
     // Ajuste por Objetivo
     let targetCalories = tdee;
     if (this.userProfile.goal === 'lose_fat') {
-      targetCalories -= 500; // Déficit calórico
+      targetCalories -= 500; // DÃ©ficit calÃ³rico
     } else if (this.userProfile.goal === 'build_muscle') {
-      targetCalories += 300; // Superávit calórico
+      targetCalories += 300; // SuperÃ¡vit calÃ³rico
     }
 
-    // Cálculos de Macros: Proteína según objetivo y actividad
+    // CÃ¡lculos de Macros: ProteÃ­na segÃºn objetivo y actividad
     let proteinMultiplier = 1.0;
     
     if (this.userProfile.goal === 'lose_fat') {
-      proteinMultiplier = 2.2; // Pérdida de Peso: 2.0 - 2.4g para proteger músculo
+      proteinMultiplier = 2.2; // PÃ©rdida de Peso: 2.0 - 2.4g para proteger mÃºsculo
     } else if (this.userProfile.goal === 'build_muscle') {
       proteinMultiplier = 2.0; // Ganancia muscular: 1.6 - 2.2g
     } else {
@@ -229,11 +229,11 @@ export class ProfilePage implements OnInit {
     const targetProtein = Math.round(this.userProfile.weight * proteinMultiplier);
     const proteinCalories = targetProtein * 4;
 
-    // Grasas: 25% de las calorías totales
+    // Grasas: 25% de las calorÃ­as totales
     const targetFats = Math.round((targetCalories * 0.25) / 9);
     const fatsCalories = targetFats * 9;
 
-    // Carbohidratos: El resto de las calorías
+    // Carbohidratos: El resto de las calorÃ­as
     const targetCarbs = Math.round((targetCalories - proteinCalories - fatsCalories) / 4);
 
     const completeProfile = {
@@ -268,11 +268,11 @@ export class ProfilePage implements OnInit {
       dailyFatsTarget: completeProfile.dailyFatsTarget
     };
     
-    this.http.put(`http://localhost:8080/api/v1/users/${this.userId}`, updateDto).subscribe({
+    this.http.put(`/api/v1/users/${this.userId}`, updateDto).subscribe({
       next: async (res: any) => {
         if (!silent) {
           const toast = await this.toastCtrl.create({
-            message: '¡Macros calculados y guardados en la nube!',
+            message: 'Â¡Macros calculados y guardados en la nube!',
             duration: 2500,
             color: 'success'
           });
@@ -306,15 +306,15 @@ export class ProfilePage implements OnInit {
 
   async logout() {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro que deseas salir?',
+      header: 'Cerrar SesiÃ³n',
+      message: 'Â¿EstÃ¡s seguro que deseas salir?',
       buttons: [
         {
           text: 'Cancelar',
           role: 'cancel'
         },
         {
-          text: 'Sí, Salir',
+          text: 'SÃ­, Salir',
           handler: () => {
             localStorage.clear();
             this.router.navigate(['/login']);
@@ -335,7 +335,7 @@ export class ProfilePage implements OnInit {
       });
 
       const loading = await this.loadingCtrl.create({
-        message: 'La IA está analizando tu físico...',
+        message: 'La IA estÃ¡ analizando tu fÃ­sico...',
         spinner: 'crescent'
       });
       await loading.present();
@@ -344,7 +344,7 @@ export class ProfilePage implements OnInit {
         base64Image: image.base64String
       };
 
-      this.http.post('http://localhost:8080/api/v1/ai/analyze-body', payload).subscribe({
+      this.http.post('/api/v1/ai/analyze-body', payload).subscribe({
         next: (res: any) => {
           loading.dismiss();
           this.bodyResult = res;

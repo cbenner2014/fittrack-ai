@@ -14,7 +14,7 @@ import html2pdf from 'html2pdf.js';
   standalone: false,
 })
 export class HomePage {
-  // Datos dinámicos del usuario actual
+  // Datos dinÃ¡micos del usuario actual
   userName = 'Usuario';
   userInitials: string = 'US';
   userId: string = '';
@@ -56,16 +56,16 @@ export class HomePage {
   selectedDate: Date = new Date();
   weekDays: any[] = [];
 
-  // Hidratación
+  // HidrataciÃ³n
   waterConsumed: number = 0; // En mililitros
   waterTarget: number = 2500; // Meta por defecto
 
   // Misiones Diarias
   showQuests: boolean = false;
   quests = [
-    { id: 'water', title: 'Modo Acuático', desc: 'Registra al menos 2L de agua', xp: 50, icon: 'water', color: '#00d2ff' },
-    { id: 'food', title: 'Nutrición IA', desc: 'Escanea 1 comida hoy', xp: 100, icon: 'restaurant', color: '#ff9d00' },
-    { id: 'machine', title: 'Cazador de Hierro', desc: 'Analiza 1 máquina hoy', xp: 75, icon: 'barbell', color: '#9d00ff' }
+    { id: 'water', title: 'Modo AcuÃ¡tico', desc: 'Registra al menos 2L de agua', xp: 50, icon: 'water', color: '#00d2ff' },
+    { id: 'food', title: 'NutriciÃ³n IA', desc: 'Escanea 1 comida hoy', xp: 100, icon: 'restaurant', color: '#ff9d00' },
+    { id: 'machine', title: 'Cazador de Hierro', desc: 'Analiza 1 mÃ¡quina hoy', xp: 75, icon: 'barbell', color: '#9d00ff' }
   ];
   claimedQuests: string[] = [];
 
@@ -94,7 +94,7 @@ export class HomePage {
   }
 
   ionViewWillEnter() {
-    // Al entrar a la pantalla, cargar los datos de la sesión actual
+    // Al entrar a la pantalla, cargar los datos de la sesiÃ³n actual
     this.userId = localStorage.getItem('userId') || '2';
     const storedName = localStorage.getItem('userName');
     
@@ -109,7 +109,7 @@ export class HomePage {
   }
 
   loadProfile() {
-    // 1. Cargar rápido de memoria local
+    // 1. Cargar rÃ¡pido de memoria local
     const savedProfile = localStorage.getItem('btrack_user_profile');
     if (savedProfile) {
       const parsedProfile = JSON.parse(savedProfile);
@@ -122,7 +122,7 @@ export class HomePage {
     }
     
     // 2. Traer del servidor silenciosamente para mantener actualizado (XP, Nivel, etc)
-    this.http.get(`http://localhost:8080/api/v1/users/${this.userId}`).subscribe({
+    this.http.get(`/api/v1/users/${this.userId}`).subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
           const dbUser = res.data;
@@ -145,10 +145,10 @@ export class HomePage {
   }
 
   loadMachineHistory() {
-    this.http.get(`http://localhost:8080/api/v1/machine-logs/user/${this.userId}`).subscribe({
+    this.http.get(`/api/v1/machine-logs/user/${this.userId}`).subscribe({
       next: (machines: any) => {
         this.machineHistory = machines.map((m: any) => {
-          // Obtener nombre del día
+          // Obtener nombre del dÃ­a
           const dateObj = new Date(m.logDate + 'T12:00:00Z'); // Ajuste de zona horaria
           let dayName = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
           dayName = dayName.charAt(0).toUpperCase() + dayName.slice(1); // Capitalizar
@@ -165,14 +165,14 @@ export class HomePage {
         });
         this.updateHydrationTarget();
       },
-      error: (err) => console.error('Error cargando historial de máquinas', err)
+      error: (err) => console.error('Error cargando historial de mÃ¡quinas', err)
     });
   }
 
   generateWeek() {
     this.weekDays = [];
     const today = new Date();
-    // Generar 3 días antes y 3 días después
+    // Generar 3 dÃ­as antes y 3 dÃ­as despuÃ©s
     for (let i = -3; i <= 3; i++) {
       const d = new Date();
       d.setDate(today.getDate() + i);
@@ -195,14 +195,14 @@ export class HomePage {
   loadDailyHistory(targetDateString?: string) {
     const target = targetDateString || this.selectedDate.toISOString().split('T')[0];
 
-    this.http.get(`http://localhost:8080/api/v1/meals/user/${this.userId}`).subscribe({
+    this.http.get(`/api/v1/meals/user/${this.userId}`).subscribe({
       next: (meals: any) => {
-        // Iluminar puntos verdes si hay datos en ese día
+        // Iluminar puntos verdes si hay datos en ese dÃ­a
         this.weekDays.forEach(day => {
           day.hasData = meals.some((m: any) => m.logDate === day.fullDateString);
         });
 
-        // Cargar agua para el día seleccionado
+        // Cargar agua para el dÃ­a seleccionado
         const savedWater = localStorage.getItem(`water_${this.userId}_${target}`);
         this.waterConsumed = savedWater ? parseInt(savedWater, 10) : 0;
 
@@ -234,7 +234,7 @@ export class HomePage {
     });
   }
 
-  // --- SISTEMA DE GAMIFICACIÓN ---
+  // --- SISTEMA DE GAMIFICACIÃ“N ---
   evaluateQuests() {
     const todayStr = new Date().toISOString().split('T')[0];
     const savedClaimed = localStorage.getItem(`quests_${this.userId}_${todayStr}`);
@@ -280,9 +280,9 @@ export class HomePage {
 
   async showLevelUpAlert() {
     const alert = await this.alertCtrl.create({
-      header: '¡SUBISTE DE NIVEL!',
-      message: `Has alcanzado el Nivel ${this.userProfile.level}. ¡Eres una bestia! Sigue así.`,
-      buttons: ['¡A TRITURAR!'],
+      header: 'Â¡SUBISTE DE NIVEL!',
+      message: `Has alcanzado el Nivel ${this.userProfile.level}. Â¡Eres una bestia! Sigue asÃ­.`,
+      buttons: ['Â¡A TRITURAR!'],
       cssClass: 'neon-alert'
     });
     await alert.present();
@@ -297,12 +297,12 @@ export class HomePage {
   }
   // ---------------------------------
 
-  // --- HIDRATACIÓN ---
+  // --- HIDRATACIÃ“N ---
   updateHydrationTarget() {
     let weight = this.userProfile.weight || 70; // 70kg por defecto
     let base = weight * 35; // 35ml por kg
     
-    // Sumar 500ml si ha entrenado este día
+    // Sumar 500ml si ha entrenado este dÃ­a
     const targetDate = this.selectedDate.toISOString().split('T')[0];
     const workedOut = this.machineHistory.some(m => m.date === targetDate);
     if (workedOut) {
@@ -417,7 +417,7 @@ export class HomePage {
   }
 
   logout() {
-    // Limpiar toda la sesión y volver al login
+    // Limpiar toda la sesiÃ³n y volver al login
     localStorage.clear();
     this.router.navigate(['/login']);
   }
@@ -443,7 +443,7 @@ export class HomePage {
       header: 'Escanear Comida',
       buttons: [
         { text: 'Tomar Foto', icon: 'camera', handler: () => { this.processPhoto(CameraSource.Camera, 'meals/analyze', 'comida.jpg', true); } },
-        { text: 'Abrir Galería', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'meals/analyze', 'comida.jpg', true); } },
+        { text: 'Abrir GalerÃ­a', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'meals/analyze', 'comida.jpg', true); } },
         { text: 'Cancelar', icon: 'close', role: 'cancel' }
       ]
     });
@@ -452,17 +452,17 @@ export class HomePage {
 
   async scanMachine() {
     const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Analizar Máquina',
+      header: 'Analizar MÃ¡quina',
       buttons: [
         { text: 'Tomar Foto', icon: 'camera', handler: () => { this.processPhoto(CameraSource.Camera, 'machines/analyze', 'maquina.jpg', false); } },
-        { text: 'Abrir Galería', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'machines/analyze', 'maquina.jpg', false); } },
+        { text: 'Abrir GalerÃ­a', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'machines/analyze', 'maquina.jpg', false); } },
         { text: 'Cancelar', icon: 'close', role: 'cancel' }
       ]
     });
     await actionSheet.present();
   }
 
-  // Lógica unificada para procesar la foto
+  // LÃ³gica unificada para procesar la foto
   private async processPhoto(source: CameraSource, endpoint: string, fileName: string, isFood: boolean) {
     if (this.isRequestInProgress) return;
     this.isRequestInProgress = true;
@@ -490,7 +490,7 @@ export class HomePage {
       const formData = new FormData();
       formData.append('file', blob, fileName);
 
-      this.http.post(`http://localhost:8080/api/v1/${endpoint}`, formData).subscribe({
+      this.http.post(`/api/v1/${endpoint}`, formData).subscribe({
         next: async (res: any) => {
           await loading.dismiss();
           this.isViewingHistory = false; // Modo escaneo nuevo
@@ -510,7 +510,7 @@ export class HomePage {
         }
       });
     } catch (e) {
-      console.log('Cámara cancelada o error:', e);
+      console.log('CÃ¡mara cancelada o error:', e);
       this.isRequestInProgress = false;
     }
   }
@@ -534,7 +534,7 @@ export class HomePage {
       }
 
       const loading = await this.loadingCtrl.create({
-        message: 'Buscando engaños...',
+        message: 'Buscando engaÃ±os...',
         spinner: 'bubbles',
         backdropDismiss: false
       });
@@ -597,8 +597,8 @@ export class HomePage {
       if (p.dietPreference) dietPref = p.dietPreference;
     }
 
-    // Llamar a la IA con el ID del usuario actual dinámicamente y la dieta elegida
-    const url = `http://localhost:8080/api/v1/coach-recommendations/generate-plan/${this.userId}?dietPreference=${encodeURIComponent(dietPref)}`;
+    // Llamar a la IA con el ID del usuario actual dinÃ¡micamente y la dieta elegida
+    const url = `/api/v1/coach-recommendations/generate-plan/${this.userId}?dietPreference=${encodeURIComponent(dietPref)}`;
     this.http.post(url, {}).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
@@ -643,7 +643,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://localhost:8080/api/v1/meals', request).subscribe({
+    this.http.post('/api/v1/meals', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -666,7 +666,7 @@ export class HomePage {
     });
     await loading.present();
 
-    this.http.delete(`http://localhost:8080/api/v1/meals/${this.foodResult.id}`).subscribe({
+    this.http.delete(`/api/v1/meals/${this.foodResult.id}`).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isFoodModalOpen = false;
@@ -722,7 +722,7 @@ export class HomePage {
       logDate: new Date().toISOString().split('T')[0]
     };
 
-    this.http.post('http://localhost:8080/api/v1/machine-logs', request).subscribe({
+    this.http.post('/api/v1/machine-logs', request).subscribe({
       next: async () => {
         await loading.dismiss();
         this.isMachineModalOpen = false;
@@ -732,7 +732,7 @@ export class HomePage {
       },
       error: async (err) => {
         await loading.dismiss();
-        alert('Error al guardar la máquina en la nube');
+        alert('Error al guardar la mÃ¡quina en la nube');
       }
     });
   }
@@ -755,7 +755,7 @@ export class HomePage {
         
         <!-- Header -->
         <div style="text-align: center; border-bottom: 2px solid #00ff88; padding-bottom: 20px; margin-bottom: 30px;">
-          <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px;">Plan de Acción B-Track</h1>
+          <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px;">Plan de AcciÃ³n B-Track</h1>
           <p style="color: #666; font-size: 14px; margin-top: 5px;">Personalizado para ${this.userName}</p>
         </div>
 
@@ -766,18 +766,18 @@ export class HomePage {
           </p>
         </div>
 
-        <!-- Sección de Rutina -->
+        <!-- SecciÃ³n de Rutina -->
         <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px;">
           <h2 style="color: #000; font-size: 20px; margin-top: 0; display: flex; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-             💪 Plan de Entrenamiento
+             ðŸ’ª Plan de Entrenamiento
           </h2>
           <p style="color: #444; font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 0;">${this.coachResult.workoutPlan}</p>
         </div>
 
-        <!-- Sección de Nutrición -->
+        <!-- SecciÃ³n de NutriciÃ³n -->
         <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
           <h2 style="color: #000; font-size: 20px; margin-top: 0; display: flex; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-             🥗 Guía de Nutrición
+             ðŸ¥— GuÃ­a de NutriciÃ³n
           </h2>
           <p style="color: #444; font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 0;">${this.coachResult.nutritionPlan}</p>
         </div>
@@ -835,7 +835,7 @@ export class HomePage {
       dietPreference: dietPref
     };
 
-    this.http.post('http://localhost:8080/api/v1/ai/chat', payload).subscribe({
+    this.http.post('/api/v1/ai/chat', payload).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.reply) {
@@ -867,7 +867,7 @@ export class HomePage {
           } catch (e) {}
         }
         
-        alert('Hubo un error de conexión con la IA.');
+        alert('Hubo un error de conexiÃ³n con la IA.');
       }
     });
   }

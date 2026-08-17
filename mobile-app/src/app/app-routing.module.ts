@@ -22,7 +22,8 @@ const routes: Routes = [
   {
     path: 'history',
     loadChildren: () => import('./history/history.module').then( m => m.HistoryPageModule)
-  },  {
+  },
+  {
     path: 'gimnasios',
     loadChildren: () => import('./gimnasios/gimnasios.module').then( m => m.GimnasiosPageModule)
   },

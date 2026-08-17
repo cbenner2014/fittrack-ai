@@ -29,8 +29,8 @@ export class LoginPage {
   async login() {
     if (!this.email || !this.password) {
       const alert = await this.alertCtrl.create({
-        header: 'Campos vacíos',
-        message: 'Por favor ingresa tu correo y contraseña.',
+        header: 'Campos vacÃ­os',
+        message: 'Por favor ingresa tu correo y contraseÃ±a.',
         buttons: ['OK']
       });
       await alert.present();
@@ -45,11 +45,11 @@ export class LoginPage {
 
     const loginData = { email: this.email, password: this.password };
 
-    this.http.post('http://localhost:8080/api/v1/users/login', loginData).subscribe({
+    this.http.post('/api/v1/users/login', loginData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
-          // Guardar los datos de sesión en la memoria del celular
+          // Guardar los datos de sesiÃ³n en la memoria del celular
           localStorage.setItem('userId', res.userId);
           localStorage.setItem('userName', res.fullName);
           this.router.navigate(['/home']);
@@ -59,7 +59,7 @@ export class LoginPage {
         await loading.dismiss();
         const alert = await this.alertCtrl.create({
           header: 'Acceso Denegado',
-          message: 'El correo o la contraseña son incorrectos.',
+          message: 'El correo o la contraseÃ±a son incorrectos.',
           buttons: ['Intentar de nuevo']
         });
         await alert.present();
@@ -90,11 +90,11 @@ export class LoginPage {
       password: this.password 
     };
 
-    this.http.post('http://localhost:8080/api/v1/users', registerData).subscribe({
+    this.http.post('/api/v1/users', registerData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
-          // Logueo automático tras registro
+          // Logueo automÃ¡tico tras registro
           localStorage.setItem('userId', res.data.id);
           localStorage.setItem('userName', res.data.fullName);
           

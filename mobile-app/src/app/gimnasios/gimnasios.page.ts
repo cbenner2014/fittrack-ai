@@ -30,8 +30,8 @@ export class GimnasiosPage implements OnInit {
           this.loadingLocation = false;
         },
         (error) => {
-          console.error('Error obteniendo ubicación', error);
-          // Fallback a un punto céntrico de Lima si rechazan el permiso
+          console.error('Error obteniendo ubicaciÃ³n', error);
+          // Fallback a un punto cÃ©ntrico de Lima si rechazan el permiso
           const fallback = `https://www.google.com/maps?q=-12.0464,-77.0428&z=13&output=embed`;
           this.mapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fallback);
           this.loadingLocation = false;
