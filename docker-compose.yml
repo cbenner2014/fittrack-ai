@@ -42,5 +42,15 @@ services:
     depends_on:
       - backend
 
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: fitness_ai_tunnel
+    restart: always
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
+    depends_on:
+      - frontend
+
 volumes:
   db_data:
