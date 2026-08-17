@@ -38,7 +38,7 @@ services:
     container_name: fitness_ai_frontend
     restart: always
     ports:
-      - "80:80"
+      - "8001:80"
     depends_on:
       - backend
 
