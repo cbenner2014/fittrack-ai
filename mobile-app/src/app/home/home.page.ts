@@ -87,15 +87,22 @@ export class HomePage {
   ) {}
 
   ngOnInit() {
-    this.userId = localStorage.getItem('userId') || '2';
+    this.userId = localStorage.getItem('userId') || '';
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.generateWeek();
     this.loadDailyHistory();
     this.loadProfile();
   }
 
   ionViewWillEnter() {
-    // Al entrar a la pantalla, cargar los datos de la sesiÃ³n actual
-    this.userId = localStorage.getItem('userId') || '2';
+    this.userId = localStorage.getItem('userId') || '';
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
     const storedName = localStorage.getItem('userName');
     
     if (storedName) {

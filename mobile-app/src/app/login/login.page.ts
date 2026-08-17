@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { LoadingController, AlertController } from '@ionic/angular';
 
@@ -16,7 +16,7 @@ export class LoginPage {
   password = '';
 
   constructor(
-    private router: Router,
+    private navCtrl: NavController,
     private http: HttpClient,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController
@@ -52,7 +52,7 @@ export class LoginPage {
           // Guardar los datos de sesiÃ³n en la memoria del celular
           localStorage.setItem('userId', res.userId);
           localStorage.setItem('userName', res.fullName);
-          this.router.navigate(['/home']);
+          this.navCtrl.navigateRoot('/home');
         }
       },
       error: async (err) => {
@@ -99,7 +99,7 @@ export class LoginPage {
           localStorage.setItem('userName', res.data.fullName);
           
           // Como es nuevo, lo mandamos al Perfil de Usuario directo
-          this.router.navigate(['/profile']);
+          this.navCtrl.navigateRoot('/profile');
         }
       },
       error: async (err) => {
