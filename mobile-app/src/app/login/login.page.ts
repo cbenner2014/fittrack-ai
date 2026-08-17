@@ -49,9 +49,10 @@ export class LoginPage {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
-          // Guardar los datos de sesiÃ³n en la memoria del celular
+          // Guardar los datos de sesiÃ³n y el TOKEN en la memoria del celular
           localStorage.setItem('userId', res.userId);
           localStorage.setItem('userName', res.fullName);
+          if (res.token) localStorage.setItem('token', res.token);
           this.navCtrl.navigateRoot('/home');
         }
       },
@@ -90,13 +91,14 @@ export class LoginPage {
       password: this.password 
     };
 
-    this.http.post('/api/v1/users', registerData).subscribe({
+    this.http.post('/api/v1/users/register', registerData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
           // Logueo automÃ¡tico tras registro
           localStorage.setItem('userId', res.data.id);
           localStorage.setItem('userName', res.data.fullName);
+          if (res.token) localStorage.setItem('token', res.token);
           
           // Como es nuevo, lo mandamos al Perfil de Usuario directo
           this.navCtrl.navigateRoot('/profile');
