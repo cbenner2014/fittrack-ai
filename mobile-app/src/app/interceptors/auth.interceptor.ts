@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // Obtener el token del localStorage
     const token = localStorage.getItem('token');
 
-    // Clonar la petición para agregar el header de Authorization
+    // Clonar la petición para inyectar la cabecera Bearer Token de forma transparente
     if (token) {
       request = request.clone({
         setHeaders: {
@@ -33,8 +33,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
-          // Si el token expiró o es inválido, cerrar sesión
+        if (error.status === 401) {
+          // Si el token expiró o no es válido, redirigir a login
           const router = this.injector.get(Router);
           router.navigate(['/login']);
         }
