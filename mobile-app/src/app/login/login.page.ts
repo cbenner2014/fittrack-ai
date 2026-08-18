@@ -22,6 +22,19 @@ export class LoginPage {
     private toastCtrl: ToastController
   ) {}
 
+  ionViewWillEnter() {
+    // Si el usuario ya está autenticado, no permitir ver el login y enviarlo al Home
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+    if (token) {
+      if (role === 'ROLE_ADMIN') {
+        this.navCtrl.navigateRoot('/admin', { animated: false, replaceUrl: true });
+      } else {
+        this.navCtrl.navigateRoot('/home', { animated: false, replaceUrl: true });
+      }
+    }
+  }
+
   toggleRegister() {
     this.isRegistering = !this.isRegistering;
   }
