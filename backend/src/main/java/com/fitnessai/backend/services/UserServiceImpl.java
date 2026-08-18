@@ -62,12 +62,34 @@ public class UserServiceImpl implements UserService {
         if (dto.getDailyProteinTarget() != null) user.setDailyProteinTarget(dto.getDailyProteinTarget());
         if (dto.getDailyCarbsTarget() != null) user.setDailyCarbsTarget(dto.getDailyCarbsTarget());
         if (dto.getDailyFatsTarget() != null) user.setDailyFatsTarget(dto.getDailyFatsTarget());
-        if (dto.getXp() != null) user.setXp(dto.getXp());
-        if (dto.getLevel() != null) user.setLevel(dto.getLevel());
         
+        // Anti-Cheat: NO se permite modificar directamente el nivel o XP desde la edición de perfil.
+
         if (dto.getGoal() != null) {
             user.setGoal(User.Goal.valueOf(dto.getGoal().toUpperCase()));
         }
+
+        User updatedUser = userRepository.save(user);
+        return UserMapper.toResponseDto(updatedUser);
+    }
+
+    @Override
+    public UserResponseDto addXp(Long id, int amount) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        int currentXp = (user.getXp() != null ? user.getXp() : 0) + amount;
+        int currentLevel = user.getLevel() != null ? user.getLevel() : 1;
+        int xpNeeded = currentLevel * 300;
+
+        while (currentXp >= xpNeeded) {
+            currentLevel++;
+            currentXp -= xpNeeded;
+            xpNeeded = currentLevel * 300;
+        }
+
+        user.setXp(currentXp);
+        user.setLevel(currentLevel);
 
         User updatedUser = userRepository.save(user);
         return UserMapper.toResponseDto(updatedUser);

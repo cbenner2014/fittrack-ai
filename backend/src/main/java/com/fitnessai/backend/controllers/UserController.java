@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fitnessai.backend.utils.JwtUtil;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -76,14 +75,30 @@ public class UserController {
         ));
     }
 
-
-
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateUser(@PathVariable Long id, @RequestBody UserRequestDto userRequestDto) {
         UserResponseDto updatedUser = userService.updateUser(id, userRequestDto);
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Perfil actualizado correctamente",
+                "data", updatedUser
+        ));
+    }
+
+    @PostMapping("/{id}/add-xp")
+    public ResponseEntity<Map<String, Object>> addXp(
+            @PathVariable Long id, 
+            @RequestParam(defaultValue = "50") Integer amount) {
+        if (amount == null || amount <= 0 || amount > 200) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Cantidad de XP inválida (máx 200 por acción)"
+            ));
+        }
+        UserResponseDto updatedUser = userService.addXp(id, amount);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "XP sumada correctamente",
                 "data", updatedUser
         ));
     }

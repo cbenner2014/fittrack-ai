@@ -265,24 +265,25 @@ export class HomePage {
   claimQuest(quest: any) {
     if (!this.isQuestDone(quest.id) || this.isQuestClaimed(quest.id)) return;
     
-    // Dar recompensa
-    this.userProfile.xp = (this.userProfile.xp || 0) + quest.xp;
-    
-    // Verificar si sube de nivel (cada 300 XP sube 1 nivel)
-    const xpNeeded = this.userProfile.level * 300;
-    if (this.userProfile.xp >= xpNeeded) {
-      this.userProfile.level++;
-      this.userProfile.xp -= xpNeeded; // Deja el residuo
-      this.showLevelUpAlert();
-    }
-    
-    // Guardar estado
-    this.claimedQuests.push(quest.id);
-    const todayStr = new Date().toISOString().split('T')[0];
-    localStorage.setItem(`quests_${this.userId}_${todayStr}`, JSON.stringify(this.claimedQuests));
-    
-    // Guardar perfil
-    localStorage.setItem('btrack_user_profile', JSON.stringify(this.userProfile));
+    this.http.post(`/api/v1/users/${this.userId}/add-xp?amount=${quest.xp}`, {}).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          const oldLevel = this.userProfile.level || 1;
+          this.userProfile.xp = res.data.xp;
+          this.userProfile.level = res.data.level;
+          
+          if (res.data.level > oldLevel) {
+            this.showLevelUpAlert();
+          }
+          
+          this.claimedQuests.push(quest.id);
+          const todayStr = new Date().toISOString().split('T')[0];
+          localStorage.setItem(`quests_${this.userId}_${todayStr}`, JSON.stringify(this.claimedQuests));
+          localStorage.setItem('btrack_user_profile', JSON.stringify(this.userProfile));
+        }
+      },
+      error: (err) => console.error('Error sumando XP:', err)
+    });
   }
 
   async showLevelUpAlert() {

@@ -7,11 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    // Patrones de URI para detectar el ID de usuario objetivo y prevenir IDOR / BOLA
+    private static final Pattern USER_ID_PATH_PATTERN = Pattern.compile("^/api/v1/users/(\\d+)(?:/.*)?$");
+    private static final Pattern RESOURCE_USER_PATTERN = Pattern.compile("^/api/v1/[^/]+/user/(\\d+)(?:/.*)?$");
+    private static final Pattern GENERATE_PLAN_PATTERN = Pattern.compile("^/api/v1/coach-recommendations/generate-plan/(\\d+)(?:/.*)?$");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -24,6 +32,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"error\": \"No token provided or invalid format\"}");
             return false;
         }
@@ -33,20 +42,43 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         if (tokenUserId == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
             return false;
         }
 
-        // Si la URL contiene un ID de usuario explícito (/api/v1/meals/user/2), verificar que coincida con el token
-        // Esto previene el ataque IDOR directamente en el interceptor!
-        String uri = request.getRequestURI();
-        
-        // Guardar el userId en la request para usarlo en los controladores si es necesario
         request.setAttribute("userId", tokenUserId);
-        
-        // Para mayor seguridad extrema, verificar que cualquier parametro "user/{id}" o similar coincida
-        // Aunque lo mejor es usar directamente request.getAttribute("userId") en el controller.
-        
+
+        // Control de Acceso Estricto (Anti-IDOR): Verificar que el usuario no consulte ni altere datos ajenos
+        String uri = request.getRequestURI();
+        Long targetUserId = extractTargetUserId(uri);
+
+        if (targetUserId != null && !targetUserId.equals(tokenUserId)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"error\": \"Acceso Denegado: No tienes permisos para acceder o modificar la cuenta de otro usuario.\"}");
+            return false;
+        }
+
         return true;
+    }
+
+    private Long extractTargetUserId(String uri) {
+        Matcher m1 = USER_ID_PATH_PATTERN.matcher(uri);
+        if (m1.matches()) {
+            return Long.parseLong(m1.group(1));
+        }
+
+        Matcher m2 = RESOURCE_USER_PATTERN.matcher(uri);
+        if (m2.matches()) {
+            return Long.parseLong(m2.group(1));
+        }
+
+        Matcher m3 = GENERATE_PLAN_PATTERN.matcher(uri);
+        if (m3.matches()) {
+            return Long.parseLong(m3.group(1));
+        }
+
+        return null;
     }
 }

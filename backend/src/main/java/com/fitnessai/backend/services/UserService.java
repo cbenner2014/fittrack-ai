@@ -9,5 +9,6 @@ public interface UserService {
     UserResponseDto createUser(UserRequestDto userRequestDto);
     UserResponseDto getUserById(Long id);
     UserResponseDto updateUser(Long id, UserRequestDto userRequestDto);
+    UserResponseDto addXp(Long id, int amount);
     List<UserResponseDto> getAllUsers();
 }
