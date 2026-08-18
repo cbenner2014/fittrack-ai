@@ -313,18 +313,26 @@ export class ProfilePage implements OnInit {
 
   async logout() {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar SesiÃ³n',
-      message: 'Â¿EstÃ¡s seguro que deseas salir?',
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro de que deseas salir de tu cuenta?',
       buttons: [
         {
           text: 'Cancelar',
           role: 'cancel'
         },
         {
-          text: 'SÃ­, Salir',
-          handler: () => {
+          text: 'Sí, Salir',
+          handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Cerrando sesión de forma segura...',
+              spinner: 'crescent',
+              duration: 800
+            });
+            await loading.present();
             localStorage.clear();
-            this.router.navigate(['/login']);
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 400);
           }
         }
       ]

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { NavController, LoadingController, AlertController, ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { LoadingController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +18,8 @@ export class LoginPage {
     private navCtrl: NavController,
     private http: HttpClient,
     private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private toastCtrl: ToastController
   ) {}
 
   toggleRegister() {
@@ -38,12 +38,12 @@ export class LoginPage {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Autenticando...',
+      message: 'Iniciando sesión de forma segura...',
       spinner: 'crescent'
     });
     await loading.present();
 
-    const loginData = { email: this.email, password: this.password };
+    const loginData = { email: this.email.trim(), password: this.password };
 
     this.http.post('/api/v1/users/login', loginData).subscribe({
       next: async (res: any) => {
@@ -55,11 +55,21 @@ export class LoginPage {
           localStorage.setItem('userRole', res.role || 'ROLE_USER');
           if (res.token) localStorage.setItem('token', res.token);
 
-          // Redirección inteligente según el ROL
+          const toast = await this.toastCtrl.create({
+            message: res.role === 'ROLE_ADMIN'
+              ? `👑 Bienvenido al Panel Administrador, ${res.fullName || 'Admin'}`
+              : `👋 ¡Hola de nuevo, ${res.fullName || 'Atleta'}! Preparando tu entrenamiento...`,
+            duration: 2500,
+            color: 'success',
+            position: 'top'
+          });
+          toast.present();
+
+          // Redirección inteligente reemplazando el historial para que atrás no vuelva al login
           if (res.role === 'ROLE_ADMIN') {
-            this.navCtrl.navigateRoot('/admin');
+            this.navCtrl.navigateRoot('/admin', { animated: true, replaceUrl: true });
           } else {
-            this.navCtrl.navigateRoot('/home');
+            this.navCtrl.navigateRoot('/home', { animated: true, replaceUrl: true });
           }
         }
       },
@@ -87,14 +97,14 @@ export class LoginPage {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Creando cuenta...',
+      message: 'Creando y asegurando tu cuenta...',
       spinner: 'crescent'
     });
     await loading.present();
 
     const registerData = { 
-      fullName: this.fullName,
-      email: this.email, 
+      fullName: this.fullName.trim(),
+      email: this.email.trim(), 
       password: this.password 
     };
 
@@ -108,8 +118,16 @@ export class LoginPage {
           localStorage.setItem('userRole', res.role || 'ROLE_USER');
           if (res.token) localStorage.setItem('token', res.token);
           
-          // Redirigir al perfil para completar datos físicos iniciales
-          this.navCtrl.navigateRoot('/profile');
+          const toast = await this.toastCtrl.create({
+            message: `🎉 ¡Cuenta creada con éxito! Bienvenido a FitTrack, ${res.data.fullName}`,
+            duration: 3000,
+            color: 'success',
+            position: 'top'
+          });
+          toast.present();
+
+          // Redirigir al perfil para completar datos físicos iniciales reemplazando login del historial
+          this.navCtrl.navigateRoot('/profile', { animated: true, replaceUrl: true });
         }
       },
       error: async (err) => {

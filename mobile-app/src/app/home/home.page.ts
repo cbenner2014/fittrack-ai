@@ -436,7 +436,7 @@ export class HomePage {
       header: 'Escanear Comida',
       buttons: [
         { text: 'Tomar Foto', icon: 'camera', handler: () => { this.processPhoto(CameraSource.Camera, 'meals/analyze', 'comida.jpg', true); } },
-        { text: 'Abrir GalerÃ­a', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'meals/analyze', 'comida.jpg', true); } },
+        { text: 'Abrir Galería', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'meals/analyze', 'comida.jpg', true); } },
         { text: 'Cancelar', icon: 'close', role: 'cancel' }
       ]
     });
@@ -445,10 +445,10 @@ export class HomePage {
 
   async scanMachine() {
     const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Analizar MÃ¡quina',
+      header: 'Analizar Máquina',
       buttons: [
         { text: 'Tomar Foto', icon: 'camera', handler: () => { this.processPhoto(CameraSource.Camera, 'machines/analyze', 'maquina.jpg', false); } },
-        { text: 'Abrir GalerÃ­a', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'machines/analyze', 'maquina.jpg', false); } },
+        { text: 'Abrir Galería', icon: 'image', handler: () => { this.processPhoto(CameraSource.Photos, 'machines/analyze', 'maquina.jpg', false); } },
         { text: 'Cancelar', icon: 'close', role: 'cancel' }
       ]
     });

@@ -290,9 +290,31 @@ export class AdminPage implements OnInit {
     });
   }
 
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
+  async logout() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cerrar Sesión Admin',
+      message: '¿Estás seguro de que deseas salir del panel de administración?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Salir',
+          role: 'destructive',
+          handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Cerrando sesión administrativa...',
+              spinner: 'crescent',
+              duration: 800
+            });
+            await loading.present();
+            localStorage.clear();
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 400);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async presentToast(message: string, color: string = 'success') {
