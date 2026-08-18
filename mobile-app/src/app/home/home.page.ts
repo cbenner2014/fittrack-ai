@@ -890,34 +890,45 @@ export class HomePage {
     let title = 'Aviso';
     let message = fallbackMessage;
 
-    if (err && err.status === 429) {
-      title = '⏱️ Límite de IA';
-      message = 'Has alcanzado el límite de análisis de IA (máximo 5 por minuto). Por favor, espera unos segundos antes de volver a intentar.';
-      if (err.error && err.error.error) {
-        message = err.error.error;
-      } else if (typeof err.error === 'string') {
-        try {
-          const parsed = JSON.parse(err.error);
-          if (parsed.error) message = parsed.error;
-        } catch (e) {}
+    if (err) {
+      if (err.status === 429) {
+        title = '⏱️ Límite de IA';
+        message = 'Has alcanzado el límite de análisis de IA (máximo 5 por minuto). Por favor, espera unos segundos antes de volver a intentar.';
+      } else if (err.status === 503) {
+        title = '⚡ Alta Demanda en IA';
+        message = 'Google Gemini está recibiendo un pico alto de consultas en este instante. Por favor, reintenta tu escaneo en unos segundos.';
+      } else {
+        let rawError = '';
+        if (typeof err.error === 'string') {
+          try {
+            const parsed = JSON.parse(err.error);
+            rawError = parsed.error || parsed.message || err.error;
+          } catch (e) {
+            rawError = err.error;
+          }
+        } else if (err.error && typeof err.error === 'object') {
+          rawError = typeof err.error.error === 'string' ? err.error.error : (err.error.message || JSON.stringify(err.error));
+        } else if (typeof err.message === 'string') {
+          rawError = err.message;
+        }
+
+        if (rawError) {
+          const lower = rawError.toLowerCase();
+          if (lower.includes('503') || lower.includes('high demand') || lower.includes('unavailable')) {
+            title = '⚡ Alta Demanda en IA';
+            message = 'Google Gemini está recibiendo un pico alto de consultas en este instante. Por favor, reintenta tu escaneo en unos segundos.';
+          } else {
+            message = rawError;
+          }
+        }
       }
-    } else if (err && err.error && err.error.error) {
-      message = err.error.error;
-    } else if (err && typeof err.error === 'string') {
-      try {
-        const parsed = JSON.parse(err.error);
-        if (parsed.error) message = parsed.error;
-      } catch (e) {}
     }
 
-    if (message.includes('high demand') || message.includes('503') || message.includes('UNAVAILABLE') || (err && err.status === 503)) {
-      title = '⚡ Alta Demanda en IA';
-      message = 'Google Gemini está recibiendo un pico alto de consultas en este instante. Por favor, reintenta tu escaneo en unos segundos.';
-    }
+    const finalMessage = typeof message === 'string' ? message : JSON.stringify(message);
 
     const alert = await this.alertCtrl.create({
       header: title,
-      message: message,
+      message: finalMessage,
       buttons: ['ENTENDIDO'],
       cssClass: 'neon-alert'
     });
