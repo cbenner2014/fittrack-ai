@@ -509,14 +509,37 @@ export class HomePage {
   }
 
   async scanLabel() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Escanear Etiqueta Nutricional',
+      buttons: [
+        { 
+          text: 'Tomar Foto', 
+          icon: 'camera', 
+          handler: () => { this.processLabelPhoto(CameraSource.Camera); } 
+        },
+        { 
+          text: 'Abrir Galería', 
+          icon: 'image', 
+          handler: () => { this.processLabelPhoto(CameraSource.Photos); } 
+        },
+        { 
+          text: 'Cancelar', 
+          icon: 'close', 
+          role: 'cancel' 
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  private async processLabelPhoto(source: CameraSource) {
     if (this.isRequestInProgress) return;
     this.isRequestInProgress = true;
 
     try {
-      // Capacitor Camera handles both Web and Native gracefully
       const photo = await Camera.getPhoto({
         resultType: CameraResultType.Base64,
-        source: CameraSource.Prompt,
+        source: source,
         quality: 90
       });
       let base64Image = photo.base64String;
@@ -527,7 +550,7 @@ export class HomePage {
       }
 
       const loading = await this.loadingCtrl.create({
-        message: 'Buscando engaÃ±os...',
+        message: 'Buscando engaños...',
         spinner: 'bubbles',
         backdropDismiss: false
       });
@@ -546,7 +569,6 @@ export class HomePage {
       }).subscribe({
         next: async (res: any) => {
           await loading.dismiss();
-          // parse JSON string to Object
           this.labelResult = typeof res === 'string' ? JSON.parse(res) : res;
           this.isLabelModalOpen = true;
           this.isRequestInProgress = false;
@@ -558,6 +580,7 @@ export class HomePage {
         }
       });
     } catch (e) {
+      console.log('Cámara cancelada o error:', e);
       this.isRequestInProgress = false;
     }
   }

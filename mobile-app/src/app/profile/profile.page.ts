@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
-import { ToastController, AlertController, LoadingController } from '@ionic/angular';
+import { ToastController, AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import Chart from 'chart.js/auto';
 
@@ -39,6 +39,7 @@ export class ProfilePage implements OnInit {
     public router: Router,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
+    private actionSheetCtrl: ActionSheetController,
     private http: HttpClient,
     private loadingCtrl: LoadingController
   ) { }
@@ -332,16 +333,42 @@ export class ProfilePage implements OnInit {
   }
 
   async scanBody() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Escanear Físico con IA',
+      buttons: [
+        {
+          text: 'Tomar Foto',
+          icon: 'camera',
+          handler: () => { this.processBodyPhoto(CameraSource.Camera); }
+        },
+        {
+          text: 'Abrir Galería',
+          icon: 'image',
+          handler: () => { this.processBodyPhoto(CameraSource.Photos); }
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  private async processBodyPhoto(source: CameraSource) {
     try {
       const image = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Prompt
+        source: source
       });
 
+      if (!image.base64String) return;
+
       const loading = await this.loadingCtrl.create({
-        message: 'La IA estÃ¡ analizando tu fÃ­sico...',
+        message: 'La IA está analizando tu físico...',
         spinner: 'crescent'
       });
       await loading.present();
@@ -373,7 +400,7 @@ export class ProfilePage implements OnInit {
         }
       });
     } catch (e) {
-      console.log('User cancelled photo', e);
+      console.log('Usuario canceló la foto', e);
     }
   }
 }
