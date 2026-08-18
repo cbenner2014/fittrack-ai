@@ -54,11 +54,13 @@ public class GeminiVisionServiceImpl implements AiVisionService {
             )
         );
 
-        // 2. Lista de modelos con fallback automático en caso de saturación (503 / 429)
+        // 2. Lista amplia de modelos con relevo automático y retry
         List<String> candidateModels = new ArrayList<>();
         candidateModels.add(primaryModel);
+        if (!candidateModels.contains("gemini-3.7-flash")) candidateModels.add("gemini-3.7-flash");
         if (!candidateModels.contains("gemini-3.5-flash")) candidateModels.add("gemini-3.5-flash");
         if (!candidateModels.contains("gemini-3.5-flash-lite")) candidateModels.add("gemini-3.5-flash-lite");
+        if (!candidateModels.contains("gemini-3.1-flash-lite")) candidateModels.add("gemini-3.1-flash-lite");
 
         Exception lastException = null;
 
@@ -78,6 +80,9 @@ public class GeminiVisionServiceImpl implements AiVisionService {
             } catch (Exception e) {
                 lastException = e;
                 log.warn("Modelo {} no disponible o saturado ({}), intentando siguiente modelo...", modelName, e.getMessage());
+                try {
+                    Thread.sleep(400); // Pequeña pausa de 400ms para permitir al balanceador de Google recuperarse
+                } catch (InterruptedException ignored) {}
             }
         }
 

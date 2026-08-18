@@ -910,6 +910,11 @@ export class HomePage {
       } catch (e) {}
     }
 
+    if (message.includes('high demand') || message.includes('503') || message.includes('UNAVAILABLE') || (err && err.status === 503)) {
+      title = '⚡ Alta Demanda en IA';
+      message = 'Google Gemini está recibiendo un pico alto de consultas en este instante. Por favor, reintenta tu escaneo en unos segundos.';
+    }
+
     const alert = await this.alertCtrl.create({
       header: title,
       message: message,
