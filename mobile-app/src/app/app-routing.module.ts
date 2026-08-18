@@ -2,11 +2,13 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 import { AdminGuard } from './guards/admin.guard';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule),
+    canActivate: [AuthGuard]
   },
   {
     path: '',
@@ -19,15 +21,18 @@ const routes: Routes = [
   },
   {
     path: 'profile',
-    loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+    loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule),
+    canActivate: [AuthGuard]
   },
   {
     path: 'history',
-    loadChildren: () => import('./history/history.module').then( m => m.HistoryPageModule)
+    loadChildren: () => import('./history/history.module').then( m => m.HistoryPageModule),
+    canActivate: [AuthGuard]
   },
   {
     path: 'gimnasios',
-    loadChildren: () => import('./gimnasios/gimnasios.module').then( m => m.GimnasiosPageModule)
+    loadChildren: () => import('./gimnasios/gimnasios.module').then( m => m.GimnasiosPageModule),
+    canActivate: [AuthGuard]
   },
   {
     path: 'admin',
