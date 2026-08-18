@@ -7,6 +7,7 @@
     font-size: 80px;
     color: #00ff88;
     margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.6));
   }
 
   h1 {
@@ -16,43 +17,81 @@
   }
 
   p {
-    color: #aaa;
-    font-size: 0.9rem;
+    color: #94a3b8;
+    font-size: 0.95rem;
     margin-top: 5px;
   }
 }
 
 .glass-card {
-  background: rgba(25, 25, 30, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  background: rgba(18, 22, 32, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  border-radius: 22px;
+  padding: 24px 20px;
+  box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 255, 136, 0.04);
 }
 
 .form-container {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .custom-input {
-  --background: transparent;
-  --color: #fff;
-  --placeholder-color: #666;
-  --border-color: rgba(255, 255, 255, 0.2);
-  --padding-start: 0;
-  margin-bottom: 15px;
+  --background: rgba(255, 255, 255, 0.05);
+  --color: #ffffff;
+  --placeholder-color: #38bdf8;
+  --placeholder-opacity: 0.7;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --inner-padding-end: 0;
+  border-radius: 16px;
+  border: 1.5px solid rgba(0, 255, 136, 0.3);
+  margin-bottom: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s ease;
+
+  &:focus-within {
+    border-color: #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    --background: rgba(0, 255, 136, 0.08);
+  }
 
   ion-label {
     color: #00ff88 !important;
-    font-weight: bold;
-    font-size: 0.9rem;
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
   }
 
   ion-input, ion-select {
-    margin-top: 5px;
-    font-size: 1.1rem;
+    color: #ffffff !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    --color: #ffffff;
+  }
+
+  ion-select::part(icon) {
+    color: #00ff88;
+    opacity: 1;
+    font-size: 20px;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.8));
+  }
+
+  ion-select::part(text) {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  ion-select::part(placeholder) {
+    color: #94a3b8;
+    font-weight: 500;
   }
 }
 
@@ -62,19 +101,39 @@
 }
 
 .btn-neon {
-  background: transparent;
-  color: #00ff88;
-  border: 1px solid #00ff88;
+  background: linear-gradient(135deg, #00ff88, #00d2ff);
+  color: #000000;
+  border: none;
   border-radius: 30px;
-  padding: 15px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  box-shadow: 0 0 10px rgba(0,255,136,0.2), inset 0 0 10px rgba(0,255,136,0.1);
-  transition: 0.3s;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover {
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.7);
+    transform: translateY(-2px);
+  }
 
   &:active {
-    background: #00ff88;
-    color: #121214;
-    box-shadow: 0 0 20px #00ff88;
+    transform: scale(0.98);
+  }
+
+  &.outline {
+    background: rgba(0, 255, 136, 0.08);
+    color: #00ff88;
+    border: 1.5px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+
+    &:hover {
+      background: rgba(0, 255, 136, 0.18);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+    }
   }
 }

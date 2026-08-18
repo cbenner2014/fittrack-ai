@@ -120,20 +120,20 @@
 
     <h2 class="section-title">IA Scanner 👁️</h2>
     
-    <div class="action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-      <div class="glass-card action-card" (click)="scanFood()" style="padding: 10px;">
+    <div class="action-grid">
+      <div class="action-card food-card" (click)="scanFood()">
         <ion-icon name="fast-food-outline" class="action-icon food-icon"></ion-icon>
-        <h3 style="font-size: 0.8rem;">Comida</h3>
+        <h3>Comida</h3>
       </div>
       
-      <div class="glass-card action-card" (click)="scanMachine()" style="padding: 10px;">
+      <div class="action-card gym-card" (click)="scanMachine()">
         <ion-icon name="barbell-outline" class="action-icon gym-icon"></ion-icon>
-        <h3 style="font-size: 0.8rem;">Máquina</h3>
+        <h3>Máquina</h3>
       </div>
 
-      <div class="glass-card action-card" (click)="scanLabel()" style="padding: 10px; border-color: rgba(255,157,0,0.4);">
-        <ion-icon name="barcode-outline" class="action-icon" style="color: #ff9d00; text-shadow: 0 0 10px rgba(255,157,0,0.5);"></ion-icon>
-        <h3 style="font-size: 0.8rem;">Etiqueta</h3>
+      <div class="action-card label-card" (click)="scanLabel()">
+        <ion-icon name="barcode-outline" class="action-icon label-icon"></ion-icon>
+        <h3>Etiqueta</h3>
       </div>
     </div>
 
