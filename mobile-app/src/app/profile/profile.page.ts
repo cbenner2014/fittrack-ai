@@ -30,6 +30,7 @@ export class ProfilePage implements OnInit {
   chart: any = null;
   newGoalLog: string = '';
   userId: string = '';
+  isAdmin: boolean = false;
 
   isBodyModalOpen = false;
   bodyResult: any = null;
@@ -48,6 +49,7 @@ export class ProfilePage implements OnInit {
 
   ionViewWillEnter() {
     this.userId = localStorage.getItem('userId') || '';
+    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
     if (!this.userId) {
       this.router.navigate(['/login']);
       return;

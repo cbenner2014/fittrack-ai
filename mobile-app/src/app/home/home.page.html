@@ -8,6 +8,12 @@
         <span *ngIf="userProfile.goal === 'build_muscle'">Ganar Masa</span>
         <span *ngIf="userProfile.goal !== 'lose_fat' && userProfile.goal !== 'maintain' && userProfile.goal !== 'build_muscle'">{{ userProfile.goal }}</span>
       </p>
+
+      <!-- BADGE EXCLUSIVO DE ADMIN (SOLO VISIBLE SI ES ROLE_ADMIN) -->
+      <div *ngIf="isAdmin" (click)="$event.stopPropagation(); router.navigate(['/admin'])" class="admin-inline-pill">
+        <ion-icon name="shield-checkmark"></ion-icon>
+        <span>👑 Panel Admin</span>
+      </div>
     </div>
     
     <!-- MEDALLA DE RANGO -->

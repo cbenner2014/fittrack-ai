@@ -121,6 +121,10 @@
   </div>
 
   <div style="text-align: center; margin-top: 25px; margin-bottom: 100px; display: flex; flex-direction: column; gap: 15px;">
+    <button *ngIf="isAdmin" class="btn-neon" (click)="router.navigate(['/admin'])" style="width: 100%; background: linear-gradient(135deg, #ffaa00, #ff6a00); color: #000; border-color: #ffaa00; box-shadow: 0 0 15px rgba(255,170,0,0.4);">
+      <ion-icon name="shield-checkmark"></ion-icon> 👑 Volver al Panel Administrador
+    </button>
+
     <button class="btn-neon outline" (click)="logout()" style="width: 100%; border-color: #ff2a2a; color: #ff2a2a;">
       <ion-icon name="log-out-outline"></ion-icon> Cerrar Sesión
     </button>

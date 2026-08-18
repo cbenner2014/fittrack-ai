@@ -1,14 +1,6 @@
 <ion-app>
   <ion-router-outlet></ion-router-outlet>
 
-  <!-- BOTÓN FLOTANTE: RETORNAR AL PANEL DE ADMINISTRADOR -->
-  <div *ngIf="isAdmin && !router.url.includes('/admin') && !router.url.includes('/login')" 
-       class="floating-admin-return-btn" 
-       (click)="router.navigate(['/admin'])">
-    <ion-icon name="shield-checkmark"></ion-icon>
-    <span>👑 Volver al Panel Admin</span>
-  </div>
-
   <!-- BOTTOM NAVIGATION BAR (Solo para atletas o vistas normales, nunca en /admin) -->
   <div *ngIf="showTabs" class="floating-nav-bar">
     <div class="nav-item" [class.active]="router.url.includes('/home')" (click)="router.navigate(['/home'])">

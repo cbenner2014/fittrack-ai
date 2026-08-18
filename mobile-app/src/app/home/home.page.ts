@@ -18,6 +18,7 @@ export class HomePage {
   userName = 'Usuario';
   userInitials: string = 'US';
   userId: string = '';
+  isAdmin: boolean = false;
 
   // Variables para Modales Premium
   isFoodModalOpen = false;
@@ -88,6 +89,7 @@ export class HomePage {
 
   ngOnInit() {
     this.userId = localStorage.getItem('userId') || '';
+    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
     if (!this.userId) {
       this.router.navigate(['/login']);
       return;
@@ -99,6 +101,7 @@ export class HomePage {
 
   ionViewWillEnter() {
     this.userId = localStorage.getItem('userId') || '';
+    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
     if (!this.userId) {
       this.router.navigate(['/login']);
       return;
