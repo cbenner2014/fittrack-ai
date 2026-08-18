@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 public class GeminiVisionServiceImpl implements AiVisionService {
 
-    private static final Logger log = LoggerFactory.getLogger(GeminiVisionServiceImpl.java);
+    private static final Logger log = LoggerFactory.getLogger(GeminiVisionServiceImpl.class);
 
     private final RestClient restClient;
     private final String apiKey;
