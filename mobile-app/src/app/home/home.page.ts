@@ -35,6 +35,10 @@ export class HomePage {
   isCoachModalOpen = false;
   coachResult: any = null;
 
+  // MODAL INDEPENDIENTE DE LISTA DE COMPRAS
+  isShoppingListModalOpen = false;
+  shoppingListResult: any = null;
+
   userProfile: any = {
     name: 'Atleta',
     age: 25,
@@ -359,7 +363,7 @@ export class HomePage {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Creando lista de mercado...',
+      message: 'Organizando tu lista de supermercado...',
       spinner: 'dots'
     });
     await loading.present();
@@ -372,26 +376,149 @@ export class HomePage {
       next: async (res: any) => {
         await loading.dismiss();
         
-        // El AI devuelve JSON. Lo parseamos
         let parsedList: any;
         if (typeof res === 'string') {
-           try { parsedList = JSON.parse(res); } catch(e) { parsedList = res; }
+           try { parsedList = JSON.parse(res); } catch (e) { parsedList = res; }
         } else {
            parsedList = res;
         }
 
         if (parsedList && parsedList.shoppingList) {
-          // Guardarlo en coachResult para mostrar en UI
-          this.coachResult.shoppingList = parsedList.shoppingList;
+          this.shoppingListResult = parsedList.shoppingList;
+          this.isShoppingListModalOpen = true; // Abre en su propia ventana dedicada
         } else {
           alert('No se pudo estructurar la lista.');
         }
       },
       error: async (err) => {
         await loading.dismiss();
+        // Si viene el JSON dentro de error.text
+        if (err && err.error && typeof err.error.text === 'string') {
+          try {
+            const parsed = JSON.parse(err.error.text);
+            if (parsed && parsed.shoppingList) {
+              this.shoppingListResult = parsed.shoppingList;
+              this.isShoppingListModalOpen = true;
+              return;
+            }
+          } catch (e) {}
+        }
         this.showAiErrorAlert(err, 'Hubo un error al crear la lista de compras.');
       }
     });
+  }
+
+  downloadShoppingListPDF() {
+    if (!this.shoppingListResult || !Array.isArray(this.shoppingListResult)) return;
+
+    const todayDate = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    let categoriesHtml = '';
+    this.shoppingListResult.forEach((cat: any) => {
+      let itemsHtml = '';
+      if (cat.items && Array.isArray(cat.items)) {
+        cat.items.forEach((item: string) => {
+          itemsHtml += `
+            <div style="display: flex; align-items: center; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13.5px; color: #334155;">
+              <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid #64748b; border-radius: 3px; margin-right: 12px;"></span>
+              <span>${item}</span>
+            </div>
+          `;
+        });
+      }
+
+      categoriesHtml += `
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+          <h3 style="margin: 0 0 10px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 2px solid #fef08a; padding-bottom: 6px;">
+            🛒 ${cat.category}
+          </h3>
+          <div style="display: flex; flex-direction: column;">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    });
+
+    const pdfHtml = `
+      <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; padding: 32px; max-width: 780px; margin: 0 auto;">
+        
+        <!-- Header Banner Premium -->
+        <div style="background: linear-gradient(135deg, #1c1917 0%, #292524 100%); border-radius: 16px; padding: 24px 28px; color: #ffffff; margin-bottom: 20px; border: 1px solid #44403c;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">
+                B-TRACK AI • CHECKLIST DE SUPERMERCADO
+              </div>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                Lista de Compras Semanal
+              </h1>
+              <div style="font-size: 13px; color: #a8a29e; margin-top: 4px;">
+                Personalizada para: <span style="color: #ffffff; font-weight: 600;">${this.userName}</span>
+              </div>
+            </div>
+            <div style="text-align: right; background: rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="font-size: 10px; text-transform: uppercase; color: #d6d3d1; font-weight: 700;">Fecha</div>
+              <div style="font-size: 13px; font-weight: 700; color: #fbbf24;">${todayDate}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
+          💡 <strong>Tip de compra:</strong> Las cantidades están agrupadas para toda la semana para que compres por volumen y no tengas sobras innecesarias.
+        </div>
+
+        <!-- Categorías -->
+        ${categoriesHtml}
+
+        <!-- Footer -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 11px; margin-top: 20px;">
+          <div>B-Track AI • Supermarket Smart Checklist</div>
+          <div>¡A cumplir tus metas de nutrición! 🥗💪</div>
+        </div>
+      </div>
+    `;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = pdfHtml;
+
+    const opt: any = {
+      margin:       [8, 8, 8, 8],
+      filename:     `Lista_Compras_${this.userName.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(tempDiv).save();
+  }
+
+  async copyShoppingList() {
+    if (!this.shoppingListResult || !Array.isArray(this.shoppingListResult)) return;
+
+    let text = `🛒 *LISTA DE COMPRAS SEMANAL B-TRACK*\n👤 Atleta: ${this.userName}\n\n`;
+    this.shoppingListResult.forEach((cat: any) => {
+      text += `📦 *${cat.category.toUpperCase()}*\n`;
+      if (cat.items && Array.isArray(cat.items)) {
+        cat.items.forEach((item: string) => {
+          text += `  ▫️ ${item}\n`;
+        });
+      }
+      text += `\n`;
+    });
+    text += `_Generado por B-Track AI Coach_`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      const alert = await this.alertCtrl.create({
+        header: '¡Copiado!',
+        message: 'La lista de compras se copió al portapapeles. ¡Pégala directamente en WhatsApp!',
+        buttons: ['GENIAL'],
+        cssClass: 'neon-alert'
+      });
+      await alert.present();
+    } catch (e) {
+      alert('Lista copiada:\n\n' + text);
+    }
   }
 
   addWater(amount: number) {
@@ -790,56 +917,93 @@ export class HomePage {
 
   downloadPDF() {
     if (!this.coachResult) return;
-    
-    // Crear una plantilla HTML hermosa y limpia para el PDF
+
+    const todayDate = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    const goalName = this.userProfile?.goalText || (this.userProfile?.goal === 'lose_fat' ? 'Perder Grasa' : this.userProfile?.goal === 'build_muscle' ? 'Ganar Masa Muscular' : 'Mantenimiento y Salud');
+    const caloriesTarget = this.userProfile?.dailyCaloriesTarget ? `${this.userProfile.dailyCaloriesTarget} kcal` : 'Personalizado';
+
+    // Plantilla de diseño ultra premium para el PDF (Colores de marca B-Track: Oscuro, Neón Esmeralda, Cúrcuma y Blanco)
     const pdfHtml = `
-      <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f9f9fb; max-width: 800px; margin: auto;">
+      <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; padding: 32px; max-width: 780px; margin: 0 auto;">
         
-        <!-- Header -->
-        <div style="text-align: center; border-bottom: 2px solid #00ff88; padding-bottom: 20px; margin-bottom: 30px;">
-          <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px;">Plan de AcciÃ³n B-Track</h1>
-          <p style="color: #666; font-size: 14px; margin-top: 5px;">Personalizado para ${this.userName}</p>
+        <!-- Header Banner Premium -->
+        <div style="background: linear-gradient(135deg, #090d16 0%, #111827 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 24px; border: 1px solid #1e293b; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #00ff88; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">
+                B-TRACK AI COACH • REPORTE OFICIAL
+              </div>
+              <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                Plan de Rendimiento Semanal
+              </h1>
+              <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">
+                Personalizado para: <span style="color: #ffffff; font-weight: 600;">${this.userName}</span>
+              </div>
+            </div>
+            <div style="text-align: right; background: rgba(255,255,255,0.05); padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 1px;">Objetivo</div>
+              <div style="font-size: 14px; font-weight: 700; color: #00ff88;">${goalName}</div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Meta: ${caloriesTarget}</div>
+            </div>
+          </div>
         </div>
 
-        <!-- Mensaje Motivacional -->
-        <div style="background-color: #e5fff2; border-left: 4px solid #00ff88; padding: 15px 20px; border-radius: 4px; margin-bottom: 30px;">
-          <p style="margin: 0; font-style: italic; color: #005a30; font-size: 16px;">
-            "${this.coachResult.message}"
+        <!-- Mensaje Motivacional del Coach -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #00ff88; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+            Mensaje de tu Coach
+          </div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #14532d; font-style: italic;">
+            "${this.coachResult.message || 'La disciplina constante es la clave para alcanzar tu mejor versión física y mental.'}"
           </p>
         </div>
 
-        <!-- SecciÃ³n de Rutina -->
-        <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px;">
-          <h2 style="color: #000; font-size: 20px; margin-top: 0; display: flex; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-             ðŸ’ª Plan de Entrenamiento
-          </h2>
-          <p style="color: #444; font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 0;">${this.coachResult.workoutPlan}</p>
+        <!-- Sección 1: Plan de Entrenamiento -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+            <div style="background: #eef2ff; color: #4f46e5; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 12px; font-weight: bold;">
+              P1
+            </div>
+            <div>
+              <h2 style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a;">Plan de Entrenamiento</h2>
+              <div style="font-size: 12px; color: #64748b;">Rutina estructurada para máxima eficiencia y recuperación</div>
+            </div>
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.7; color: #334155; white-space: pre-wrap;">${this.coachResult.workoutPlan}</div>
         </div>
 
-        <!-- SecciÃ³n de NutriciÃ³n -->
-        <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-          <h2 style="color: #000; font-size: 20px; margin-top: 0; display: flex; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-             ðŸ¥— GuÃ­a de NutriciÃ³n
-          </h2>
-          <p style="color: #444; font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 0;">${this.coachResult.nutritionPlan}</p>
+        <!-- Sección 2: Guía de Nutrición -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+            <div style="background: #ecfdf5; color: #059669; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 12px; font-weight: bold;">
+              N1
+            </div>
+            <div>
+              <h2 style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a;">Guía de Nutrición y Hábitos</h2>
+              <div style="font-size: 12px; color: #64748b;">Distribución de comidas adaptada a tu preferencia</div>
+            </div>
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.7; color: #334155; white-space: pre-wrap;">${this.coachResult.nutritionPlan}</div>
         </div>
-        
+
         <!-- Footer -->
-        <div style="text-align: center; margin-top: 40px; color: #aaa; font-size: 12px;">
-          Generado por B-Track AI Coach
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 11px;">
+          <div>B-Track AI • Tu Coach Inteligente de Fitness</div>
+          <div>Emitido el ${todayDate}</div>
         </div>
+
       </div>
     `;
 
     // Crear un contenedor temporal invisible para html2pdf
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = pdfHtml;
-    
+
     const opt: any = {
-      margin:       0,
-      filename:     `Plan_BTrack_${this.userName}.pdf`,
+      margin:       [8, 8, 8, 8],
+      filename:     `Plan_BTrack_${this.userName.replace(/\s+/g, '_')}.pdf`,
       image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
