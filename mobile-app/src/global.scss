@@ -243,3 +243,40 @@ ion-popover {
     }
   }
 }
+
+/* 4. LOADING OVERLAY (Escribiendo..., Analizando...) */
+ion-loading {
+  --background: rgba(18, 22, 32, 0.98);
+  --backdrop-opacity: 0.75;
+  --spinner-color: #00ff88;
+
+  .loading-wrapper {
+    background: rgba(18, 22, 32, 0.98) !important;
+    border: 1.5px solid rgba(0, 255, 136, 0.5) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 255, 136, 0.3) !important;
+    padding: 20px 26px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .loading-content {
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+  }
+
+  .loading-spinner {
+    color: #00ff88 !important;
+    filter: drop-shadow(0 0 8px #00ff88);
+
+    svg, circle {
+      stroke: #00ff88 !important;
+      fill: #00ff88 !important;
+    }
+  }
+}
+
