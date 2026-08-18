@@ -11,8 +11,9 @@ public class UserMapper {
         
         User user = new User();
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(dto.getPassword()); // En un futuro aquí usaremos BCrypt
+        user.setPasswordHash(dto.getPassword());
         user.setFullName(dto.getFullName());
+        user.setRole(User.Role.ROLE_USER); // Por defecto usuario estándar
         user.setInitialWeight(dto.getInitialWeight());
         user.setCurrentWeight(dto.getCurrentWeight());
         user.setHeight(dto.getHeight());
@@ -41,6 +42,7 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
+        dto.setRole(user.getRole() != null ? user.getRole().name() : "ROLE_USER");
         dto.setCurrentWeight(user.getCurrentWeight());
         dto.setHeight(user.getHeight());
         dto.setAge(user.getAge());

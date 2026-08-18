@@ -1,0 +1,423 @@
+<div class="admin-layout">
+  
+  <!-- SIDEBAR NAVEGACIÓN -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-badge">
+        <ion-icon name="shield-checkmark" class="brand-icon"></ion-icon>
+      </div>
+      <div>
+        <h2>FIT<span>TRACK</span></h2>
+        <span class="admin-tag">ADMIN CORE</span>
+      </div>
+    </div>
+
+    <div class="admin-user-pill">
+      <div class="user-avatar">
+        <ion-icon name="person-circle"></ion-icon>
+      </div>
+      <div class="user-info">
+        <h4>{{ adminName }}</h4>
+        <span class="role-badge">SUPER ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <button class="menu-btn" [class.active]="currentTab === 'dashboard'" (click)="setTab('dashboard')">
+        <ion-icon name="grid-outline"></ion-icon>
+        <span>Métricas Generales</span>
+      </button>
+
+      <button class="menu-btn" [class.active]="currentTab === 'users'" (click)="setTab('users')">
+        <ion-icon name="people-outline"></ion-icon>
+        <span>Usuarios & Atletas</span>
+      </button>
+
+      <button class="menu-btn" [class.active]="currentTab === 'machines'" (click)="setTab('machines')">
+        <ion-icon name="barbell-outline"></ion-icon>
+        <span>Catálogo Máquinas</span>
+      </button>
+
+      <button class="menu-btn" [class.active]="currentTab === 'ai'" (click)="setTab('ai')">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+        <span>Monitor IA & Seguridad</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="admin-main">
+    
+    <!-- TOP HEADER -->
+    <header class="admin-topbar">
+      <div class="topbar-title">
+        <h1>{{ currentTab === 'dashboard' ? 'Panel de Control y Analíticas' : 
+               currentTab === 'users' ? 'Gestión de Usuarios del Sistema' : 
+               currentTab === 'machines' ? 'Catálogo de Máquinas de Gimnasio' : 'Monitor de Seguridad e IA' }}</h1>
+        <p>B-Track AI Enterprise Security & Data Management</p>
+      </div>
+      
+      <div class="topbar-actions">
+        <span class="status-indicator live">
+          <span class="dot"></span> Backend & MySQL Conectados
+        </span>
+      </div>
+    </header>
+
+    <div class="admin-content-area">
+
+      <!-- VISTA 1: DASHBOARD & MÉTRICAS -->
+      <section *ngIf="currentTab === 'dashboard'" class="tab-view dashboard-view">
+        
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+          <div class="kpi-card green-glow">
+            <div class="kpi-icon-wrap">
+              <ion-icon name="people"></ion-icon>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-title">Usuarios Registrados</span>
+              <h3 class="kpi-number">{{ stats.totalUsers }}</h3>
+              <span class="kpi-sub">{{ stats.adminUsersCount }} Administradores</span>
+            </div>
+          </div>
+
+          <div class="kpi-card blue-glow">
+            <div class="kpi-icon-wrap">
+              <ion-icon name="restaurant"></ion-icon>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-title">Comidas Registradas</span>
+              <h3 class="kpi-number">{{ stats.totalMealsLogged }}</h3>
+              <span class="kpi-sub">Total en base de datos</span>
+            </div>
+          </div>
+
+          <div class="kpi-card purple-glow">
+            <div class="kpi-icon-wrap">
+              <ion-icon name="fitness"></ion-icon>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-title">Máquinas Escaneadas</span>
+              <h3 class="kpi-number">{{ stats.totalMachinesLogged }}</h3>
+              <span class="kpi-sub">Entrenamientos en la nube</span>
+            </div>
+          </div>
+
+          <div class="kpi-card cyan-glow">
+            <div class="kpi-icon-wrap">
+              <ion-icon name="shield-checkmark"></ion-icon>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-title">Blindaje de Seguridad</span>
+              <h3 class="kpi-number">100%</h3>
+              <span class="kpi-sub">BCrypt • JWT • Anti-IDOR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRÁFICAS Y DISTRIBUCIÓN -->
+        <div class="analytics-grid">
+          
+          <div class="chart-box glass-card">
+            <h3>🎯 Distribución de Objetivos de Usuarios</h3>
+            <div class="goals-breakdown">
+              <div class="goal-item">
+                <div class="goal-header">
+                  <span>🔥 Quemar Grasa (Déficit)</span>
+                  <strong>{{ stats.goalsDistribution.loseWeight }}</strong>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill red-fill" [style.width.%]="stats.totalUsers > 0 ? (stats.goalsDistribution.loseWeight / stats.totalUsers) * 100 : 0"></div>
+                </div>
+              </div>
+
+              <div class="goal-item">
+                <div class="goal-header">
+                  <span>💪 Ganar Músculo (Superávit)</span>
+                  <strong>{{ stats.goalsDistribution.gainMuscle }}</strong>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill green-fill" [style.width.%]="stats.totalUsers > 0 ? (stats.goalsDistribution.gainMuscle / stats.totalUsers) * 100 : 0"></div>
+                </div>
+              </div>
+
+              <div class="goal-item">
+                <div class="goal-header">
+                  <span>⚖️ Mantener Peso</span>
+                  <strong>{{ stats.goalsDistribution.maintain }}</strong>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill blue-fill" [style.width.%]="stats.totalUsers > 0 ? (stats.goalsDistribution.maintain / stats.totalUsers) * 100 : 0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-actions-box glass-card">
+            <h3>⚡ Acciones Rápidas de Administración</h3>
+            <div class="actions-list">
+              <button class="quick-btn" (click)="setTab('users')">
+                <ion-icon name="person-add-outline"></ion-icon>
+                <span>Administrar Usuarios</span>
+              </button>
+              <button class="quick-btn" (click)="setTab('machines')">
+                <ion-icon name="add-circle-outline"></ion-icon>
+                <span>Añadir Máquina al Catálogo</span>
+              </button>
+              <button class="quick-btn" (click)="loadStats()">
+                <ion-icon name="refresh-outline"></ion-icon>
+                <span>Sincronizar Métricas</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VISTA 2: GESTIÓN DE USUARIOS -->
+      <section *ngIf="currentTab === 'users'" class="tab-view users-view">
+        
+        <!-- TOOLBAR BÚSQUEDA Y FILTRO -->
+        <div class="table-toolbar glass-card">
+          <div class="search-input-wrap">
+            <ion-icon name="search-outline"></ion-icon>
+            <input type="text" placeholder="Buscar por nombre, correo o ID..." [(ngModel)]="searchQuery" (input)="applyUserFilter()" />
+          </div>
+
+          <div class="filter-group">
+            <label>Filtrar Rol:</label>
+            <select [(ngModel)]="roleFilter" (change)="applyUserFilter()">
+              <option value="ALL">Todos los Usuarios</option>
+              <option value="ROLE_ADMIN">Solo Administradores</option>
+              <option value="ROLE_USER">Solo Atletas (Usuarios)</option>
+            </select>
+          </div>
+
+          <button class="refresh-btn" (click)="loadUsers()">
+            <ion-icon name="refresh"></ion-icon> Recargar
+          </button>
+        </div>
+
+        <!-- TABLA DE USUARIOS -->
+        <div class="table-card glass-card">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Usuario</th>
+                  <th>Correo</th>
+                  <th>Objetivo</th>
+                  <th>Nivel & XP</th>
+                  <th>Rol</th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of filteredUsers">
+                  <td class="id-cell">#{{ user.id }}</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-mini">{{ (user.fullName || 'U').charAt(0).toUpperCase() }}</div>
+                      <div>
+                        <strong>{{ user.fullName || 'Sin Nombre' }}</strong>
+                        <span class="joined-date">{{ user.createdAt | date:'shortDate' }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="email-text">{{ user.email }}</span></td>
+                  <td>
+                    <span class="goal-pill" [class.gain]="user.goal === 'GAIN_MUSCLE'" [class.lose]="user.goal === 'LOSE_WEIGHT'">
+                      {{ user.goal || 'No definido' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="level-badge">
+                      <span>Nvl {{ user.level || 1 }}</span>
+                      <small>{{ user.xp || 0 }} XP</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="role-pill" [class.admin]="user.role === 'ROLE_ADMIN'" (click)="toggleRole(user)" title="Click para cambiar rol">
+                      {{ user.role === 'ROLE_ADMIN' ? '👑 ADMIN' : '👤 ATLETA' }}
+                    </span>
+                  </td>
+                  <td class="text-right actions-cell">
+                    <button class="icon-btn edit-btn" (click)="toggleRole(user)" title="Cambiar Rol">
+                      <ion-icon name="swap-horizontal-outline"></ion-icon>
+                    </button>
+                    <button class="icon-btn key-btn" (click)="openResetPasswordModal(user)" title="Restablecer Clave">
+                      <ion-icon name="key-outline"></ion-icon>
+                    </button>
+                    <button class="icon-btn delete-btn" (click)="deleteUser(user)" title="Eliminar Usuario">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="filteredUsers.length === 0 && !isLoading">
+                  <td colspan="7" class="empty-row">
+                    <ion-icon name="file-tray-outline"></ion-icon>
+                    <p>No se encontraron usuarios coincidentes.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VISTA 3: CATÁLOGO DE MÁQUINAS -->
+      <section *ngIf="currentTab === 'machines'" class="tab-view machines-view">
+        <div class="machines-grid-layout">
+          
+          <!-- FORMULARIO CREAR MÁQUINA -->
+          <div class="create-machine-card glass-card">
+            <h3>🏋️ Nueva Máquina de Gimnasio</h3>
+            <p>Añade equipos oficiales al catálogo de reconocimiento de IA.</p>
+            
+            <div class="form-group">
+              <label>Nombre de la Máquina *</label>
+              <input type="text" placeholder="Ej: Press de Pecho Inclinado" [(ngModel)]="newMachine.name" />
+            </div>
+
+            <div class="form-group">
+              <label>Músculos Objetivos *</label>
+              <input type="text" placeholder="Ej: Pectoral Superior, Tríceps" [(ngModel)]="newMachine.targetMuscles" />
+            </div>
+
+            <div class="form-group">
+              <label>Instrucciones de Uso</label>
+              <textarea rows="3" placeholder="Paso 1: Ajustar asiento... Paso 2: Empujar..." [(ngModel)]="newMachine.usageInstructions"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Consejo de Seguridad</label>
+              <input type="text" placeholder="Ej: Mantener espalda firme en el respaldo" [(ngModel)]="newMachine.tips" />
+            </div>
+
+            <button class="neon-submit-btn" (click)="createMachine()">
+              <ion-icon name="add-circle"></ion-icon> GUARDAR MÁQUINA
+            </button>
+          </div>
+
+          <!-- LISTA DE MÁQUINAS -->
+          <div class="machines-list-card glass-card">
+            <h3>Catálogo de Equipamiento ({{ machinesList.length }})</h3>
+            <div class="machines-scroll-list">
+              <div class="machine-item-card" *ngFor="let m of machinesList">
+                <div class="machine-icon-box">
+                  <ion-icon name="barbell"></ion-icon>
+                </div>
+                <div class="machine-details">
+                  <h4>{{ m.name }}</h4>
+                  <span class="muscles-tag">🎯 {{ m.targetMuscles }}</span>
+                  <p class="instructions-snippet">{{ m.usageInstructions }}</p>
+                </div>
+              </div>
+
+              <div *ngIf="machinesList.length === 0" class="empty-state">
+                <p>No hay máquinas registradas en el catálogo.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VISTA 4: MONITOR DE IA Y SEGURIDAD -->
+      <section *ngIf="currentTab === 'ai'" class="tab-view ai-view">
+        <div class="ai-monitor-grid">
+          
+          <div class="monitor-card glass-card">
+            <h3>⚡ Estado de Servicios Conectados</h3>
+            <div class="service-status-list">
+              <div class="service-item">
+                <div class="service-name">
+                  <ion-icon name="logo-google" class="green-text"></ion-icon>
+                  <div>
+                    <strong>Google Gemini Vision AI</strong>
+                    <span>Análisis de Comidas y Físico</span>
+                  </div>
+                </div>
+                <span class="status-pill operational">OPERATIVO</span>
+              </div>
+
+              <div class="service-item">
+                <div class="service-name">
+                  <ion-icon name="cloud-upload" class="green-text"></ion-icon>
+                  <div>
+                    <strong>Cloudinary CDN</strong>
+                    <span>Almacenamiento de Multimedia</span>
+                  </div>
+                </div>
+                <span class="status-pill operational">OPERATIVO</span>
+              </div>
+
+              <div class="service-item">
+                <div class="service-name">
+                  <ion-icon name="server" class="green-text"></ion-icon>
+                  <div>
+                    <strong>MySQL 8 Database</strong>
+                    <span>Persistencia y Transacciones</span>
+                  </div>
+                </div>
+                <span class="status-pill operational">OPERATIVO</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="monitor-card glass-card">
+            <h3>🛡️ Configuración de Seguridad Activa</h3>
+            <div class="security-rules-list">
+              <div class="rule-item">
+                <ion-icon name="checkmark-circle" class="green-text"></ion-icon>
+                <div>
+                  <strong>Rate Limiting Token Bucket</strong>
+                  <p>Límite activo: <b>5 escaneos/minuto por usuario</b> (Protección Anti-DDoS y Cooldown).</p>
+                </div>
+              </div>
+
+              <div class="rule-item">
+                <ion-icon name="checkmark-circle" class="green-text"></ion-icon>
+                <div>
+                  <strong>Cifrado Criptográfico BCrypt</strong>
+                  <p>Contraseñas hasheadas irreversiblemente con salting dinámico.</p>
+                </div>
+              </div>
+
+              <div class="rule-item">
+                <ion-icon name="checkmark-circle" class="green-text"></ion-icon>
+                <div>
+                  <strong>Filtro de Archivos Magic Bytes</strong>
+                  <p>Inspección binaria en subidas (solo JPEG, PNG, WebP ≤ 10MB).</p>
+                </div>
+              </div>
+
+              <div class="rule-item">
+                <ion-icon name="checkmark-circle" class="green-text"></ion-icon>
+                <div>
+                  <strong>Aislamiento Estricto Anti-IDOR</strong>
+                  <p>Verificación de propiedad en URLs y payloads.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+</div>

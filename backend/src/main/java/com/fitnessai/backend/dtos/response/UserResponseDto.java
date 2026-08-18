@@ -9,6 +9,7 @@ public class UserResponseDto {
     private Long id;
     private String email;
     private String fullName;
+    private String role;
     private Double currentWeight;
     private Double height;
     private String goal;

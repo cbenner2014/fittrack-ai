@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data // Lombok: genera getters, setters, toString, equals y hashCode
-@NoArgsConstructor // Lombok: constructor vacío
-@AllArgsConstructor // Lombok: constructor con todos los argumentos
-@Builder // Lombok: Patrón builder para instanciar fácilmente
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -27,6 +27,11 @@ public class User {
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'ROLE_USER'")
+    @Builder.Default
+    private Role role = Role.ROLE_USER;
 
     @Column(name = "initial_weight")
     private Double initialWeight;
@@ -56,9 +61,11 @@ public class User {
     private Integer dailyFatsTarget;
 
     @Column(nullable = false, columnDefinition = "integer default 0")
+    @Builder.Default
     private Integer xp = 0;
 
     @Column(nullable = false, columnDefinition = "integer default 1")
+    @Builder.Default
     private Integer level = 1;
 
     @Enumerated(EnumType.STRING)
@@ -71,6 +78,10 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public enum Role {
+        ROLE_USER, ROLE_ADMIN
+    }
 
     public enum Goal {
         LOSE_WEIGHT, GAIN_MUSCLE, MAINTAIN

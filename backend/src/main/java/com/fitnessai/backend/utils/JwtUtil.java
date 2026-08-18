@@ -28,25 +28,43 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(Long userId) {
+    public String generateToken(Long userId, String role) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("role", role != null ? role : "ROLE_USER")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
 
+    public String generateToken(Long userId) {
+        return generateToken(userId, "ROLE_USER");
+    }
+
     public Long validateTokenAndGetUserId(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            Claims claims = getClaims(token);
             return Long.parseLong(claims.getSubject());
         } catch (Exception e) {
             return null; // Token inválido o expirado
         }
+    }
+
+    public String getRoleFromToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return "ROLE_USER";
+        }
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

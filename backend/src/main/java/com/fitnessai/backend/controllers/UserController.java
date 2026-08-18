@@ -66,13 +66,15 @@ public class UserController {
             ));
         }
         
-        String token = jwtUtil.generateToken(user.getId());
+        String userRole = user.getRole() != null ? user.getRole().name() : "ROLE_USER";
+        String token = jwtUtil.generateToken(user.getId(), userRole);
         
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Login exitoso",
                 "userId", user.getId(),
                 "fullName", user.getFullName(),
+                "role", userRole,
                 "token", token
         ));
     }
@@ -80,12 +82,14 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
         UserResponseDto createdUser = userService.createUser(userRequestDto);
-        String token = jwtUtil.generateToken(createdUser.getId());
+        String role = createdUser.getRole() != null ? createdUser.getRole() : "ROLE_USER";
+        String token = jwtUtil.generateToken(createdUser.getId(), role);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "success", true,
                 "message", "Usuario creado exitosamente",
                 "data", createdUser,
+                "role", role,
                 "token", token
         ));
     }

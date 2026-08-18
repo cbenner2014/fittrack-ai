@@ -47,17 +47,33 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        String role = jwtUtil.getRoleFromToken(token);
         request.setAttribute("userId", tokenUserId);
+        request.setAttribute("userRole", role);
 
-        // Control de Acceso Estricto (Anti-IDOR): Verificar que el usuario no consulte ni altere datos ajenos
         String uri = request.getRequestURI();
-        Long targetUserId = extractTargetUserId(uri);
 
-        if (targetUserId != null && !targetUserId.equals(tokenUserId)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"error\": \"Acceso Denegado: No tienes permisos para acceder o modificar la cuenta de otro usuario.\"}");
-            return false;
+        // Control de Acceso para Rutas Administrativas (/api/v1/admin/**)
+        if (uri.startsWith("/api/v1/admin")) {
+            if (!"ROLE_ADMIN".equals(role)) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\": \"Acceso Denegado: Se requieren privilegios de Administrador.\"}");
+                return false;
+            }
+            return true; // Administrador tiene acceso total a rutas admin
+        }
+
+        // Control de Acceso Estricto (Anti-IDOR) para usuarios normales:
+        // Si el usuario es administrador, puede auditar cualquier cuenta; si es usuario normal, solo la suya
+        if (!"ROLE_ADMIN".equals(role)) {
+            Long targetUserId = extractTargetUserId(uri);
+            if (targetUserId != null && !targetUserId.equals(tokenUserId)) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\": \"Acceso Denegado: No tienes permisos para acceder o modificar la cuenta de otro usuario.\"}");
+                return false;
+            }
         }
 
         return true;

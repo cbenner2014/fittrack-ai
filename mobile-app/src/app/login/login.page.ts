@@ -29,8 +29,8 @@ export class LoginPage {
   async login() {
     if (!this.email || !this.password) {
       const alert = await this.alertCtrl.create({
-        header: 'Campos vacÃ­os',
-        message: 'Por favor ingresa tu correo y contraseÃ±a.',
+        header: 'Campos vacíos',
+        message: 'Por favor ingresa tu correo y contraseña.',
         buttons: ['OK']
       });
       await alert.present();
@@ -49,18 +49,25 @@ export class LoginPage {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
-          // Guardar los datos de sesiÃ³n y el TOKEN en la memoria del celular
+          // Guardar datos de sesión, ROL y el TOKEN
           localStorage.setItem('userId', res.userId);
           localStorage.setItem('userName', res.fullName);
+          localStorage.setItem('userRole', res.role || 'ROLE_USER');
           if (res.token) localStorage.setItem('token', res.token);
-          this.navCtrl.navigateRoot('/home');
+
+          // Redirección inteligente según el ROL
+          if (res.role === 'ROLE_ADMIN') {
+            this.navCtrl.navigateRoot('/admin');
+          } else {
+            this.navCtrl.navigateRoot('/home');
+          }
         }
       },
       error: async (err) => {
         await loading.dismiss();
         const alert = await this.alertCtrl.create({
           header: 'Acceso Denegado',
-          message: 'El correo o la contraseÃ±a son incorrectos.',
+          message: 'El correo o la contraseña son incorrectos.',
           buttons: ['Intentar de nuevo']
         });
         await alert.present();
@@ -95,12 +102,13 @@ export class LoginPage {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
-          // Logueo automÃ¡tico tras registro
+          // Logueo automático tras registro
           localStorage.setItem('userId', res.data.id);
           localStorage.setItem('userName', res.data.fullName);
+          localStorage.setItem('userRole', res.role || 'ROLE_USER');
           if (res.token) localStorage.setItem('token', res.token);
           
-          // Como es nuevo, lo mandamos al Perfil de Usuario directo
+          // Redirigir al perfil para completar datos físicos iniciales
           this.navCtrl.navigateRoot('/profile');
         }
       },
