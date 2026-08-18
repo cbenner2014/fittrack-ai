@@ -73,9 +73,21 @@ export class AdminPage implements OnInit {
       return;
     }
 
-    if (role !== 'ROLE_ADMIN') {
-      // Si no es admin, redirigir a la app normal
-      this.navCtrl.navigateRoot('/home');
+    try {
+      // Validar token criptográfico real
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const tokenData = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+      
+      if (tokenData.role !== 'ROLE_ADMIN' || role !== 'ROLE_ADMIN') {
+        localStorage.setItem('userRole', tokenData.role || 'ROLE_USER');
+        this.presentToast('⛔ ACCESO DENEGADO: Tu cuenta no tiene rol de Administrador.', 'danger');
+        this.navCtrl.navigateRoot('/home');
+        return;
+      }
+    } catch (e) {
+      localStorage.clear();
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -103,7 +115,12 @@ export class AdminPage implements OnInit {
           this.stats = res.data;
         }
       },
-      error: (err) => console.error('Error cargando stats:', err)
+      error: (err) => {
+        if (err.status === 403 || err.status === 401) {
+          this.presentToast('⛔ Permisos insuficientes en el servidor.', 'danger');
+          this.navCtrl.navigateRoot('/home');
+        }
+      }
     });
   }
 
@@ -119,7 +136,10 @@ export class AdminPage implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Error cargando usuarios:', err);
+        if (err.status === 403 || err.status === 401) {
+          this.presentToast('⛔ No autorizado para listar usuarios.', 'danger');
+          this.navCtrl.navigateRoot('/home');
+        }
       }
     });
   }
