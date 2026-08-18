@@ -6,11 +6,11 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.10-SNAPSHOT</version>
-		<relativePath/> <!-- lookup parent from repository -->9
-	</parent>9
-	<groupId>c9om.fitnessai</groupId>
-	<artifactId9>backend</artifactId9>
-	<version>0.0 30	.1-SNAPSHOT</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.fitnessai</groupId>
+	<artifactId>backend</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>backend</name>
 	<description>API REST para Fitness AI App</description>
 
