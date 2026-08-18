@@ -631,17 +631,33 @@ export class HomePage {
       if (p.dietPreference) dietPref = p.dietPreference;
     }
 
-    // Llamar a la IA con el ID del usuario actual dinÃ¡micamente y la dieta elegida
+    // Llamar a la IA con el ID del usuario actual dinámicamente y la dieta elegida
     const url = `/api/v1/coach-recommendations/generate-plan/${this.userId}?dietPreference=${encodeURIComponent(dietPref)}`;
     this.http.post(url, {}).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
-        this.coachResult = res;
+        let parsed = res;
+        if (typeof res === 'string') {
+          try { parsed = JSON.parse(res); } catch (e) { parsed = res; }
+        }
+        this.coachResult = parsed;
         this.isCoachModalOpen = true;
         this.isRequestInProgress = false;
       },
       error: async (err) => {
         await loading.dismiss();
+        // Si el backend devolvió el JSON exitosamente pero Angular no lo parseó por el header
+        if (err && err.error && typeof err.error.text === 'string') {
+          try {
+            const parsed = JSON.parse(err.error.text);
+            if (parsed && (parsed.workoutPlan || parsed.nutritionPlan || parsed.recommendationType)) {
+              this.coachResult = parsed;
+              this.isCoachModalOpen = true;
+              this.isRequestInProgress = false;
+              return;
+            }
+          } catch (e) {}
+        }
         this.showAiErrorAlert(err, 'Hubo un error al generar tu plan con la IA.');
         this.isRequestInProgress = false;
       }

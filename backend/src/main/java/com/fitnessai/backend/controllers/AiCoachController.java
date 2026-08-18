@@ -7,6 +7,7 @@ import com.fitnessai.backend.services.AiVisionService;
 import com.fitnessai.backend.repositories.UserRepository;
 import com.fitnessai.backend.entities.User;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -33,7 +34,7 @@ public class AiCoachController {
         return ResponseEntity.ok(service.getRecommendationsByUser(userId));
     }
 
-    @PostMapping("/generate-plan/{userId}")
+    @PostMapping(value = "/generate-plan/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> generateWeeklyPlan(
             @PathVariable Long userId,
             @RequestParam(required = false, defaultValue = "Tradicional (3 a 5 comidas)") String dietPreference) {
@@ -80,7 +81,7 @@ public class AiCoachController {
         }
     }
 
-    @PostMapping("/generate-shopping-list")
+    @PostMapping(value = "/generate-shopping-list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> generateShoppingList(@RequestBody Map<String, String> payload) {
         String planStr = payload.get("nutritionPlan");
         String prompt = "Actúa como un experto organizador de compras de supermercado. En base a este plan nutricional semanal exacto: " + planStr + ". " +
