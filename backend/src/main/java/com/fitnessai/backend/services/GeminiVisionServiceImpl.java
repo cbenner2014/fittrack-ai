@@ -1,25 +1,30 @@
 package com.fitnessai.backend.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class GeminiVisionServiceImpl implements AiVisionService {
 
+    private static final Logger log = LoggerFactory.getLogger(GeminiVisionServiceImpl.java);
+
     private final RestClient restClient;
     private final String apiKey;
-    private final String apiUrl;
+    private final String primaryModel;
 
     public GeminiVisionServiceImpl(
             @Value("${gemini.api.key:AQUI_IRA_TU_API_KEY}") String apiKey,
             @Value("${gemini.api.model:gemini-3.6-flash}") String model
     ) {
         this.apiKey = apiKey;
-        this.apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
+        this.primaryModel = model;
         this.restClient = RestClient.builder().build();
     }
 
@@ -49,21 +54,34 @@ public class GeminiVisionServiceImpl implements AiVisionService {
             )
         );
 
-        // 2. Disparamos la petición a la IA
-        try {
-            Map response = restClient.post()
-                    .uri(apiUrl + "?key=" + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody)
-                    .retrieve()
-                    .body(Map.class);
+        // 2. Lista de modelos con fallback automático en caso de saturación (503 / 429)
+        List<String> candidateModels = new ArrayList<>();
+        candidateModels.add(primaryModel);
+        if (!candidateModels.contains("gemini-3.5-flash")) candidateModels.add("gemini-3.5-flash");
+        if (!candidateModels.contains("gemini-3.5-flash-lite")) candidateModels.add("gemini-3.5-flash-lite");
 
-            // 3. Extraemos el texto JSON de la respuesta compleja de Gemini
-            return extractTextFromResponse(response);
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Error al comunicarse con la IA: " + e.getMessage());
+        Exception lastException = null;
+
+        for (String modelName : candidateModels) {
+            String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey;
+            try {
+                Map response = restClient.post()
+                        .uri(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(Map.class);
+
+                // 3. Extraemos el texto JSON de la respuesta
+                return extractTextFromResponse(response);
+
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("Modelo {} no disponible o saturado ({}), intentando siguiente modelo...", modelName, e.getMessage());
+            }
         }
+
+        throw new RuntimeException("Error al comunicarse con la IA: " + (lastException != null ? lastException.getMessage() : "Desconocido"));
     }
 
     private String extractTextFromResponse(Map response) {
