@@ -52,7 +52,7 @@ export class AdminPage implements OnInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private navCtrl: NavController,
-    private router: Router
+    public router: Router
   ) {}
 
   ngOnInit() {

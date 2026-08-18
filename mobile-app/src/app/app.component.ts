@@ -9,11 +9,15 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class AppComponent {
   showTabs = false;
+  isAdmin = false;
 
   constructor(public router: Router) {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        this.showTabs = !event.url.includes('/login') && event.url !== '/';
+        const url = event.urlAfterRedirects || event.url;
+        const isAuthOrAdmin = url.includes('/login') || url.includes('/admin') || url === '/';
+        this.showTabs = !isAuthOrAdmin;
+        this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
       }
     });
   }
