@@ -776,16 +776,24 @@ export class HomePage {
         // Si el backend devolvió el JSON exitosamente pero Angular no lo parseó por el header
         if (err && err.error && typeof err.error.text === 'string') {
           try {
-            const parsed = JSON.parse(err.error.text);
-            if (parsed && (parsed.workoutPlan || parsed.nutritionPlan || parsed.recommendationType)) {
+            let raw = err.error.text.trim();
+            const start = raw.indexOf('{');
+            const end = raw.lastIndexOf('}');
+            if (start !== -1 && end !== -1 && start < end) {
+              raw = raw.substring(start, end + 1);
+            }
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.workoutPlan || parsed.nutritionPlan || parsed.recommendationType || parsed.message)) {
               this.coachResult = parsed;
               this.isCoachModalOpen = true;
               this.isRequestInProgress = false;
               return;
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn('No se pudo parsear err.error.text:', e);
+          }
         }
-        this.showAiErrorAlert(err, 'Hubo un error al generar tu plan con la IA.');
+        this.showAiErrorAlert(err, 'Hubo un error al generar tu plan con la IA. Por favor, reintenta en un momento.');
         this.isRequestInProgress = false;
       }
     });
@@ -1082,21 +1090,28 @@ export class HomePage {
         if (typeof err.error === 'string') {
           try {
             const parsed = JSON.parse(err.error);
-            rawError = parsed.error || parsed.message || err.error;
+            rawError = parsed.error || parsed.message || '';
           } catch (e) {
             rawError = err.error;
           }
         } else if (err.error && typeof err.error === 'object') {
-          rawError = typeof err.error.error === 'string' ? err.error.error : (err.error.message || JSON.stringify(err.error));
+          if (typeof err.error.error === 'string') {
+            rawError = err.error.error;
+          } else if (typeof err.error.message === 'string') {
+            rawError = err.error.message;
+          }
         } else if (typeof err.message === 'string') {
           rawError = err.message;
         }
 
         if (rawError) {
           const lower = rawError.toLowerCase();
-          if (lower.includes('503') || lower.includes('high demand') || lower.includes('unavailable')) {
+          if (lower.includes('503') || lower.includes('high demand') || lower.includes('unavailable') || lower.includes('saturado')) {
             title = '⚡ Alta Demanda en IA';
             message = 'Google Gemini está recibiendo un pico alto de consultas en este instante. Por favor, reintenta tu escaneo en unos segundos.';
+          } else if (rawError.startsWith('{') || rawError.includes('"text":') || rawError.includes('"recommendationType"')) {
+            // Es un volcado de JSON técnico, mostrar mensaje amistoso
+            message = fallbackMessage;
           } else {
             message = rawError;
           }
@@ -1104,7 +1119,7 @@ export class HomePage {
       }
     }
 
-    const finalMessage = typeof message === 'string' ? message : JSON.stringify(message);
+    const finalMessage = typeof message === 'string' ? message : fallbackMessage;
 
     const alert = await this.alertCtrl.create({
       header: title,

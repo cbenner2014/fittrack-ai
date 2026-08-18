@@ -56,7 +56,7 @@ public class GeminiVisionServiceImpl implements AiVisionService {
             ),
             "generationConfig", Map.of(
                 "responseMimeType", "application/json",
-                "maxOutputTokens", 2048
+                "maxOutputTokens", 8192
             )
         );
 
