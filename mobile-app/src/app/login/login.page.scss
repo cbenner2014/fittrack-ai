@@ -9,19 +9,19 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.95) 100%);
-  padding: 30px;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.5) 0%, rgba(10,10,10,0.96) 100%);
+  padding: 30px 20px;
 }
 
 .logo-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   
   .glow-circle {
     width: 80px;
     height: 80px;
-    background: rgba(0, 255, 136, 0.1);
-    border: 2px solid var(--ion-color-primary);
+    background: rgba(0, 255, 136, 0.12);
+    border: 2px solid #00ff88;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -31,7 +31,7 @@
     
     .logo-icon {
       font-size: 40px;
-      color: var(--ion-color-primary);
+      color: #00ff88;
     }
   }
   
@@ -40,14 +40,16 @@
     font-weight: 900;
     margin: 0 0 5px;
     letter-spacing: 2px;
+    color: #ffffff;
     
     .neon {
-      color: var(--ion-color-primary);
+      color: #00ff88;
+      text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
     }
   }
   
   .brand-subtitle {
-    color: #ccc;
+    color: #bbb;
     font-size: 14px;
     margin: 0;
   }
@@ -58,76 +60,128 @@
   max-width: 400px;
   text-align: center;
   padding: 35px 25px;
-  background: rgba(25, 25, 25, 0.6);
+  background: rgba(18, 18, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
   
   h2 {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     margin-bottom: 25px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
   }
   
   .input-group {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px 15px;
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     &:focus-within {
-      border-color: var(--ion-color-primary);
-      box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.05);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.25);
     }
     
     ion-icon {
-      color: #888;
-      font-size: 20px;
-      margin-right: 15px;
+      color: #00ff88;
+      font-size: 22px;
+      margin-right: 12px;
+      flex-shrink: 0;
     }
     
     input {
       background: transparent;
       border: none;
-      color: white;
+      color: #ffffff;
       width: 100%;
       font-size: 15px;
+      font-weight: 500;
       outline: none;
       
       &::placeholder {
-        color: #666;
+        color: #777;
+      }
+
+      /* Evitar que el autofill del navegador oscurezca o vuelva ilegible el texto */
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover, 
+      &:-webkit-autofill:focus {
+        -webkit-text-fill-color: #ffffff;
+        -webkit-box-shadow: 0 0 0px 1000px rgba(30, 30, 35, 1) inset;
+        transition: background-color 5000s ease-in-out 0s;
       }
     }
   }
   
   .neon-btn {
     width: 100%;
-    background: var(--ion-color-primary);
-    color: #000;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 16px;
-    padding: 15px;
-    border-radius: 12px;
-    margin-top: 15px;
+    letter-spacing: 1.5px;
+    padding: 16px;
+    border-radius: 14px;
+    margin-top: 22px;
     border: none;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-    transition: transform 0.2s;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &.login-btn {
+      background: linear-gradient(135deg, #00ff88 0%, #00d2ff 100%);
+      color: #050505;
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.55), 0 4px 15px rgba(0, 0, 0, 0.4);
+
+      &:hover {
+        box-shadow: 0 0 35px rgba(0, 255, 136, 0.8), 0 6px 20px rgba(0, 0, 0, 0.5);
+        transform: translateY(-2px);
+      }
+    }
+
+    &.register-btn {
+      background: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
+      color: #050505;
+      box-shadow: 0 0 28px rgba(0, 255, 136, 0.6), 0 4px 15px rgba(0, 0, 0, 0.4);
+
+      &:hover {
+        box-shadow: 0 0 38px rgba(0, 255, 136, 0.85), 0 6px 20px rgba(0, 0, 0, 0.5);
+        transform: translateY(-2px);
+      }
+    }
     
     &:active {
-      transform: scale(0.95);
+      transform: scale(0.97);
     }
   }
   
   .register-link {
-    margin-top: 25px;
-    font-size: 13px;
-    color: #888;
+    margin-top: 26px;
+    font-size: 14px;
+    color: #999;
     
     .neon {
-      color: var(--ion-color-primary);
+      color: #00ff88;
       font-weight: 700;
-      margin-left: 5px;
+      margin-left: 6px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #55ffb0;
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+      }
     }
   }
 }

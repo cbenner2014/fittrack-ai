@@ -6,6 +6,7 @@ import com.fitnessai.backend.entities.User;
 import com.fitnessai.backend.mappers.UserMapper;
 import com.fitnessai.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -28,6 +31,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = UserMapper.toEntity(userRequestDto);
+        // Cifrado seguro de contraseña con algoritmo BCrypt (irreversible)
+        user.setPasswordHash(passwordEncoder.encode(userRequestDto.getPassword()));
+        
         User savedUser = userRepository.save(user);
         return UserMapper.toResponseDto(savedUser);
     }

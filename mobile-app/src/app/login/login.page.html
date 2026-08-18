@@ -27,8 +27,8 @@
         <input type="password" placeholder="Contraseña" [(ngModel)]="password" />
       </div>
 
-      <button class="neon-btn" (click)="login()" *ngIf="!isRegistering">INGRESAR</button>
-      <button class="neon-btn" (click)="register()" *ngIf="isRegistering" style="background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); border-color: var(--neon-purple);">REGISTRARSE</button>
+      <button class="neon-btn login-btn" (click)="login()" *ngIf="!isRegistering">INGRESAR</button>
+      <button class="neon-btn register-btn" (click)="register()" *ngIf="isRegistering">REGISTRARSE</button>
       
       <p class="register-link" *ngIf="!isRegistering">¿No tienes cuenta? <span class="neon" (click)="toggleRegister()">Regístrate</span></p>
       <p class="register-link" *ngIf="isRegistering">¿Ya tienes cuenta? <span class="neon" (click)="toggleRegister()">Inicia Sesión</span></p>

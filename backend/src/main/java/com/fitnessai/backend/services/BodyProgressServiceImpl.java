@@ -15,19 +15,25 @@ import java.util.stream.Collectors;
 public class BodyProgressServiceImpl implements BodyProgressService {
     private final BodyProgressLogRepository repository;
     private final UserRepository userRepository;
+
     public BodyProgressServiceImpl(BodyProgressLogRepository repository, UserRepository userRepository) { 
         this.repository = repository; 
         this.userRepository = userRepository;
     }
+
     @Override
-    public BodyProgressLogResponseDto createBodyProgress(BodyProgressLogRequestDto dto) {
-        User user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+    public BodyProgressLogResponseDto createBodyProgress(Long authUserId, BodyProgressLogRequestDto dto) {
+        User user = userRepository.findById(authUserId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + authUserId));
         BodyProgressLog log = BodyProgressMapper.toEntity(dto);
         log.setUser(user);
         return BodyProgressMapper.toResponseDto(repository.save(log));
     }
+
     @Override
     public List<BodyProgressLogResponseDto> getProgressByUser(Long userId) {
-        return repository.findByUserId(userId).stream().map(BodyProgressMapper::toResponseDto).collect(Collectors.toList());
+        return repository.findByUserId(userId).stream()
+                .map(BodyProgressMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 }

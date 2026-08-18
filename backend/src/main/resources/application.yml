@@ -31,6 +31,17 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: false
 
+# Configuración de Seguridad JWT
+jwt:
+  secret: ${JWT_SECRET:BTrackDefaultSecureKeyForDevelopmentOnly2026Secure256BitKey!}
+  expiration-ms: ${JWT_EXPIRATION_MS:604800000} # 7 días en milisegundos
+
+# Configuración de Rate Limiting para IA (Anti-DoS)
+ai:
+  rate-limit:
+    max-requests: ${AI_MAX_REQUESTS_PER_MINUTE:5}
+    window-seconds: ${AI_WINDOW_SECONDS:60}
+
 # Configuración de Inteligencia Artificial
 gemini:
   api:

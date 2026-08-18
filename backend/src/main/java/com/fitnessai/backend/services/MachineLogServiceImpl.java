@@ -20,7 +20,9 @@ public class MachineLogServiceImpl implements MachineLogService {
     }
 
     @Override
-    public MachineLogResponseDto logMachine(MachineLogRequestDto requestDto) {
+    public MachineLogResponseDto logMachine(Long authUserId, MachineLogRequestDto requestDto) {
+        // Forzar el userId del usuario autenticado para evitar spoofing
+        requestDto.setUserId(authUserId);
         MachineLog entity = MachineLogMapper.toEntity(requestDto);
         MachineLog saved = repository.save(entity);
         return MachineLogMapper.toResponseDto(saved);
@@ -34,7 +36,15 @@ public class MachineLogServiceImpl implements MachineLogService {
     }
 
     @Override
-    public void deleteMachineLog(Long id) {
-        repository.deleteById(id);
+    public void deleteMachineLog(Long authUserId, Long id) {
+        MachineLog log = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro de máquina no encontrado con ID: " + id));
+
+        // Verificación estricta de propiedad (Anti-BOLA)
+        if (!log.getUserId().equals(authUserId)) {
+            throw new RuntimeException("Acceso Denegado: No tienes permisos para eliminar este registro.");
+        }
+
+        repository.delete(log);
     }
 }

@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.fitnessai.backend.utils.JwtUtil;
 
@@ -22,12 +23,18 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserController(UserService userService, UserRepository userRepository, JwtUtil jwtUtil) {
+    public UserController(
+            UserService userService, 
+            UserRepository userRepository, 
+            JwtUtil jwtUtil,
+            PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -35,7 +42,24 @@ public class UserController {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElse(null);
                 
-        if (user == null || !user.getPasswordHash().equals(loginDto.getPassword())) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "success", false,
+                    "message", "Credenciales incorrectas"
+            ));
+        }
+
+        // Verificación segura con BCrypt
+        boolean passwordValid = passwordEncoder.matches(loginDto.getPassword(), user.getPasswordHash());
+
+        // Compatibilidad retroactiva: si el usuario fue creado previamente en texto plano, migramos su hash automáticamente
+        if (!passwordValid && user.getPasswordHash().equals(loginDto.getPassword())) {
+            passwordValid = true;
+            user.setPasswordHash(passwordEncoder.encode(loginDto.getPassword()));
+            userRepository.save(user);
+        }
+
+        if (!passwordValid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
                     "message", "Credenciales incorrectas"

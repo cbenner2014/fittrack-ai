@@ -12,11 +12,18 @@ import java.util.List;
 @RequestMapping("/api/v1/body-progress")
 public class BodyProgressController {
     private final BodyProgressService service;
-    public BodyProgressController(BodyProgressService service) { this.service = service; }
-    @PostMapping
-    public ResponseEntity<BodyProgressLogResponseDto> createProgress(@Valid @RequestBody BodyProgressLogRequestDto dto) {
-        return ResponseEntity.ok(service.createBodyProgress(dto));
+
+    public BodyProgressController(BodyProgressService service) { 
+        this.service = service; 
     }
+
+    @PostMapping
+    public ResponseEntity<BodyProgressLogResponseDto> createProgress(
+            @RequestAttribute("userId") Long authUserId,
+            @Valid @RequestBody BodyProgressLogRequestDto dto) {
+        return ResponseEntity.ok(service.createBodyProgress(authUserId, dto));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<BodyProgressLogResponseDto>> getProgressByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(service.getProgressByUser(userId));

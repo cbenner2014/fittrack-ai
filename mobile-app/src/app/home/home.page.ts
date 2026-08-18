@@ -358,25 +358,7 @@ export class HomePage {
       },
       error: async (err) => {
         await loading.dismiss();
-        
-        if (err.error && typeof err.error === 'string') {
-          try {
-             const p = JSON.parse(err.error);
-             if (p.shoppingList) {
-               this.coachResult.shoppingList = p.shoppingList;
-               return;
-             }
-             if (p.error) {
-               alert('Error de IA: ' + p.error);
-               return;
-             }
-          } catch(e) {}
-        } else if (err.error && err.error.error) {
-           alert('Error de IA: ' + err.error.error);
-           return;
-        }
-        
-        alert('Hubo un error al crear la lista de compras: ' + JSON.stringify(err));
+        this.showAiErrorAlert(err, 'Hubo un error al crear la lista de compras.');
       }
     });
   }
@@ -513,7 +495,7 @@ export class HomePage {
         },
         error: async (err) => {
           await loading.dismiss();
-          alert('Hubo un error al conectar con la IA.');
+          this.showAiErrorAlert(err, 'Hubo un error al procesar el análisis con la IA.');
           this.isRequestInProgress = false;
         }
       });
@@ -568,17 +550,7 @@ export class HomePage {
         },
         error: async (err) => {
           await loading.dismiss();
-          
-          if (err.error && typeof err.error === 'string') {
-            try {
-              this.labelResult = JSON.parse(err.error);
-              this.isLabelModalOpen = true;
-              this.isRequestInProgress = false;
-              return;
-            } catch (e) {}
-          }
-          
-          alert('Hubo un error al leer la etiqueta.');
+          this.showAiErrorAlert(err, 'Hubo un error al leer la etiqueta.');
           this.isRequestInProgress = false;
         }
       });
@@ -616,15 +588,7 @@ export class HomePage {
       },
       error: async (err) => {
         await loading.dismiss();
-        let errorMsg = 'Error desconocido';
-        if (err.error && err.error.error) {
-           errorMsg = err.error.error;
-        } else if (err.error) {
-           errorMsg = JSON.stringify(err.error);
-        } else {
-           errorMsg = err.message;
-        }
-        alert('Hubo un error al conectar con la IA: ' + errorMsg);
+        this.showAiErrorAlert(err, 'Hubo un error al generar tu plan con la IA.');
         this.isRequestInProgress = false;
       }
     });
@@ -863,20 +827,41 @@ export class HomePage {
       },
       error: async (err) => {
         await loading.dismiss();
-        
-        // El servidor devuelve un string que a veces httpClient no sabe parsear como JSON si viene texto directo.
-        if (err.error && typeof err.error === 'string') {
-          try {
-            const parsed = JSON.parse(err.error);
-            if (parsed.reply) {
-              this.chatHistory.push({ role: 'ai', text: parsed.reply });
-              return;
-            }
-          } catch (e) {}
-        }
-        
-        alert('Hubo un error de conexiÃ³n con la IA.');
+        this.showAiErrorAlert(err, 'Hubo un error de conexión con la IA.');
       }
     });
+  }
+
+  async showAiErrorAlert(err: any, fallbackMessage: string = 'Hubo un problema al consultar la IA.') {
+    let title = 'Aviso';
+    let message = fallbackMessage;
+
+    if (err && err.status === 429) {
+      title = '⏱️ Límite de IA';
+      message = 'Has alcanzado el límite de análisis de IA (máximo 5 por minuto). Por favor, espera unos segundos antes de volver a intentar.';
+      if (err.error && err.error.error) {
+        message = err.error.error;
+      } else if (typeof err.error === 'string') {
+        try {
+          const parsed = JSON.parse(err.error);
+          if (parsed.error) message = parsed.error;
+        } catch (e) {}
+      }
+    } else if (err && err.error && err.error.error) {
+      message = err.error.error;
+    } else if (err && typeof err.error === 'string') {
+      try {
+        const parsed = JSON.parse(err.error);
+        if (parsed.error) message = parsed.error;
+      } catch (e) {}
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: title,
+      message: message,
+      buttons: ['ENTENDIDO'],
+      cssClass: 'neon-alert'
+    });
+    await alert.present();
   }
 }

@@ -2,6 +2,7 @@ package com.fitnessai.backend.services;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fitnessai.backend.utils.FileValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,9 @@ public class CloudinaryService {
     }
 
     public String uploadImage(MultipartFile file) {
+        // Validación estricta de seguridad (tamaño, tipo MIME y Magic Bytes)
+        FileValidator.validateImageFile(file);
+
         try {
             // Sube el archivo a Cloudinary y obtiene un Map con todos los datos de respuesta
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());

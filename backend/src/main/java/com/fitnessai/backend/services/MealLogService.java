@@ -5,7 +5,7 @@ import com.fitnessai.backend.dtos.response.MealLogResponseDto;
 import java.util.List;
 
 public interface MealLogService {
-    MealLogResponseDto createMealLog(MealLogRequestDto dto);
+    MealLogResponseDto createMealLog(Long authUserId, MealLogRequestDto dto);
     List<MealLogResponseDto> getMealLogsByUser(Long userId);
-    void deleteMealLog(Long id);
+    void deleteMealLog(Long authUserId, Long id);
 }

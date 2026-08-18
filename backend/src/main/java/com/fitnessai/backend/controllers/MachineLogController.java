@@ -19,8 +19,10 @@ public class MachineLogController {
     }
 
     @PostMapping
-    public ResponseEntity<MachineLogResponseDto> logMachine(@RequestBody MachineLogRequestDto request) {
-        return ResponseEntity.ok(service.logMachine(request));
+    public ResponseEntity<MachineLogResponseDto> logMachine(
+            @RequestAttribute("userId") Long authUserId,
+            @RequestBody MachineLogRequestDto request) {
+        return ResponseEntity.ok(service.logMachine(authUserId, request));
     }
 
     @GetMapping("/user/{userId}")
@@ -29,8 +31,10 @@ public class MachineLogController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMachineLog(@PathVariable Long id) {
-        service.deleteMachineLog(id);
+    public ResponseEntity<Void> deleteMachineLog(
+            @RequestAttribute("userId") Long authUserId,
+            @PathVariable Long id) {
+        service.deleteMachineLog(authUserId, id);
         return ResponseEntity.noContent().build();
     }
 }

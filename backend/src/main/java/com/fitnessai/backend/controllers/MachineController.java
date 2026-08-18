@@ -3,6 +3,7 @@ package com.fitnessai.backend.controllers;
 import com.fitnessai.backend.dtos.request.MachineRequestDto;
 import com.fitnessai.backend.dtos.response.MachineResponseDto;
 import com.fitnessai.backend.services.MachineService;
+import com.fitnessai.backend.utils.FileValidator;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,9 @@ public class MachineController {
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> analyzeGymMachine(@RequestParam("file") MultipartFile file) {
         try {
+            // Validación estricta temprana de la imagen (tamaño, tipo MIME y Magic Bytes)
+            FileValidator.validateImageFile(file);
+
             // 1. Subir la foto real a Cloudinary
             String imageUrl = cloudinaryService.uploadImage(file);
 
@@ -68,6 +72,8 @@ public class MachineController {
             // 5. Devolver al celular
             return ResponseEntity.ok(aiJsonResponse);
 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("{\"error\": \"Error al procesar la máquina: " + e.getMessage() + "\"}");
         }

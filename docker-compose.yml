@@ -28,6 +28,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root1234}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-BTrackDefaultSecureKeyForDevelopmentOnly2026Secure256BitKey!}
     # No exponemos el 8080 al exterior. 
     # El frontend (nginx) se comunicará internamente.
 

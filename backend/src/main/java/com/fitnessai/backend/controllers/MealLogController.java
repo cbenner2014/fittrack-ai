@@ -5,6 +5,7 @@ import com.fitnessai.backend.dtos.response.MealLogResponseDto;
 import com.fitnessai.backend.services.MealLogService;
 import com.fitnessai.backend.services.AiVisionService;
 import com.fitnessai.backend.services.CloudinaryService;
+import com.fitnessai.backend.utils.FileValidator;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +28,10 @@ public class MealLogController {
     }
 
     @PostMapping
-    public ResponseEntity<MealLogResponseDto> createMealLog(@Valid @RequestBody MealLogRequestDto dto) {
-        return ResponseEntity.ok(mealLogService.createMealLog(dto));
+    public ResponseEntity<MealLogResponseDto> createMealLog(
+            @RequestAttribute("userId") Long authUserId,
+            @Valid @RequestBody MealLogRequestDto dto) {
+        return ResponseEntity.ok(mealLogService.createMealLog(authUserId, dto));
     }
 
     @GetMapping("/user/{userId}")
@@ -37,14 +40,19 @@ public class MealLogController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMealLog(@PathVariable Long id) {
-        mealLogService.deleteMealLog(id);
+    public ResponseEntity<Void> deleteMealLog(
+            @RequestAttribute("userId") Long authUserId,
+            @PathVariable Long id) {
+        mealLogService.deleteMealLog(authUserId, id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> analyzeAndUploadMeal(@RequestParam("file") MultipartFile file) {
         try {
+            // Validación estricta temprana de la imagen (tamaño, tipo MIME y Magic Bytes)
+            FileValidator.validateImageFile(file);
+
             // 1. Subir la foto real a Cloudinary para guardarla permanentemente
             String imageUrl = cloudinaryService.uploadImage(file);
 
@@ -75,6 +83,8 @@ public class MealLogController {
             // 5. Devolvemos el JSON de Gemini (que ya incluye el link de Cloudinary incrustado) al celular
             return ResponseEntity.ok(aiJsonResponse);
 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("{\"error\": \"Error al procesar la imagen: " + e.getMessage() + "\"}");
         }

@@ -5,6 +5,6 @@ import com.fitnessai.backend.dtos.response.BodyProgressLogResponseDto;
 import java.util.List;
 
 public interface BodyProgressService {
-    BodyProgressLogResponseDto createBodyProgress(BodyProgressLogRequestDto dto);
+    BodyProgressLogResponseDto createBodyProgress(Long authUserId, BodyProgressLogRequestDto dto);
     List<BodyProgressLogResponseDto> getProgressByUser(Long userId);
 }

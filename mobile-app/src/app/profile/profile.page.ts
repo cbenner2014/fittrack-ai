@@ -356,10 +356,16 @@ export class ProfilePage implements OnInit {
         },
         error: async (err) => {
           loading.dismiss();
+          let msg = 'Error al analizar la imagen';
+          if (err && err.status === 429) {
+            msg = 'Límite alcanzado: Espera un momento antes de volver a escanear tu físico.';
+          } else if (err && err.error && err.error.error) {
+            msg = err.error.error;
+          }
           const toast = await this.toastCtrl.create({
-            message: 'Error al analizar la imagen',
-            duration: 2000,
-            color: 'danger'
+            message: msg,
+            duration: 3000,
+            color: err && err.status === 429 ? 'warning' : 'danger'
           });
           toast.present();
         }
