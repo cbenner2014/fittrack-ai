@@ -3,19 +3,19 @@
 
   <!-- BOTTOM NAVIGATION BAR (Solo para atletas o vistas normales, nunca en /admin) -->
   <div *ngIf="showTabs" class="floating-nav-bar">
-    <div class="nav-item" [class.active]="router.url.includes('/home')" (click)="router.navigate(['/home'])">
+    <div class="nav-item" [class.active]="router.url.includes('/home')" (click)="goToTab('/home')">
       <ion-icon name="home"></ion-icon>
       <span>Inicio</span>
     </div>
-    <div class="nav-item" [class.active]="router.url.includes('/gimnasios')" (click)="router.navigate(['/gimnasios'])">
+    <div class="nav-item" [class.active]="router.url.includes('/gimnasios')" (click)="goToTab('/gimnasios')">
       <ion-icon name="map"></ion-icon>
       <span>Gimnasios</span>
     </div>
-    <div class="nav-item" [class.active]="router.url.includes('/history')" (click)="router.navigate(['/history'])">
+    <div class="nav-item" [class.active]="router.url.includes('/history')" (click)="goToTab('/history')">
       <ion-icon name="calendar"></ion-icon>
       <span>Historial</span>
     </div>
-    <div class="nav-item" [class.active]="router.url.includes('/profile')" (click)="router.navigate(['/profile'])">
+    <div class="nav-item" [class.active]="router.url.includes('/profile')" (click)="goToTab('/profile')">
       <ion-icon name="person"></ion-icon>
       <span>Perfil</span>
     </div>

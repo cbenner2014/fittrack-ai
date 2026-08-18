@@ -38,6 +38,11 @@ export class AppComponent implements OnInit {
     });
   }
 
+  goToTab(route: string) {
+    if (this.router.url === route || this.router.url.startsWith(route)) return;
+    this.navCtrl.navigateRoot(route, { animated: false, replaceUrl: true });
+  }
+
   ngOnInit() {
     this.initBackButtonHandling();
   }
