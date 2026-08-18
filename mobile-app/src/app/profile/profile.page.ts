@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
-import { ToastController, AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
+import { ToastController, AlertController, LoadingController, ActionSheetController, NavController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import Chart from 'chart.js/auto';
 
@@ -40,21 +40,38 @@ export class ProfilePage implements OnInit {
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
+    private navCtrl: NavController,
     private http: HttpClient,
     private loadingCtrl: LoadingController
   ) { }
 
   ngOnInit() {
-    // La inicializaciÃ³n ahora se hace en ionViewWillEnter
+    // La inicialización se maneja en ionViewWillEnter
   }
 
   ionViewWillEnter() {
-    this.userId = localStorage.getItem('userId') || '';
-    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
-    if (!this.userId) {
-      this.router.navigate(['/login']);
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
+    if (!token || !userId) {
+      // Limpiar memoria de variables
+      this.userId = '';
+      this.userProfile = {
+        name: '',
+        gender: 'male',
+        age: null,
+        weight: null,
+        height: null,
+        activityLevel: 1.2,
+        goal: 'maintain',
+        dietPreference: 'Tradicional (3 a 5 comidas)'
+      };
+      this.navCtrl.navigateRoot('/login', { replaceUrl: true, animated: false });
       return;
     }
+
+    this.userId = userId;
+    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
     
     // Limpiamos los datos del usuario anterior por seguridad
     this.userProfile = {
@@ -326,13 +343,19 @@ export class ProfilePage implements OnInit {
             const loading = await this.loadingCtrl.create({
               message: 'Cerrando sesión de forma segura...',
               spinner: 'crescent',
-              duration: 800
+              duration: 600
             });
             await loading.present();
+            
+            // Limpieza exhaustiva de sesión y memoria local
             localStorage.clear();
+            sessionStorage.clear();
+            this.userId = '';
+            this.userProfile = { name: '', goal: 'maintain' };
+
             setTimeout(() => {
-              this.router.navigate(['/login']);
-            }, 400);
+              this.navCtrl.navigateRoot('/login', { animated: true, replaceUrl: true });
+            }, 300);
           }
         }
       ]

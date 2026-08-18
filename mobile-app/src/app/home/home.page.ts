@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { HttpClient } from '@angular/common/http';
-import { LoadingController, AlertController, ActionSheetController } from '@ionic/angular';
+import { LoadingController, AlertController, ActionSheetController, NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 // @ts-ignore
@@ -84,35 +84,63 @@ export class HomePage {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
+    private navCtrl: NavController,
     public router: Router
   ) {}
 
   ngOnInit() {
-    this.userId = localStorage.getItem('userId') || '';
-    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
-    if (!this.userId) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    this.generateWeek();
-    this.loadDailyHistory();
-    this.loadProfile();
+    this.checkSessionAndLoad();
   }
 
   ionViewWillEnter() {
-    this.userId = localStorage.getItem('userId') || '';
-    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
-    if (!this.userId) {
-      this.router.navigate(['/login']);
+    this.checkSessionAndLoad();
+  }
+
+  private checkSessionAndLoad() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    
+    if (!token || !userId) {
+      // Limpiar memoria de variables por seguridad
+      this.userId = '';
+      this.userName = '';
+      this.todaysMeals = [];
+      this.machineHistory = [];
+      this.userProfile = {
+        name: '',
+        gender: 'male',
+        age: 25,
+        weight: 70,
+        height: 175,
+        activityLevel: 1.2,
+        goal: 'lose_fat',
+        goalText: 'Perder Grasa',
+        baseCalories: 2000,
+        dailyCaloriesTarget: 2200,
+        dailyProteinTarget: 160,
+        dailyCarbsTarget: 220,
+        dailyFatsTarget: 70,
+        totalCaloriesConsumed: 0,
+        totalProteinConsumed: 0,
+        totalCarbsConsumed: 0,
+        totalFatsConsumed: 0,
+        level: 1,
+        xp: 0
+      };
+      this.navCtrl.navigateRoot('/login', { replaceUrl: true, animated: false });
       return;
     }
+
+    this.userId = userId;
+    this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
     const storedName = localStorage.getItem('userName');
     
     if (storedName) {
-      this.userName = storedName.split(' ')[0]; // Solo el primer nombre
+      this.userName = storedName.split(' ')[0];
       this.userInitials = this.userName.substring(0, 2).toUpperCase();
     }
     
+    this.generateWeek();
     this.loadDailyHistory();
     this.loadProfile();
     this.loadMachineHistory();

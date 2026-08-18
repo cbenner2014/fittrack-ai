@@ -303,13 +303,14 @@ export class AdminPage implements OnInit {
             const loading = await this.loadingCtrl.create({
               message: 'Cerrando sesión administrativa...',
               spinner: 'crescent',
-              duration: 800
+              duration: 600
             });
             await loading.present();
             localStorage.clear();
+            sessionStorage.clear();
             setTimeout(() => {
-              this.router.navigate(['/login']);
-            }, 400);
+              this.navCtrl.navigateRoot('/login', { animated: true, replaceUrl: true });
+            }, 300);
           }
         }
       ]
