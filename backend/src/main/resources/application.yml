@@ -46,6 +46,7 @@ ai:
 gemini:
   api:
     key: ${gemini.api.key} # Viene del application-secrets.yml
+    model: ${GEMINI_MODEL:gemini-3.6-flash}
 
 # Configuración de Cloudinary (Subida de Imágenes)
 cloudinary:

@@ -12,10 +12,14 @@ public class GeminiVisionServiceImpl implements AiVisionService {
 
     private final RestClient restClient;
     private final String apiKey;
-    private final String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private final String apiUrl;
 
-    public GeminiVisionServiceImpl(@Value("${gemini.api.key:AQUI_IRA_TU_API_KEY}") String apiKey) {
+    public GeminiVisionServiceImpl(
+            @Value("${gemini.api.key:AQUI_IRA_TU_API_KEY}") String apiKey,
+            @Value("${gemini.api.model:gemini-3.6-flash}") String model
+    ) {
         this.apiKey = apiKey;
+        this.apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
         this.restClient = RestClient.builder().build();
     }
 
