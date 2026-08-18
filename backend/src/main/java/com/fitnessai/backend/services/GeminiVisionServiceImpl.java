@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,16 @@ public class GeminiVisionServiceImpl implements AiVisionService {
 
     public GeminiVisionServiceImpl(
             @Value("${gemini.api.key:AQUI_IRA_TU_API_KEY}") String apiKey,
-            @Value("${gemini.api.model:gemini-3.6-flash}") String model
+            @Value("${gemini.api.model:gemini-3.5-flash}") String model
     ) {
         this.apiKey = apiKey;
         this.primaryModel = model;
-        this.restClient = RestClient.builder().build();
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // 5 segundos para conectar
+        factory.setReadTimeout(12000);   // 12 segundos maximo de espera por modelo
+
+        this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
     @Override
@@ -54,13 +60,13 @@ public class GeminiVisionServiceImpl implements AiVisionService {
             )
         );
 
-        // 2. Lista amplia de modelos con relevo automático y retry
+        // 2. Lista optimizada con los modelos más estables y rápidos primero
         List<String> candidateModels = new ArrayList<>();
         candidateModels.add(primaryModel);
-        if (!candidateModels.contains("gemini-3.7-flash")) candidateModels.add("gemini-3.7-flash");
         if (!candidateModels.contains("gemini-3.5-flash")) candidateModels.add("gemini-3.5-flash");
+        if (!candidateModels.contains("gemini-3.7-flash")) candidateModels.add("gemini-3.7-flash");
         if (!candidateModels.contains("gemini-3.5-flash-lite")) candidateModels.add("gemini-3.5-flash-lite");
-        if (!candidateModels.contains("gemini-3.1-flash-lite")) candidateModels.add("gemini-3.1-flash-lite");
+        if (!candidateModels.contains("gemini-3.6-flash")) candidateModels.add("gemini-3.6-flash");
 
         Exception lastException = null;
 
