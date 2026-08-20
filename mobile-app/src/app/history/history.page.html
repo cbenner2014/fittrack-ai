@@ -136,10 +136,10 @@
                 🎯 {{ machine.targetMuscles || machine.targetMuscle || 'General' }}
               </span>
               
-              <span *ngIf="machine.weightLog" style="background: rgba(157, 0, 255, 0.2); color: #d8b4fe; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(157,0,255,0.4);">
-                ⚡ {{ machine.weightLog }}
+              <span *ngIf="getLatestWeight(machine)" style="background: rgba(157, 0, 255, 0.2); color: #d8b4fe; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(157,0,255,0.4);">
+                ⚡ {{ getLatestWeight(machine) }}
               </span>
-              <span *ngIf="!machine.weightLog" style="background: rgba(255, 255, 255, 0.06); color: #94a3b8; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem;">
+              <span *ngIf="!getLatestWeight(machine)" style="background: rgba(255, 255, 255, 0.06); color: #94a3b8; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem;">
                 + Registrar carga
               </span>
             </div>
@@ -227,107 +227,191 @@
         <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 16px; right: 16px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isMachineModalOpen = false"></ion-icon>
         
         <ion-content class="ion-padding" style="--background: transparent;">
-          <div style="padding-top: 15px;">
-            <!-- Imagen Grande de la Máquina -->
-            <div *ngIf="selectedMachine?.imageUrl" style="width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 14px; border: 1.5px solid rgba(157, 0, 255, 0.4); background: #000;">
+          <div style="padding-top: 10px;">
+            <!-- Imagen Compacta de la Máquina -->
+            <div *ngIf="selectedMachine?.imageUrl" style="width: 100%; height: 135px; border-radius: 16px; overflow: hidden; margin-bottom: 12px; border: 1.5px solid rgba(157, 0, 255, 0.4); background: #000;">
               <img [src]="selectedMachine.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
             </div>
 
-            <div style="font-size: 11px; font-weight: 700; color: #00ff88; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 4px;">
+            <div style="font-size: 10px; font-weight: 700; color: #00ff88; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-bottom: 2px;">
               DETALLE DE ENTRENAMIENTO
             </div>
-            <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; text-align: center; margin: 0 0 12px 0; line-height: 1.3;">
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; text-align: center; margin: 0 0 8px 0; line-height: 1.2;">
               {{ selectedMachine?.name || selectedMachine?.machineName }}
             </h2>
             
-            <!-- Grupo Muscular Badge -->
-            <div style="display: flex; justify-content: center; margin-bottom: 18px;">
-              <div style="background: rgba(0, 255, 136, 0.12); border: 1px solid rgba(0, 255, 136, 0.3); color: #00ff88; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-align: center; max-width: 90%;">
-                <ion-icon name="fitness-outline" style="font-size: 16px; flex-shrink: 0;"></ion-icon> 
+            <!-- Grupo Muscular Badge Compacto -->
+            <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+              <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.25); color: #00ff88; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; text-align: center; max-width: 90%;">
+                <ion-icon name="fitness-outline" style="font-size: 14px; flex-shrink: 0;"></ion-icon> 
                 <span>{{ selectedMachine?.targetMuscles || selectedMachine?.targetMuscle }}</span>
               </div>
             </div>
 
-            <!-- Sección de Registro de Carga / Series Editable dentro del Modal -->
-            <div style="background: rgba(157, 0, 255, 0.1); border: 1px solid rgba(157, 0, 255, 0.3); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
-              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                <ion-icon name="speedometer-outline"></ion-icon> Anotar Carga de Hoy
+            <!-- 1. ACORDEÓN COMPACTO: Anotar Nueva Carga -->
+            <div style="background: rgba(157, 0, 255, 0.05); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: all 0.25s ease;">
+              <div (click)="showWeightInput = !showWeightInput" 
+                   style="padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(157, 0, 255, 0.08);">
+                <span style="font-size: 11px; font-weight: 800; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                  <ion-icon name="speedometer-outline" style="font-size: 15px;"></ion-icon> Anotar Carga de Hoy
+                </span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span *ngIf="getLatestWeight(selectedMachine)" style="font-size: 9.5px; background: rgba(157, 0, 255, 0.2); color: #d8b4fe; padding: 2px 7px; border-radius: 6px; font-weight: 700;">
+                    {{ getLatestWeight(selectedMachine) }}
+                  </span>
+                  <ion-icon [name]="showWeightInput ? 'chevron-up-outline' : 'chevron-down-outline'" style="color: #c084fc; font-size: 16px;"></ion-icon>
+                </div>
               </div>
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <ion-input [(ngModel)]="selectedMachine.weightLog" placeholder="Ej: 4 series x 50kg / 12 reps" style="background: rgba(0,0,0,0.4); color: white; --padding-start: 12px; border-radius: 10px; border: 1px solid rgba(157,0,255,0.4); font-size: 0.9rem; flex: 1;"></ion-input>
-                <button (click)="saveMachineWeight(selectedMachine)" style="background: linear-gradient(135deg, #9d00ff, #7928ca); color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 12px rgba(157,0,255,0.4);">
-                  Guardar
+
+              <div *ngIf="showWeightInput" style="padding: 12px 14px; border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.25);">
+                <!-- Grid Compacto de 3 Columnas (Series, Reps, Peso) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 6px; margin-bottom: 12px;">
+                  
+                  <!-- SERIES -->
+                  <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 10px; padding: 6px 4px; text-align: center;">
+                    <div style="font-size: 9px; color: #a855f7; font-weight: 700; text-transform: uppercase;">Series</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px;">
+                      <button (click)="decrementSets()" style="width: 22px; height: 22px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                      <span style="font-size: 15px; font-weight: 800; color: #ffffff; min-width: 18px;">{{ inputSets }}</span>
+                      <button (click)="incrementSets()" style="width: 22px; height: 22px; border-radius: 6px; border: none; background: rgba(157,0,255,0.3); color: white; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                    </div>
+                  </div>
+
+                  <!-- REPS -->
+                  <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 10px; padding: 6px 4px; text-align: center;">
+                    <div style="font-size: 9px; color: #a855f7; font-weight: 700; text-transform: uppercase;">Reps</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px;">
+                      <button (click)="decrementReps()" style="width: 22px; height: 22px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+                      <span style="font-size: 15px; font-weight: 800; color: #ffffff; min-width: 18px;">{{ inputReps }}</span>
+                      <button (click)="incrementReps()" style="width: 22px; height: 22px; border-radius: 6px; border: none; background: rgba(157,0,255,0.3); color: white; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                    </div>
+                  </div>
+
+                  <!-- PESO CON TOGGLE INLINE KG/LBS -->
+                  <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 10px; padding: 6px 4px; text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <span style="font-size: 9px; color: #00ff88; font-weight: 700; text-transform: uppercase;">Peso:</span>
+                      <button (click)="toggleWeightUnit()" style="background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; padding: 1px 5px; border-radius: 6px; font-size: 8.5px; font-weight: 800; cursor: pointer;">
+                        {{ weightUnit.toUpperCase() }}
+                      </button>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 4px;">
+                      <button (click)="decrementWeight(5)" style="width: 20px; height: 22px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;">-5</button>
+                      <ion-input type="number" [(ngModel)]="inputWeight" style="background: rgba(255,255,255,0.06); text-align: center; color: #00ff88; font-weight: 800; font-size: 14px; border-radius: 6px; border: 1px solid rgba(0,255,136,0.3); width: 38px; --padding-start: 1px; --padding-end: 1px; height: 22px;"></ion-input>
+                      <button (click)="incrementWeight(5)" style="width: 20px; height: 22px; border-radius: 6px; border: none; background: rgba(0,255,136,0.2); color: #00ff88; font-weight: 800; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+5</button>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Botón de Guardado Limpio -->
+                <button (click)="saveMachineWeight(selectedMachine)"
+                        style="width: 100%; padding: 11px; background: linear-gradient(135deg, #9d00ff 0%, #7928ca 100%); color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 0 14px rgba(157,0,255,0.4); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                  <ion-icon name="checkmark-circle" style="font-size: 17px;"></ion-icon>
+                  <span>Guardar Serie</span>
                 </button>
               </div>
             </div>
 
-            <!-- Evolución y Sobrecarga Progresiva (Historial de Sesiones) -->
-            <div *ngIf="getMachineProgressHistory(selectedMachine).length > 0" 
-                 style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
-              <div style="font-size: 11px; font-weight: 700; color: #00ff88; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                <span style="display: flex; align-items: center; gap: 6px;">
+            <!-- 2. ACORDEÓN: Evolución y Sobrecarga Progresiva (Historial Detallado) -->
+            <div *ngIf="parseWeightHistory(selectedMachine).length > 0" 
+                 style="background: rgba(0, 255, 136, 0.03); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease;">
+              <div (click)="showHistorySection = !showHistorySection" 
+                   style="padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 255, 136, 0.06);">
+                <span style="font-size: 11.5px; font-weight: 800; color: #00ff88; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
                   <ion-icon name="trending-up-outline" style="font-size: 16px;"></ion-icon> Tu Evolución y Sobrecarga Progresiva
                 </span>
-                <span style="font-size: 10px; background: rgba(0, 255, 136, 0.15); color: #00ff88; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
-                  {{ getMachineProgressHistory(selectedMachine).length }} sesiones
-                </span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 10px; background: rgba(0, 255, 136, 0.15); color: #00ff88; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                    {{ parseWeightHistory(selectedMachine).length }} registros
+                  </span>
+                  <ion-icon [name]="showHistorySection ? 'chevron-up-outline' : 'chevron-down-outline'" style="color: #00ff88; font-size: 18px;"></ion-icon>
+                </div>
               </div>
 
-              <!-- Lista Cronológica de Registros de Carga -->
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div *ngFor="let record of getMachineProgressHistory(selectedMachine); let first = first; let last = last"
-                     style="background: rgba(0,0,0,0.4); padding: 9px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00ff88;">
-                  <div>
-                    <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
-                      📅 {{ formatSessionDate(record.logDate) }}
-                      <span *ngIf="first" style="color: #00ff88; margin-left: 4px; font-weight: 700;">(Última Sesión ⭐)</span>
-                      <span *ngIf="last && !first" style="color: #c084fc; margin-left: 4px; font-weight: 700;">(Primera Vez 🏁)</span>
+              <div *ngIf="showHistorySection" style="padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.2);">
+                <!-- Lista Cronológica de Registros de Carga -->
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div *ngFor="let record of parseWeightHistory(selectedMachine); let i = index; let first = first; let last = last"
+                       style="background: rgba(0,0,0,0.4); padding: 9px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00ff88;">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
+                        📅 {{ record.displayDate }}
+                        <span *ngIf="first" style="color: #00ff88; margin-left: 4px; font-weight: 700;">(Última Serie ⭐)</span>
+                        <span *ngIf="last && !first" style="color: #c084fc; margin-left: 4px; font-weight: 700;">(Serie Inicial 🏁)</span>
+                      </div>
+                      <div style="font-size: 14px; color: #ffffff; font-weight: 800; margin-top: 2px;">
+                        {{ record.weight }}
+                      </div>
                     </div>
-                    <div style="font-size: 13.5px; color: #ffffff; font-weight: 800; margin-top: 2px;">
-                      {{ record.weightLog }}
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                      <ion-icon [name]="first ? 'flame' : 'checkmark-circle-outline'" [style.color]="first ? '#ff9d00' : '#00ff88'" style="font-size: 18px;"></ion-icon>
+                      <ion-icon name="trash-outline" (click)="deleteWeightRecord(selectedMachine, i)" style="color: #ef4444; font-size: 15px; cursor: pointer; opacity: 0.8; padding: 4px;"></ion-icon>
                     </div>
                   </div>
-                  <ion-icon [name]="first ? 'flame' : 'checkmark-circle-outline'" [style.color]="first ? '#ff9d00' : '#00ff88'" style="font-size: 18px;"></ion-icon>
                 </div>
               </div>
             </div>
 
-            <!-- Programar en mi Rutina Semanal (Días) Editable -->
-            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left;">
-              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <span style="display: flex; align-items: center; gap: 6px;">
-                  <ion-icon name="calendar-outline"></ion-icon> Días de Rutina Semanal
+            <!-- 1. ACORDEÓN: Programar Días de Rutina Semanal -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease;">
+              <div (click)="showRoutineSchedule = !showRoutineSchedule" 
+                   style="padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(157, 0, 255, 0.06);">
+                <span style="font-size: 11.5px; font-weight: 800; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                  <ion-icon name="calendar-outline" style="font-size: 16px;"></ion-icon> Días de Rutina Semanal
                 </span>
-                <button (click)="saveRoutineDays(selectedMachine)" style="background: #9d00ff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
-                  Guardar Días
-                </button>
+                <ion-icon [name]="showRoutineSchedule ? 'chevron-up-outline' : 'chevron-down-outline'" style="color: #c084fc; font-size: 18px;"></ion-icon>
               </div>
-              <p style="margin: 0 0 10px 0; font-size: 0.76rem; color: #94a3b8;">Toca los días que realizas esta máquina para que aparezca en tu historial:</p>
-              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button *ngFor="let day of availableWeekDays" (click)="toggleMachineRoutineDay(day)"
-                        [style.background]="isMachineRoutineDayActive(day) ? 'linear-gradient(135deg, #9d00ff, #7928ca)' : 'rgba(255, 255, 255, 0.05)'"
-                        [style.color]="isMachineRoutineDayActive(day) ? '#ffffff' : '#94a3b8'"
-                        [style.border]="isMachineRoutineDayActive(day) ? '1px solid #c084fc' : '1px solid rgba(255, 255, 255, 0.1)'"
-                        style="padding: 5px 9px; border-radius: 12px; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
-                  {{ day }}
-                </button>
+              
+              <div *ngIf="showRoutineSchedule" style="padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.2);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                  <p style="margin: 0; font-size: 0.76rem; color: #94a3b8;">Toca los días que realizas esta máquina:</p>
+                  <button (click)="saveRoutineDays(selectedMachine)" style="background: #9d00ff; color: white; border: none; padding: 5px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; cursor: pointer; box-shadow: 0 0 10px rgba(157,0,255,0.4);">
+                    Guardar Días
+                  </button>
+                </div>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                  <button *ngFor="let day of availableWeekDays" (click)="toggleMachineRoutineDay(day)"
+                          [style.background]="isMachineRoutineDayActive(day) ? 'linear-gradient(135deg, #9d00ff, #7928ca)' : 'rgba(255, 255, 255, 0.05)'"
+                          [style.color]="isMachineRoutineDayActive(day) ? '#ffffff' : '#94a3b8'"
+                          [style.border]="isMachineRoutineDayActive(day) ? '1px solid #c084fc' : '1px solid rgba(255, 255, 255, 0.1)'"
+                          style="padding: 5px 9px; border-radius: 12px; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                    {{ day }}
+                  </button>
+                </div>
               </div>
             </div>
             
-            <!-- Instrucciones de Uso Card -->
-            <div *ngIf="selectedMachine?.instructions || selectedMachine?.usageInstructions" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(157, 0, 255, 0.25); border-left: 4px solid #9d00ff; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;">
-              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                <ion-icon name="list-outline"></ion-icon> Técnica y Ejecución Correcta
+            <!-- 2. ACORDEÓN: Técnica y Ejecución Correcta -->
+            <div *ngIf="selectedMachine?.instructions || selectedMachine?.usageInstructions" 
+                 style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease;">
+              <div (click)="showTechnique = !showTechnique" 
+                   style="padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(157, 0, 255, 0.06);">
+                <span style="font-size: 11.5px; font-weight: 800; color: #c084fc; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                  <ion-icon name="list-outline" style="font-size: 16px;"></ion-icon> Ver Técnica y Ejecución Correcta
+                </span>
+                <ion-icon [name]="showTechnique ? 'chevron-up-outline' : 'chevron-down-outline'" style="color: #c084fc; font-size: 18px;"></ion-icon>
               </div>
-              <div [innerHTML]="selectedMachine?.instructions || selectedMachine?.usageInstructions" style="color: #e2e8f0; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;"></div>
+              
+              <div *ngIf="showTechnique" style="padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.2);">
+                <div [innerHTML]="selectedMachine?.instructions || selectedMachine?.usageInstructions" style="color: #e2e8f0; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;"></div>
+              </div>
             </div>
 
-            <!-- Pro Tip (si existe) -->
-            <div *ngIf="selectedMachine?.tips" style="background: rgba(255, 215, 0, 0.06); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;">
-              <div style="font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
-                💡 Tip del Entrenador
+            <!-- 3. ACORDEÓN: Tip del Entrenador (si existe) -->
+            <div *ngIf="selectedMachine?.tips" 
+                 style="background: rgba(255, 215, 0, 0.03); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease;">
+              <div (click)="showProTips = !showProTips" 
+                   style="padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 215, 0, 0.05);">
+                <span style="font-size: 11.5px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                  💡 Tip del Entrenador
+                </span>
+                <ion-icon [name]="showProTips ? 'chevron-up-outline' : 'chevron-down-outline'" style="color: #fbbf24; font-size: 18px;"></ion-icon>
               </div>
-              <p style="margin: 0; font-size: 0.84rem; color: #fde68a; line-height: 1.4;">{{ selectedMachine.tips }}</p>
+              
+              <div *ngIf="showProTips" style="padding: 14px 16px; border-top: 1px solid rgba(255, 215, 0, 0.15); background: rgba(0, 0, 0, 0.2);">
+                <p style="margin: 0; font-size: 0.84rem; color: #fde68a; line-height: 1.4;">{{ selectedMachine.tips }}</p>
+              </div>
             </div>
           </div>
         </ion-content>

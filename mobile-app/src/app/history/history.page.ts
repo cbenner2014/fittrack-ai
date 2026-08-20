@@ -220,9 +220,70 @@ export class HistoryPage implements OnInit {
     });
   }
 
+  // VARIABLES PARA SELECTORES NUMÉRICOS PREDETERMINADOS
+  inputSets: number = 4;
+  inputReps: number = 12;
+  inputWeight: number = 50;
+  weightUnit: string = 'kg'; // 'kg' o 'lbs'
+
+  // SECCIONES COLAPSABLES (ACORDEONES) DEL MODAL DE MÁQUINA
+  showWeightInput: boolean = false;
+  showHistorySection: boolean = false;
+  showRoutineSchedule: boolean = false;
+  showTechnique: boolean = false;
+  showProTips: boolean = false;
+
   openMachineDetails(machine: any) {
     this.selectedMachine = machine;
+    this.showWeightInput = false;
+    this.showHistorySection = false;
+    this.showRoutineSchedule = false;
+    this.showTechnique = false;
+    this.showProTips = false;
     this.isMachineModalOpen = true;
+
+    // Autocargar valores de la última serie si existen para mayor comodidad
+    const history = this.parseWeightHistory(machine);
+    if (history.length > 0) {
+      const last = history[0].weight || '';
+      
+      const weightMatch = last.match(/(\d+(?:\.\d+)?)\s*(kg|lbs)/i);
+      if (weightMatch) {
+        this.inputWeight = parseFloat(weightMatch[1]);
+        this.weightUnit = weightMatch[2].toLowerCase();
+      }
+
+      const setsMatch = last.match(/(\d+)\s*series/i);
+      if (setsMatch) this.inputSets = parseInt(setsMatch[1]);
+
+      const repsMatch = last.match(/(\d+)\s*reps/i);
+      if (repsMatch) this.inputReps = parseInt(repsMatch[1]);
+    } else {
+      this.inputSets = 4;
+      this.inputReps = 12;
+      this.inputWeight = 50;
+      this.weightUnit = 'kg';
+    }
+  }
+
+  incrementSets() { this.inputSets++; }
+  decrementSets() { if (this.inputSets > 1) this.inputSets--; }
+
+  incrementReps() { this.inputReps += 2; }
+  decrementReps() { if (this.inputReps > 2) this.inputReps -= 2; }
+
+  incrementWeight(step: number = 5) { this.inputWeight = (this.inputWeight || 0) + step; }
+  decrementWeight(step: number = 5) { if (this.inputWeight >= step) this.inputWeight -= step; }
+
+  toggleWeightUnit() {
+    if (this.weightUnit === 'kg') {
+      this.weightUnit = 'lbs';
+      // Conversión aproximada para facilitar al usuario (1kg ~ 2.2lbs)
+      this.inputWeight = Math.round(this.inputWeight * 2.2);
+    } else {
+      this.weightUnit = 'kg';
+      this.inputWeight = Math.round(this.inputWeight / 2.2);
+    }
   }
 
   toggleMachineRoutineDay(day: string) {
@@ -250,7 +311,7 @@ export class HistoryPage implements OnInit {
         const toast = await this.toastCtrl.create({
           message: '🗓️ Días de rutina actualizados',
           duration: 2000,
-          color: 'success',
+          position: 'middle',
           icon: 'calendar-outline'
         });
         toast.present();
@@ -259,75 +320,89 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  getMachineProgressHistory(machine: any): any[] {
-    if (!machine) return [];
-    const name = (machine.name || machine.machineName || '').toLowerCase().trim();
-    return this.allMachines
-      .filter(m => (m.name || m.machineName || '').toLowerCase().trim() === name && m.weightLog && m.weightLog.trim().length > 0)
-      .sort((a, b) => new Date(b.logDate || b.createdAt).getTime() - new Date(a.logDate || a.createdAt).getTime());
+  parseWeightHistory(machine: any): any[] {
+    if (!machine || !machine.weightLog) return [];
+    let raw = machine.weightLog.trim();
+    if (!raw) return [];
+
+    if (raw.startsWith('[') && raw.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        console.error('Error parseando weightLog JSON:', e);
+      }
+    }
+
+    // Compatibilidad con registros simples de texto anteriores
+    const logDateObj = machine.logDate ? new Date(machine.logDate + 'T12:00:00Z') : new Date();
+    const display = logDateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    return [{
+      date: machine.logDate || new Date().toISOString(),
+      displayDate: display,
+      weight: raw,
+      timestamp: logDateObj.getTime()
+    }];
   }
 
-  formatSessionDate(dateStr: string): string {
-    if (!dateStr) return 'Reciente';
-    const dateObj = new Date(dateStr + 'T12:00:00Z');
-    return dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  getLatestWeight(machine: any): string {
+    const history = this.parseWeightHistory(machine);
+    if (!history || history.length === 0) return '';
+    return history[0].weight;
   }
 
   async saveMachineWeight(machine: any) {
     if (!machine) return;
-    const targetDate = this.selectedDate.toISOString().split('T')[0];
 
-    // Buscar si ya existe un registro de esta máquina guardado exactamente en la fecha seleccionada
-    const name = (machine.name || machine.machineName || '').toLowerCase().trim();
-    const existingToday = this.allMachines.find(m => 
-      (m.name || m.machineName || '').toLowerCase().trim() === name && 
-      m.logDate && m.logDate.startsWith(targetDate)
-    );
+    const formattedWeightString = `${this.inputSets} series x ${this.inputReps} reps / ${this.inputWeight || 0} ${this.weightUnit}`;
 
-    if (existingToday && existingToday.id) {
-      // Actualizar el registro existente de hoy
-      this.http.put(`/api/v1/machine-logs/${existingToday.id}/weight`, { weightLog: machine.weightLog || '' }).subscribe({
-        next: async () => {
-          existingToday.weightLog = machine.weightLog;
-          this.loadHistory();
-          const toast = await this.toastCtrl.create({
-            message: '¡Carga actualizada en la nube! 💪',
-            duration: 2000,
-            color: 'success',
-            icon: 'barbell-outline'
-          });
-          toast.present();
-        },
-        error: async (err) => console.error('Error actualizando peso:', err)
-      });
-    } else {
-      // Crear un nuevo registro para la fecha seleccionada (para no sobrescribir sesiones anteriores)
-      const request = {
-        userId: this.userId,
-        machineName: machine.name || machine.machineName,
-        targetMuscle: machine.targetMuscles || machine.targetMuscle,
-        instructions: machine.instructions || machine.usageInstructions,
-        tips: machine.tips || '',
-        imageUrl: machine.imageUrl,
-        weightLog: machine.weightLog || '',
-        routineDays: machine.routineDays || '',
-        logDate: targetDate
-      };
+    const history = this.parseWeightHistory(machine);
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + 
+                          now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-      this.http.post('/api/v1/machine-logs', request).subscribe({
-        next: async (res: any) => {
-          this.loadHistory();
-          const toast = await this.toastCtrl.create({
-            message: '¡Nuevo registro de carga guardado en tu historial! 🚀',
-            duration: 2000,
-            color: 'success',
-            icon: 'trending-up-outline'
-          });
-          toast.present();
-        },
-        error: async (err) => console.error('Error creando registro:', err)
-      });
-    }
+    const newEntry = {
+      date: now.toISOString(),
+      displayDate: formattedDate,
+      weight: formattedWeightString,
+      timestamp: now.getTime()
+    };
+
+    // Agregar al inicio del historial de sobrecarga progresiva
+    history.unshift(newEntry);
+    const jsonString = JSON.stringify(history);
+
+    machine.weightLog = jsonString;
+
+    this.http.put(`/api/v1/machine-logs/${machine.id}/weight`, { weightLog: jsonString }).subscribe({
+      next: async () => {
+        this.loadHistory();
+        const toast = await this.toastCtrl.create({
+          message: `¡${formattedWeightString} guardado! 💪`,
+          duration: 2000,
+          position: 'middle',
+          icon: 'trending-up-outline'
+        });
+        toast.present();
+      },
+      error: async (err) => {
+        console.error('Error guardando peso:', err);
+      }
+    });
+  }
+
+  async deleteWeightRecord(machine: any, index: number) {
+    const history = this.parseWeightHistory(machine);
+    history.splice(index, 1);
+    const jsonString = history.length > 0 ? JSON.stringify(history) : '';
+    machine.weightLog = jsonString;
+
+    this.http.put(`/api/v1/machine-logs/${machine.id}/weight`, { weightLog: jsonString }).subscribe({
+      next: () => {
+        this.loadHistory();
+      },
+      error: (err) => console.error('Error eliminando registro de serie:', err)
+    });
   }
 
   async addFromLibraryToToday(libMachine: any) {
@@ -351,7 +426,7 @@ export class HistoryPage implements OnInit {
         const toast = await this.toastCtrl.create({
           message: `¡${libMachine.name} agregada al entrenamiento de hoy! 🏋️‍♂️`,
           duration: 2000,
-          color: 'success',
+          position: 'middle',
           icon: 'checkmark-circle-outline'
         });
         toast.present();
@@ -369,6 +444,7 @@ export class HistoryPage implements OnInit {
         const toast = await this.toastCtrl.create({
           message: 'Máquina eliminada del historial',
           duration: 2000,
+          position: 'middle',
           color: 'danger',
           icon: 'trash-outline'
         });

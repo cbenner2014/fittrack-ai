@@ -290,4 +290,95 @@ pwa-camera-modal {
   --background: #121620;
 }
 
+/* ==========================================================================
+   6. TOAST NOTIFICATIONS ("CUADRITO BONITO" MODAL CON FONDO OPACADO Y BLUR)
+   ========================================================================== */
+ion-toast {
+  --background: transparent;
+  --box-shadow: none;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.72) !important; /* Opaca toda la pantalla de atrás */
+  backdrop-filter: blur(10px) !important;      /* Desenfoca todas las letras de atrás */
+  -webkit-backdrop-filter: blur(10px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999999 !important;
+  animation: fadeInBackdrop 0.25s ease-out;
 
+  &::part(container) {
+    background: #111522 !important; /* Tarjeta sólida opaca para legibilidad perfecta */
+    border: 2px solid rgba(0, 255, 136, 0.65) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 255, 136, 0.35) !important;
+    padding: 22px 28px !important;
+    max-width: 85% !important;
+    min-width: 270px !important;
+    margin: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    text-align: center !important;
+    animation: toastPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  &::part(message) {
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0.3px !important;
+    text-align: center !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8) !important;
+  }
+
+  &::part(icon) {
+    color: #00ff88 !important;
+    font-size: 36px !important;
+    margin: 0 0 4px 0 !important;
+    filter: drop-shadow(0 0 12px rgba(0, 255, 136, 0.8)) !important;
+  }
+
+  &.toast-danger::part(container), &[color="danger"]::part(container) {
+    background: #1f1218 !important;
+    border-color: rgba(255, 77, 77, 0.75) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 77, 77, 0.35) !important;
+  }
+
+  &.toast-danger::part(icon), &[color="danger"]::part(icon) {
+    color: #ff4d4d !important;
+    filter: drop-shadow(0 0 12px rgba(255, 77, 77, 0.8)) !important;
+  }
+}
+
+@keyframes fadeInBackdrop {
+  0% {
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes toastPop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

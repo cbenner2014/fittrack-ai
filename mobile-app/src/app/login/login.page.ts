@@ -73,8 +73,8 @@ export class LoginPage {
               ? `👑 Bienvenido al Panel Administrador, ${res.fullName || 'Admin'}`
               : `👋 ¡Hola de nuevo, ${res.fullName || 'Atleta'}! Preparando tu entrenamiento...`,
             duration: 2500,
-            color: 'success',
-            position: 'top'
+            position: 'middle',
+            icon: 'sparkles'
           });
           toast.present();
 
@@ -134,8 +134,8 @@ export class LoginPage {
           const toast = await this.toastCtrl.create({
             message: `🎉 ¡Cuenta creada con éxito! Bienvenido a FitTrack, ${res.data.fullName}`,
             duration: 3000,
-            color: 'success',
-            position: 'top'
+            position: 'middle',
+            icon: 'checkmark-circle'
           });
           toast.present();
 

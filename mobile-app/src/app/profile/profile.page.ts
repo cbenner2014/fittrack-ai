@@ -211,7 +211,8 @@ export class ProfilePage implements OnInit {
       const toast = await this.toastCtrl.create({
         message: 'Por favor, llena todos tus datos para calcular tu plan.',
         duration: 2000,
-        color: 'warning'
+        position: 'middle',
+        icon: 'alert-circle-outline'
       });
       toast.present();
       return;
@@ -296,9 +297,10 @@ export class ProfilePage implements OnInit {
       next: async (res: any) => {
         if (!silent) {
           const toast = await this.toastCtrl.create({
-            message: 'Â¡Macros calculados y guardados en la nube!',
+            message: '¡Macros calculados y guardados en la nube! 🥗✨',
             duration: 2500,
-            color: 'success'
+            position: 'middle',
+            icon: 'checkmark-circle-outline'
           });
           toast.present();
           // Ya no redirigimos al home, para que el usuario pueda ver sus macros en pantalla
@@ -310,7 +312,9 @@ export class ProfilePage implements OnInit {
           const toast = await this.toastCtrl.create({
             message: 'Error al guardar en el servidor',
             duration: 2000,
-            color: 'danger'
+            position: 'middle',
+            color: 'danger',
+            icon: 'alert-circle-outline'
           });
           toast.present();
         }
