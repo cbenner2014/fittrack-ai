@@ -81,7 +81,7 @@ export class HomePage {
   // CHAT
   isChatModalOpen = false;
   chatMessage = '';
-  chatHistory: {role: string, text: string}[] = [];
+  chatHistory: {role: string, text: string, time?: string}[] = [];
 
   // ETIQUETAS
   isLabelModalOpen = false;
@@ -1043,19 +1043,35 @@ export class HomePage {
   }
 
   // CHAT SOS
+  isAiTyping: boolean = false;
+  quickChatPrompts: string[] = [
+    '🍟 ¿Qué pedir en comida rápida?',
+    '🍫 Antojo dulce bajo en calorías',
+    '🍕 ¿Cómo compenso un exceso?',
+    '☕ Bebidas con cafeína sin azúcar',
+    '🍗 Opción rápida con 30g de proteína'
+  ];
+
+  sendQuickPrompt(promptText: string) {
+    this.chatMessage = promptText;
+    this.sendChatMessage();
+  }
+
+  clearChatHistory() {
+    this.chatHistory = [];
+  }
+
   async sendChatMessage() {
-    if (!this.chatMessage.trim()) return;
+    if (!this.chatMessage || !this.chatMessage.trim() || this.isAiTyping) return;
 
-    // Agregar mensaje del usuario a la UI
-    const userMsg = this.chatMessage;
-    this.chatHistory.push({ role: 'user', text: userMsg });
+    const userMsg = this.chatMessage.trim();
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+    // Agregar mensaje del usuario a la UI con hora
+    this.chatHistory.push({ role: 'user', text: userMsg, time: timeStr });
     this.chatMessage = '';
-
-    const loading = await this.loadingCtrl.create({
-      message: 'Escribiendo...',
-      spinner: 'dots'
-    });
-    await loading.present();
+    this.isAiTyping = true;
 
     const profileStr = localStorage.getItem('btrack_user_profile');
     let dietPref = 'Ninguna';
@@ -1070,25 +1086,26 @@ export class HomePage {
     };
 
     this.http.post('/api/v1/ai/chat', payload).subscribe({
-      next: async (res: any) => {
-        await loading.dismiss();
-        if (res.reply) {
-          this.chatHistory.push({ role: 'ai', text: res.reply });
-        } else if (res.text) {
-          this.chatHistory.push({ role: 'ai', text: res.text });
+      next: (res: any) => {
+        this.isAiTyping = false;
+        const respTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        let replyText = '';
+        if (res && res.reply) {
+          replyText = res.reply;
+        } else if (res && res.text) {
+          replyText = res.text;
         } else {
-          // Si el JSON viene parseado diferente o como texto plano
-          let parsed;
           try {
-             parsed = JSON.parse(res);
-             if (parsed.reply) this.chatHistory.push({ role: 'ai', text: parsed.reply });
+            const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+            replyText = parsed.reply || parsed.text || parsed.message || (typeof res === 'string' ? res : JSON.stringify(res));
           } catch(e) {
-             this.chatHistory.push({ role: 'ai', text: res });
+            replyText = typeof res === 'string' ? res : 'Entendido.';
           }
         }
+        this.chatHistory.push({ role: 'ai', text: replyText, time: respTime });
       },
-      error: async (err) => {
-        await loading.dismiss();
+      error: (err) => {
+        this.isAiTyping = false;
         this.showAiErrorAlert(err, 'Hubo un error de conexión con la IA.');
       }
     });

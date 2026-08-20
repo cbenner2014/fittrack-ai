@@ -198,42 +198,118 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHAT DE EMERGENCIA -->
+  <!-- MODAL DE CHAT DE EMERGENCIA (DISEÑO PREMIUM MODERNO) -->
   <ion-modal [isOpen]="isChatModalOpen" (didDismiss)="isChatModalOpen = false" class="custom-modal">
     <ng-template>
-      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(25, 25, 30, 0.98); border: 1px solid rgba(255, 0, 85, 0.3); border-radius: 20px; overflow: hidden; position: relative;">
-        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #888; z-index: 100; cursor: pointer;" (click)="isChatModalOpen = false"></ion-icon>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: #0c0e17; border: 1.5px solid rgba(255, 0, 85, 0.4); border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.95), 0 0 25px rgba(255, 0, 85, 0.25);">
         
-        <ion-content class="ion-padding" style="--background: transparent;">
-          <ion-icon name="fitness-outline" class="modal-icon neon-text" style="font-size: 40px; text-align: center; display: block; margin: 0 auto; color: #ff0055; margin-top: 20px;"></ion-icon>
-          <h2 style="text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold;">SOS Nutricional</h2>
-          
-          <div *ngIf="chatHistory.length > 0" style="margin-bottom: 20px; max-height: 50vh; overflow-y: auto;">
-            <div *ngFor="let msg of chatHistory" [ngStyle]="{'text-align': msg.role === 'user' ? 'right' : 'left', 'margin-bottom': '15px'}">
-              <div [ngStyle]="{
-                'display': 'inline-block',
-                'padding': '10px 15px',
-                'border-radius': '15px',
-                'background': msg.role === 'user' ? 'rgba(255, 0, 85, 0.2)' : 'rgba(0, 255, 136, 0.1)',
-                'border': msg.role === 'user' ? '1px solid #ff0055' : '1px solid #00ff88',
-                'color': '#fff',
-                'max-width': '85%',
-                'text-align': 'left',
-                'font-size': '0.9rem'
-              }" [innerHTML]="msg.text"></div>
+        <!-- Header del Chat -->
+        <div style="padding: 16px 18px 12px; background: rgba(18, 20, 32, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, rgba(255,0,85,0.2), rgba(0,255,136,0.2)); border: 1.5px solid #ff0055; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(255,0,85,0.4);">
+              <ion-icon name="fitness" style="color: #ff0055; font-size: 20px;"></ion-icon>
+            </div>
+            <div>
+              <h3 style="margin: 0; color: #ffffff; font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                SOS Nutricional <span style="font-size: 8.5px; background: #00ff88; color: #000; padding: 1px 6px; border-radius: 8px; font-weight: 900;">ONLINE</span>
+              </h3>
+              <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.75rem;">Tu coach de bolsillo en tiempo real</p>
             </div>
           </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button *ngIf="chatHistory.length > 0" (click)="clearChatHistory()" title="Limpiar chat" style="background: rgba(255,255,255,0.06); border: none; color: #94a3b8; padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              <ion-icon name="trash-outline" style="font-size: 15px;"></ion-icon>
+            </button>
+            <ion-icon name="close-circle-outline" class="close-icon" style="font-size: 28px; color: #64748b; cursor: pointer;" (click)="isChatModalOpen = false"></ion-icon>
+          </div>
+        </div>
+        
+        <!-- Mensajes del Chat -->
+        <ion-content class="ion-padding" style="--background: #0c0e17;">
           
-          <div *ngIf="chatHistory.length === 0" style="text-align: center; color: #aaa; font-style: italic; margin-top: 20px;">
-            "¿Estás en el súper o en un restaurante y no sabes qué pedir? ¡Pregúntame!"
+          <!-- Estado Inicial sin Mensajes -->
+          <div *ngIf="chatHistory.length === 0" style="text-align: center; padding: 25px 15px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,0,85,0.1); border: 1.5px solid rgba(255,0,85,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+              <ion-icon name="chatbubbles" style="font-size: 28px; color: #ff0055;"></ion-icon>
+            </div>
+            <h4 style="color: #ffffff; margin: 0 0 6px 0; font-weight: 800; font-size: 1.1rem;">¿En qué te puedo ayudar hoy?</h4>
+            <p style="color: #94a3b8; font-size: 0.82rem; margin: 0 0 20px 0; line-height: 1.4;">
+              ¿Estás en un restaurante, tienes antojos o no sabes cómo cuadrar tus macros? Toca una pregunta rápida o escribe abajo:
+            </p>
+
+            <!-- Sugerencias de Preguntas Rápidas Iniciales -->
+            <div style="display: flex; flex-direction: column; gap: 8px; max-width: 320px; margin: 0 auto;">
+              <button *ngFor="let prompt of quickChatPrompts" (click)="sendQuickPrompt(prompt)"
+                      style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 0, 85, 0.25); color: #e2e8f0; padding: 10px 14px; border-radius: 14px; font-size: 0.8rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                {{ prompt }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Historial de Conversación en Burbujas -->
+          <div *ngIf="chatHistory.length > 0" style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 10px;">
+            <div *ngFor="let msg of chatHistory" [ngStyle]="{'align-self': msg.role === 'user' ? 'flex-end' : 'flex-start', 'max-width': '88%'}">
+              
+              <!-- Encabezado de la Burbuja -->
+              <div [ngStyle]="{'text-align': msg.role === 'user' ? 'right' : 'left'}" style="font-size: 10px; color: #64748b; margin-bottom: 3px; font-weight: 700;">
+                <span *ngIf="msg.role === 'user'">👤 {{ userName }}</span>
+                <span *ngIf="msg.role === 'ai'" style="color: #00ff88;">🤖 Coach IA</span>
+                <span *ngIf="msg.time" style="margin-left: 6px; color: #475569;">{{ msg.time }}</span>
+              </div>
+
+              <!-- Cuerpo de la Burbuja -->
+              <div [ngStyle]="{
+                'padding': '11px 14px',
+                'border-radius': msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                'background': msg.role === 'user' ? 'linear-gradient(135deg, rgba(255, 0, 85, 0.35) 0%, rgba(180, 0, 60, 0.4) 100%)' : 'rgba(20, 24, 38, 0.95)',
+                'border': msg.role === 'user' ? '1.5px solid #ff0055' : '1.5px solid rgba(0, 255, 136, 0.35)',
+                'color': '#ffffff',
+                'font-size': '0.88rem',
+                'line-height': '1.5',
+                'box-shadow': msg.role === 'user' ? '0 4px 15px rgba(255,0,85,0.2)' : '0 4px 15px rgba(0,0,0,0.4)',
+                'white-space': 'pre-wrap',
+                'word-break': 'break-word'
+              }" [innerHTML]="msg.text"></div>
+            </div>
+
+            <!-- Indicador de Escritura en Vivo de la IA -->
+            <div *ngIf="isAiTyping" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; background: rgba(20, 24, 38, 0.95); border: 1.5px solid rgba(0, 255, 136, 0.35); padding: 10px 14px; border-radius: 18px 18px 18px 4px;">
+              <span style="font-size: 13px;">🤖</span>
+              <span style="color: #00ff88; font-size: 0.8rem; font-weight: 700;">Coach IA está redactando tu respuesta...</span>
+            </div>
           </div>
         </ion-content>
         
-        <div style="padding: 15px; background: rgba(0,0,0,0.5); border-top: 1px solid #333; display: flex; gap: 10px;">
-          <ion-input [(ngModel)]="chatMessage" placeholder="Ej: Quiero comer dulce..." style="background: #222; color: white; --padding-start: 15px; border-radius: 20px; border: 1px solid #444; flex: 1;"></ion-input>
-          <ion-button (click)="sendChatMessage()" style="--background: #ff0055; --border-radius: 50%; width: 45px; height: 45px; margin: 0;">
-            <ion-icon name="send" slot="icon-only"></ion-icon>
-          </ion-button>
+        <!-- Barra de Entrada de Texto Multilínea con Chips -->
+        <div style="padding: 10px 14px 16px; background: rgba(14, 16, 26, 0.98); border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          
+          <!-- Chips Rápidos si ya hay conversación -->
+          <div *ngIf="chatHistory.length > 0" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; scrollbar-width: none;">
+            <button *ngFor="let prompt of quickChatPrompts" (click)="sendQuickPrompt(prompt)"
+                    style="white-space: nowrap; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 0, 85, 0.25); color: #cbd5e1; padding: 4px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 600; cursor: pointer; flex-shrink: 0;">
+              {{ prompt }}
+            </button>
+          </div>
+
+          <!-- Input Multilínea Auto-expandible + Botón Enviar -->
+          <div style="display: flex; gap: 8px; align-items: flex-end;">
+            <div style="flex: 1; background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 0, 85, 0.4); border-radius: 18px; padding: 4px 12px; min-height: 42px; display: flex; align-items: center;">
+              <ion-textarea [(ngModel)]="chatMessage" 
+                            [autoGrow]="true" 
+                            [rows]="1"
+                            placeholder="Pregunta lo que sea sobre comida..." 
+                            (keyup.enter)="sendChatMessage()"
+                            style="color: #ffffff; font-size: 0.88rem; line-height: 1.4; --padding-top: 6px; --padding-bottom: 6px;"></ion-textarea>
+            </div>
+
+            <button (click)="sendChatMessage()" 
+                    [disabled]="!chatMessage || !chatMessage.trim() || isAiTyping"
+                    [style.opacity]="(!chatMessage || !chatMessage.trim() || isAiTyping) ? '0.4' : '1'"
+                    style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #ff0055 0%, #d60047 100%); border: none; color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 16px rgba(255, 0, 85, 0.5); transition: all 0.2s ease;">
+              <ion-icon name="paper-plane" style="font-size: 18px; margin-left: -2px;"></ion-icon>
+            </button>
+          </div>
         </div>
       </div>
     </ng-template>

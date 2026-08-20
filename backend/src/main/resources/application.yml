@@ -8,6 +8,10 @@ spring:
   profiles:
     include: secrets
 
+  # Configuración de Jackson (Omitir campos null en respuestas JSON)
+  jackson:
+    default-property-inclusion: non_null
+
   # Configuración de subida de archivos (10MB)
   servlet:
     multipart:
