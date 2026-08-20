@@ -26,6 +26,7 @@ public class UserMapper {
         user.setDailyCarbsTarget(dto.getDailyCarbsTarget());
         user.setDailyFatsTarget(dto.getDailyFatsTarget());
         
+        if (dto.getAvatarUrl() != null) user.setAvatarUrl(dto.getAvatarUrl());
         if (dto.getXp() != null) user.setXp(dto.getXp());
         if (dto.getLevel() != null) user.setLevel(dto.getLevel());
         
@@ -43,6 +44,7 @@ public class UserMapper {
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setRole(user.getRole() != null ? user.getRole().name() : "ROLE_USER");
+        dto.setAvatarUrl(user.getAvatarUrl());
         dto.setCurrentWeight(user.getCurrentWeight());
         dto.setHeight(user.getHeight());
         dto.setAge(user.getAge());

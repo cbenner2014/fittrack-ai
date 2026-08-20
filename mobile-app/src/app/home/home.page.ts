@@ -17,6 +17,7 @@ export class HomePage {
   // Datos dinÃ¡micos del usuario actual
   userName = 'Usuario';
   userInitials: string = 'US';
+  userAvatar: string = '';
   userId: string = '';
   isAdmin: boolean = false;
 
@@ -141,6 +142,7 @@ export class HomePage {
 
     this.userId = userId;
     this.isAdmin = localStorage.getItem('userRole') === 'ROLE_ADMIN';
+    this.userAvatar = localStorage.getItem('userAvatar') || '';
     const storedName = localStorage.getItem('userName');
     
     if (storedName) {

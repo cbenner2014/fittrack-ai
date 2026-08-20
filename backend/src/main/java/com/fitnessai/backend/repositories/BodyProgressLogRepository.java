@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BodyProgressLogRepository extends JpaRepository<BodyProgressLog, Long> {
     List<BodyProgressLog> findByUserId(Long userId);
+    List<BodyProgressLog> findByUserIdOrderByLogDateDesc(Long userId);
 }

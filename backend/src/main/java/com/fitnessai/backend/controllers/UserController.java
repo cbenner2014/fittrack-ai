@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.fitnessai.backend.services.CloudinaryService;
 import com.fitnessai.backend.utils.JwtUtil;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -24,17 +27,20 @@ public class UserController {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
     @Autowired
     public UserController(
             UserService userService, 
             UserRepository userRepository, 
             JwtUtil jwtUtil,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            CloudinaryService cloudinaryService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @PostMapping("/login")
@@ -128,6 +134,22 @@ public class UserController {
                 "success", true,
                 "message", "XP sumada correctamente",
                 "data", updatedUser
+        ));
+    }
+
+    @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> uploadAvatar(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        String imageUrl = cloudinaryService.uploadImage(file);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        user.setAvatarUrl(imageUrl);
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Foto de perfil actualizada correctamente",
+                "avatarUrl", imageUrl
         ));
     }
 }

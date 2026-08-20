@@ -7,4 +7,5 @@ import java.util.List;
 public interface BodyProgressService {
     BodyProgressLogResponseDto createBodyProgress(Long authUserId, BodyProgressLogRequestDto dto);
     List<BodyProgressLogResponseDto> getProgressByUser(Long userId);
+    void deleteBodyProgress(Long id, Long authUserId, String role);
 }

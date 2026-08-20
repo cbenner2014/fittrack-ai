@@ -16,6 +16,8 @@ public class UserRequestDto {
     @NotBlank(message = "El nombre completo es obligatorio")
     private String fullName;
 
+    private String avatarUrl;
+
     private Double initialWeight;
     private Double currentWeight;
     private Double height;

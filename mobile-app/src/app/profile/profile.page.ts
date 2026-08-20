@@ -16,6 +16,7 @@ export class ProfilePage implements OnInit {
   
   userProfile: any = {
     name: '',
+    avatarUrl: '',
     gender: 'male',
     age: null,
     weight: null,
@@ -31,6 +32,26 @@ export class ProfilePage implements OnInit {
   newGoalLog: string = '';
   userId: string = '';
   isAdmin: boolean = false;
+  isEditingProfile: boolean = false;
+
+  getGoalLabel(goal: string): string {
+    if (goal === 'lose_fat' || goal === 'LOSE_WEIGHT') return 'Quemar Grasa';
+    if (goal === 'build_muscle' || goal === 'GAIN_MUSCLE') return 'Ganar Músculo';
+    return 'Mantener';
+  }
+
+  getDietLabel(diet: string): string {
+    if (!diet) return 'Tradicional';
+    if (diet.includes('Tradicional')) return 'Tradicional';
+    if (diet.includes('Ayuno')) return 'Ayuno 16/8';
+    if (diet.includes('Keto') || diet.includes('Cetog')) return 'Keto';
+    if (diet.includes('Paleo')) return 'Paleo';
+    if (diet.includes('Vegano')) return 'Vegano';
+    if (diet.includes('Vegetariano')) return 'Vegetariano';
+    if (diet.includes('Carnívora') || diet.includes('Carnivora')) return 'Carnívora';
+    if (diet.includes('Mediterránea') || diet.includes('Mediterranea')) return 'Mediterránea';
+    return diet;
+  }
 
   isBodyModalOpen = false;
   bodyResult: any = null;
@@ -86,6 +107,7 @@ export class ProfilePage implements OnInit {
     };
     
     this.loadProfileFromBackend();
+    this.loadBodyProgress();
     
     // Cargar historial de peso localmente por ahora (hasta migrarlo si se desea)
     const savedHistory = localStorage.getItem('weightHistory');
@@ -120,12 +142,101 @@ export class ProfilePage implements OnInit {
             else this.userProfile.goal = 'maintain';
           }
           
+          this.userProfile.avatarUrl = dbUser.avatarUrl || localStorage.getItem('userAvatar') || '';
+          if (this.userProfile.avatarUrl) {
+            localStorage.setItem('userAvatar', this.userProfile.avatarUrl);
+          }
+          
           this.newWeightLog = this.userProfile.weight;
           localStorage.setItem('btrack_user_profile', JSON.stringify(this.userProfile));
         }
       },
       error: (err) => console.error("Error cargando perfil:", err)
     });
+  }
+
+  async changeAvatar() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: '📸 Foto de Perfil',
+      subHeader: 'Elige tu foto de usuario',
+      buttons: [
+        {
+          text: 'Tomar Foto con Cámara',
+          icon: 'camera',
+          handler: () => { this.processAvatarUpload(CameraSource.Camera); }
+        },
+        {
+          text: 'Elegir de la Galería',
+          icon: 'image',
+          handler: () => { this.processAvatarUpload(CameraSource.Photos); }
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  async processAvatarUpload(source: CameraSource) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: source
+      });
+
+      if (!image.base64String) return;
+
+      const loading = await this.loadingCtrl.create({
+        message: 'Actualizando tu foto de perfil...',
+        spinner: 'crescent'
+      });
+      await loading.present();
+
+      const byteCharacters = atob(image.base64String);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const formData = new FormData();
+      formData.append('file', blob, 'avatar_' + this.userId + '.jpg');
+
+      this.http.post(`/api/v1/users/${this.userId}/avatar`, formData).subscribe({
+        next: async (res: any) => {
+          await loading.dismiss();
+          if (res && res.avatarUrl) {
+            this.userProfile.avatarUrl = res.avatarUrl;
+            localStorage.setItem('userAvatar', res.avatarUrl);
+          }
+          const toast = await this.toastCtrl.create({
+            message: '👤 ¡Foto de perfil actualizada con éxito!',
+            duration: 2500,
+            color: 'success',
+            position: 'top'
+          });
+          toast.present();
+        },
+        error: async (err) => {
+          await loading.dismiss();
+          console.error('Error al subir avatar:', err);
+          const toast = await this.toastCtrl.create({
+            message: 'Error al subir la foto de perfil.',
+            duration: 2500,
+            color: 'danger',
+            position: 'top'
+          });
+          toast.present();
+        }
+      });
+    } catch (e) {
+      console.log('Usuario canceló la selección de foto de perfil', e);
+    }
   }
 
   ionViewDidEnter() {
@@ -295,15 +406,15 @@ export class ProfilePage implements OnInit {
     
     this.http.put(`/api/v1/users/${this.userId}`, updateDto).subscribe({
       next: async (res: any) => {
+        this.isEditingProfile = false;
         if (!silent) {
           const toast = await this.toastCtrl.create({
-            message: '¡Macros calculados y guardados en la nube! 🥗✨',
+            message: '¡Perfil y macros actualizados con éxito! 🥗✨',
             duration: 2500,
             position: 'middle',
             icon: 'checkmark-circle-outline'
           });
           toast.present();
-          // Ya no redirigimos al home, para que el usuario pueda ver sus macros en pantalla
         }
       },
       error: async (err) => {
@@ -437,5 +548,203 @@ export class ProfilePage implements OnInit {
     } catch (e) {
       console.log('Usuario canceló la foto', e);
     }
+  }
+
+  // --- EVOLUCIÓN CORPORAL & FOTOS PRIVADAS ---
+  bodyProgressList: any[] = [];
+  isLoadingProgress: boolean = false;
+  isUploadProgressModalOpen: boolean = false;
+  isCompareModalOpen: boolean = false;
+  isViewPhotoModalOpen: boolean = false;
+  selectedPhotoForView: any = null;
+
+  newProgressPhoto: any = {
+    base64: '',
+    rawBase64: '',
+    weight: null,
+    bodyFat: null,
+    notes: '',
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  loadBodyProgress() {
+    if (!this.userId) return;
+    this.isLoadingProgress = true;
+    this.http.get<any[]>(`/api/v1/body-progress/user/${this.userId}`).subscribe({
+      next: (data) => {
+        this.isLoadingProgress = false;
+        this.bodyProgressList = data || [];
+      },
+      error: (err) => {
+        this.isLoadingProgress = false;
+        console.error("Error cargando fotos de progreso:", err);
+      }
+    });
+  }
+
+  async openAddPhotoActionSheet() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: '📸 Registrar Foto de Progreso',
+      subHeader: '🔒 Guardado 100% privado y protegido',
+      buttons: [
+        {
+          text: 'Tomar Foto con Cámara',
+          icon: 'camera',
+          handler: () => { this.captureProgressPhoto(CameraSource.Camera); }
+        },
+        {
+          text: 'Elegir de la Galería',
+          icon: 'image',
+          handler: () => { this.captureProgressPhoto(CameraSource.Photos); }
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  async captureProgressPhoto(source: CameraSource) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: source
+      });
+
+      if (!image.base64String) return;
+
+      this.newProgressPhoto = {
+        base64: 'data:image/jpeg;base64,' + image.base64String,
+        rawBase64: image.base64String,
+        weight: this.userProfile.weight || null,
+        bodyFat: null,
+        notes: '',
+        date: new Date().toISOString().split('T')[0]
+      };
+      this.isUploadProgressModalOpen = true;
+    } catch (e) {
+      console.log('Captura cancelada', e);
+    }
+  }
+
+  async saveNewProgressPhoto() {
+    if (!this.newProgressPhoto.rawBase64) return;
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Guardando foto en tu álbum privado...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    const byteCharacters = atob(this.newProgressPhoto.rawBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+    const formData = new FormData();
+    formData.append('file', blob, 'progress_' + Date.now() + '.jpg');
+    if (this.newProgressPhoto.weight) formData.append('weight', this.newProgressPhoto.weight.toString());
+    if (this.newProgressPhoto.bodyFat) formData.append('bodyFat', this.newProgressPhoto.bodyFat.toString());
+    if (this.newProgressPhoto.notes) formData.append('notes', this.newProgressPhoto.notes);
+    if (this.newProgressPhoto.date) formData.append('date', this.newProgressPhoto.date);
+
+    this.http.post('/api/v1/body-progress/upload', formData).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        this.isUploadProgressModalOpen = false;
+        const toast = await this.toastCtrl.create({
+          message: '📸 ¡Foto de evolución guardada!',
+          duration: 2500,
+          color: 'success',
+          position: 'top'
+        });
+        toast.present();
+        this.loadBodyProgress();
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        console.error("Error subiendo foto de progreso:", err);
+        const toast = await this.toastCtrl.create({
+          message: 'Error al guardar la foto en el servidor.',
+          duration: 2500,
+          color: 'danger',
+          position: 'top'
+        });
+        toast.present();
+      }
+    });
+  }
+
+  viewPhotoDetail(photo: any) {
+    this.selectedPhotoForView = photo;
+    this.isViewPhotoModalOpen = true;
+  }
+
+  async confirmDeleteProgress(photo: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar Foto',
+      message: '¿Estás seguro de que deseas eliminar esta foto de tu evolución?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.http.delete(`/api/v1/body-progress/${photo.id}`).subscribe({
+              next: () => {
+                this.isViewPhotoModalOpen = false;
+                this.bodyProgressList = this.bodyProgressList.filter(p => p.id !== photo.id);
+                this.toastCtrl.create({
+                  message: 'Foto eliminada correctamente.',
+                  duration: 2000,
+                  position: 'top'
+                }).then(t => t.present());
+              },
+              error: (err) => console.error("Error eliminando foto:", err)
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  openCompareModal() {
+    if (this.bodyProgressList.length < 2) {
+      this.toastCtrl.create({
+        message: 'Necesitas al menos 2 fotos registradas para comparar tu Antes vs Después.',
+        duration: 3000,
+        position: 'middle',
+        color: 'warning'
+      }).then(t => t.present());
+      return;
+    }
+    this.isCompareModalOpen = true;
+  }
+
+  getBeforePhoto() {
+    if (this.bodyProgressList.length === 0) return null;
+    return this.bodyProgressList[this.bodyProgressList.length - 1]; // La más antigua
+  }
+
+  getAfterPhoto() {
+    if (this.bodyProgressList.length === 0) return null;
+    return this.bodyProgressList[0]; // La más reciente
+  }
+
+  getWeightDiff(): string {
+    const before = this.getBeforePhoto();
+    const after = this.getAfterPhoto();
+    if (!before || !after || before.recordedWeight == null || after.recordedWeight == null) return '0 kg';
+    const diff = +(after.recordedWeight - before.recordedWeight).toFixed(1);
+    if (diff > 0) return `+${diff} kg`;
+    return `${diff} kg`;
   }
 }

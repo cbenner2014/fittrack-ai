@@ -1,11 +1,138 @@
-<ion-content [fullscreen]="true" class="ion-padding" style="--background: #121214;">
-  <div class="profile-header">
-    <ion-icon name="person-circle-outline" class="profile-icon neon-text"></ion-icon>
-    <h1 class="neon-text">Tu Perfil</h1>
-    <p>Personaliza tu metabolismo base</p>
+<ion-content [fullscreen]="true" class="ion-padding" style="--background: #0e111a;">
+
+  <!-- 1. VISTA RESUMEN COMPACTA DE ATLETA (POR DEFECTO) -->
+  <div *ngIf="!isEditingProfile" class="glass-card" style="margin-bottom: 20px; padding: 22px 18px; border-radius: 24px; border: 1.5px solid rgba(0, 255, 136, 0.4); background: linear-gradient(145deg, rgba(0, 255, 136, 0.08), rgba(15, 18, 28, 0.98)); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 136, 0.12);">
+    
+    <!-- Hero Central con Avatar Grande Táctil y Nombre -->
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 18px; position: relative;">
+      
+      <!-- Avatar Táctil con Botón de Cámara -->
+      <div (click)="changeAvatar()" style="position: relative; width: 86px; height: 86px; margin-bottom: 10px; cursor: pointer;">
+        <div style="width: 86px; height: 86px; border-radius: 50%; background: #161a29; border: 2.5px solid #00ff88; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);">
+          <img *ngIf="userProfile.avatarUrl" [src]="userProfile.avatarUrl" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+          <ion-icon *ngIf="!userProfile.avatarUrl" name="person" style="font-size: 46px; color: #00ff88;"></ion-icon>
+        </div>
+        <!-- Badge de Cámara Flotante -->
+        <div style="position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: #00d2ff; color: #000; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(0,210,255,0.6); border: 2px solid #0e111a;">
+          <ion-icon name="camera" style="font-size: 14px;"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Nombre y Datos Básicos -->
+      <h2 style="margin: 0 0 4px 0; color: #ffffff; font-size: 1.25rem; font-weight: 900; letter-spacing: -0.3px;">
+        {{ userProfile.name || 'Atleta B-Track' }}
+      </h2>
+      <span style="font-size: 12px; color: #94a3b8; font-weight: 600;">
+        {{ userProfile.gender === 'female' ? 'Mujer' : 'Hombre' }} • {{ userProfile.age || '--' }} años
+      </span>
+
+      <!-- Botón Editar Perfil Superior Derecho -->
+      <button (click)="isEditingProfile = true" 
+              style="position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.06); border: 1px solid rgba(0,255,136,0.4); color: #00ff88; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+        <ion-icon name="create-outline"></ion-icon> Editar
+      </button>
+    </div>
+
+    <!-- 2x2 Grid Ultra-Simétrico y Proporcionado (Sin desbordes) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+      
+      <!-- 1. Peso -->
+      <div style="height: 62px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 0 10px; display: flex; align-items: center; gap: 8px; box-sizing: border-box;">
+        <div style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.3); display: flex; align-items: center; justify-content: center; color: #00ff88;">
+          <ion-icon name="scale-outline" style="font-size: 18px;"></ion-icon>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; overflow: hidden;">
+          <span style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">PESO</span>
+          <span style="font-size: 0.95rem; color: #ffffff; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ userProfile.weight || '--' }} <span style="font-size: 9.5px; color: #94a3b8; font-weight: 600;">kg</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. Altura -->
+      <div style="height: 62px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 0 10px; display: flex; align-items: center; gap: 8px; box-sizing: border-box;">
+        <div style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; background: rgba(0,210,255,0.12); border: 1px solid rgba(0,210,255,0.3); display: flex; align-items: center; justify-content: center; color: #00d2ff;">
+          <ion-icon name="body-outline" style="font-size: 18px;"></ion-icon>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; overflow: hidden;">
+          <span style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">ALTURA</span>
+          <span style="font-size: 0.95rem; color: #ffffff; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ userProfile.height || '--' }} <span style="font-size: 9.5px; color: #94a3b8; font-weight: 600;">cm</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 3. Objetivo -->
+      <div style="height: 62px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 0 10px; display: flex; align-items: center; gap: 8px; box-sizing: border-box;">
+        <div style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; background: rgba(255,0,85,0.12); border: 1px solid rgba(255,0,85,0.3); display: flex; align-items: center; justify-content: center; color: #ff0055;">
+          <ion-icon name="flame-outline" style="font-size: 18px;"></ion-icon>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; overflow: hidden;">
+          <span style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">OBJETIVO</span>
+          <span style="font-size: 0.88rem; color: #00ff88; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ getGoalLabel(userProfile.goal) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 4. Estilo Dieta -->
+      <div style="height: 62px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 0 10px; display: flex; align-items: center; gap: 8px; box-sizing: border-box;">
+        <div style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; background: rgba(255,157,0,0.12); border: 1px solid rgba(255,157,0,0.3); display: flex; align-items: center; justify-content: center; color: #ff9d00;">
+          <ion-icon name="restaurant-outline" style="font-size: 18px;"></ion-icon>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; overflow: hidden;">
+          <span style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">ESTILO DIETA</span>
+          <span style="font-size: 0.88rem; color: #ff9d00; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ getDietLabel(userProfile.dietPreference) }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Macros Diarios Compactos -->
+    <div *ngIf="userProfile.dailyCaloriesTarget" style="background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); padding: 12px; margin-bottom: 14px; display: flex; justify-content: space-around; align-items: center;">
+      <div style="text-align: center;">
+        <div style="font-size: 1.25rem; font-weight: 900; color: #ffffff; text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);">
+          {{ userProfile.dailyCaloriesTarget }} <span style="font-size: 10px; color: #64748b; font-weight: normal; text-shadow: none;">kcal</span>
+        </div>
+        <div style="font-size: 8.5px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Meta Diaria</div>
+      </div>
+      <div style="height: 26px; width: 1px; background: rgba(255,255,255,0.1);"></div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.05rem; font-weight: 800; color: #00ff88;">{{ userProfile.dailyProteinTarget }}g</div>
+        <div style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase;">Proteína</div>
+      </div>
+      <div style="height: 26px; width: 1px; background: rgba(255,255,255,0.1);"></div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.05rem; font-weight: 800; color: #ff0055;">{{ userProfile.dailyCarbsTarget }}g</div>
+        <div style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase;">Carbos</div>
+      </div>
+      <div style="height: 26px; width: 1px; background: rgba(255,255,255,0.1);"></div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.05rem; font-weight: 800; color: #ff9d00;">{{ userProfile.dailyFatsTarget }}g</div>
+        <div style="font-size: 8.5px; color: #64748b; font-weight: 800; text-transform: uppercase;">Grasas</div>
+      </div>
+    </div>
+
+    <!-- Botón Rápido de Escáner Corporal IA -->
+    <button class="btn-neon outline" (click)="scanBody()" 
+            style="width: 100%; margin: 0; border-color: #00d2ff; color: #00d2ff; background: rgba(0,210,255,0.06); font-size: 0.88rem; padding: 11px; font-weight: 800;">
+      <ion-icon name="scan" style="margin-right: 6px;"></ion-icon> Escanear Físico con IA
+    </button>
   </div>
 
-  <div class="glass-card form-container">
+  <!-- 2. FORMULARIO COMPLETO DESPLEGABLE (SOLO AL DAR CLIC EN EDITAR) -->
+  <div *ngIf="isEditingProfile" class="glass-card form-container" style="margin-bottom: 20px; border: 1.5px solid #00ff88; animation: fadeIn 0.3s ease;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3 style="color: #00ff88; margin: 0; font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+        <ion-icon name="create"></ion-icon> Editar Datos del Atleta
+      </h3>
+      <button (click)="isEditingProfile = false" style="background: rgba(255,255,255,0.06); border: none; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+        ✕ Cancelar
+      </button>
+    </div>
+
     <ion-item class="custom-input">
       <ion-label position="stacked">Nombre Completo</ion-label>
       <ion-input type="text" [(ngModel)]="userProfile.name" placeholder="Ej. Juan Pérez"></ion-input>
@@ -69,40 +196,14 @@
         <ion-select-option value="Dieta Mediterránea">Dieta Mediterránea (Aceite de oliva, pescado, granos enteros)</ion-select-option>
       </ion-select>
     </ion-item>
-  </div>
 
-  <button class="btn-neon" (click)="saveProfile()" style="width: 100%; margin-top: 30px;">
-    <ion-icon name="hardware-chip-outline"></ion-icon> Calcular Macros y Guardar
-  </button>
-  
-  <!-- BOTÓN DE ESCÁNER CORPORAL -->
-  <button class="btn-neon outline" (click)="scanBody()" style="width: 100%; margin-top: 15px; border-color: #00d2ff; color: #00d2ff; background: rgba(0,210,255,0.05);">
-    <ion-icon name="body-outline"></ion-icon> Escáner Corporal IA
-  </button>
-  
-  <!-- RESULTADO DE MACROS CALCULADOS -->
-  <div class="glass-card" *ngIf="userProfile.dailyCaloriesTarget" style="margin-top: 25px; padding: 20px; border-radius: 15px; border-left: 4px solid var(--neon-green); text-align: center;">
-    <h3 style="color: white; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-      <ion-icon name="nutrition-outline" style="color: var(--neon-green);"></ion-icon> Tus Requerimientos Diarios
-    </h3>
-    
-    <div style="font-size: 2rem; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); margin-bottom: 20px;">
-      {{ userProfile.dailyCaloriesTarget }} <span style="font-size: 1rem; color: #aaa; font-weight: normal; text-shadow: none;">kcal</span>
-    </div>
-    
-    <div style="display: flex; justify-content: space-around; width: 100%;">
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <span style="font-size: 1.2rem; font-weight: bold; color: var(--neon-green);">{{ userProfile.dailyProteinTarget }}g</span>
-        <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Proteína</span>
-      </div>
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <span style="font-size: 1.2rem; font-weight: bold; color: #ff0055;">{{ userProfile.dailyCarbsTarget }}g</span>
-        <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Carbos</span>
-      </div>
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <span style="font-size: 1.2rem; font-weight: bold; color: #ff9d00;">{{ userProfile.dailyFatsTarget }}g</span>
-        <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Grasas</span>
-      </div>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-neon outline" (click)="isEditingProfile = false" style="flex: 1; margin: 0; border-color: #64748b; color: #94a3b8;">
+        Cancelar
+      </button>
+      <button class="btn-neon" (click)="saveProfile()" style="flex: 2; margin: 0;">
+        <ion-icon name="checkmark-circle"></ion-icon> Guardar Cambios
+      </button>
     </div>
   </div>
   
@@ -120,6 +221,87 @@
     </div>
   </div>
 
+  <!-- SECCIÓN DE EVOLUCIÓN CORPORAL & ÁLBUM PRIVADO -->
+  <div class="glass-card" style="margin-top: 25px; padding: 20px; border-radius: 18px; border: 1.5px solid rgba(0, 210, 255, 0.4); background: linear-gradient(145deg, rgba(0, 210, 255, 0.06), rgba(15, 20, 30, 0.95)); box-shadow: 0 4px 25px rgba(0, 210, 255, 0.15);">
+    
+    <!-- Encabezado de la Sección con Candado de Privacidad -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <ion-icon name="images" style="color: #00d2ff; font-size: 22px;"></ion-icon>
+          <h3 style="color: #ffffff; margin: 0; font-size: 1.1rem; font-weight: 800;">Evolución Corporal</h3>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <span style="font-size: 9.5px; font-weight: 800; background: rgba(0, 210, 255, 0.15); color: #00d2ff; padding: 2px 7px; border-radius: 6px; border: 1px solid rgba(0, 210, 255, 0.3);">
+            🔒 100% PRIVADO
+          </span>
+          <span style="font-size: 11px; color: #94a3b8;">Solo tú puedes ver este álbum</span>
+        </div>
+      </div>
+
+      <!-- Botón de Comparación si hay 2 o más fotos -->
+      <button *ngIf="bodyProgressList.length >= 2" (click)="openCompareModal()" 
+              style="background: linear-gradient(135deg, rgba(255,0,85,0.2), rgba(0,255,136,0.2)); border: 1px solid #00ff88; color: #00ff88; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 0 10px rgba(0,255,136,0.2);">
+        <ion-icon name="git-compare-outline" style="font-size: 14px;"></ion-icon> Antes / Después
+      </button>
+    </div>
+
+    <!-- Botón Principal: Registrar Foto de Progreso -->
+    <div style="display: flex; gap: 10px; margin-bottom: 18px;">
+      <button (click)="openAddPhotoActionSheet()" class="btn-neon" 
+              style="flex: 1; margin: 0; background: linear-gradient(135deg, #00d2ff 0%, #0088cc 100%); color: #000; border-color: #00d2ff; box-shadow: 0 0 16px rgba(0, 210, 255, 0.4); font-weight: 800; font-size: 0.88rem; padding: 12px;">
+        <ion-icon name="camera" style="font-size: 18px; margin-right: 6px;"></ion-icon> + Tomar Foto de Hoy
+      </button>
+    </div>
+
+    <!-- Estado Vacío: Sin Fotos Aún -->
+    <div *ngIf="bodyProgressList.length === 0" style="text-align: center; padding: 20px 10px; background: rgba(0,0,0,0.3); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.15);">
+      <ion-icon name="camera-outline" style="font-size: 36px; color: #64748b; margin-bottom: 8px;"></ion-icon>
+      <h4 style="color: #cbd5e1; margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700;">Tu Línea de Tiempo está vacía</h4>
+      <p style="color: #94a3b8; font-size: 0.78rem; margin: 0; line-height: 1.4;">
+        Tómate tu primera foto hoy para registrar tu peso inicial y empezar a documentar tu transformación física semana a semana.
+      </p>
+    </div>
+
+    <!-- Galería Cronológica de Fotos -->
+    <div *ngIf="bodyProgressList.length > 0" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+      <div *ngFor="let item of bodyProgressList" (click)="viewPhotoDetail(item)"
+           style="background: rgba(18, 22, 34, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+        
+        <!-- Imagen -->
+        <div style="width: 100%; height: 160px; background: #000; overflow: hidden; position: relative;">
+          <img [src]="item.frontImageUrl" alt="Foto de avance" style="width: 100%; height: 100%; object-fit: cover;">
+          
+          <!-- Badge de Fecha Flotante -->
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 3px 7px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); font-size: 9.5px; font-weight: 700; color: #fff;">
+            📅 {{ item.logDate }}
+          </div>
+
+          <!-- Lupa / Zoom Icon -->
+          <div style="position: absolute; bottom: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,210,255,0.85); display: flex; align-items: center; justify-content: center; color: #000;">
+            <ion-icon name="eye" style="font-size: 14px;"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Info Card Inferior -->
+        <div style="padding: 8px 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span *ngIf="item.recordedWeight" style="font-size: 0.85rem; font-weight: 800; color: #00ff88;">
+              ⚖️ {{ item.recordedWeight }} kg
+            </span>
+            <span *ngIf="item.aiEstimatedBodyFat" style="font-size: 0.75rem; font-weight: 700; color: #00d2ff; background: rgba(0,210,255,0.1); padding: 1px 5px; border-radius: 4px;">
+              {{ item.aiEstimatedBodyFat }}% grasa
+            </span>
+          </div>
+          <p *ngIf="item.aiFeedbackNotes" style="margin: 4px 0 0 0; font-size: 0.72rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ item.aiFeedbackNotes }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
   <div style="text-align: center; margin-top: 25px; margin-bottom: 100px; display: flex; flex-direction: column; gap: 15px;">
     <button *ngIf="isAdmin" class="btn-neon" (click)="router.navigate(['/admin'])" style="width: 100%; background: linear-gradient(135deg, #ffaa00, #ff6a00); color: #000; border-color: #ffaa00; box-shadow: 0 0 15px rgba(255,170,0,0.4);">
       <ion-icon name="shield-checkmark"></ion-icon> 👑 Volver al Panel Administrador
@@ -129,6 +311,142 @@
       <ion-icon name="log-out-outline"></ion-icon> Cerrar Sesión
     </button>
   </div>
+
+  <!-- MODAL: REGISTRAR NUEVA FOTO DE PROGRESO -->
+  <ion-modal [isOpen]="isUploadProgressModalOpen" (didDismiss)="isUploadProgressModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: #0e111a; border: 1.5px solid #00d2ff; border-radius: 24px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isUploadProgressModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <h2 style="color: #ffffff; font-weight: 800; font-size: 1.25rem; margin-top: 15px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <ion-icon name="camera" style="color: #00d2ff;"></ion-icon> Guardar Foto de Progreso
+          </h2>
+          <p style="color: #94a3b8; font-size: 0.8rem; text-align: center; margin-bottom: 20px;">
+            🔒 Esta foto se guardará de forma 100% privada y cifrada en tu cuenta
+          </p>
+
+          <!-- Previsualización de la Foto -->
+          <div style="width: 100%; max-height: 250px; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0, 210, 255, 0.3); margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+            <img [src]="newProgressPhoto.base64" style="max-height: 250px; width: 100%; object-fit: contain;">
+          </div>
+
+          <!-- Campos: Peso y Fecha -->
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <div style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 6px 12px;">
+              <label style="font-size: 10px; color: #00d2ff; font-weight: 700; text-transform: uppercase;">Peso Actual (kg)</label>
+              <ion-input type="number" [(ngModel)]="newProgressPhoto.weight" placeholder="Ej: 74.5" style="color: #fff; font-size: 1rem; font-weight: 700;"></ion-input>
+            </div>
+
+            <div style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 6px 12px;">
+              <label style="font-size: 10px; color: #00ff88; font-weight: 700; text-transform: uppercase;">Fecha</label>
+              <ion-input type="date" [(ngModel)]="newProgressPhoto.date" style="color: #fff; font-size: 0.9rem; font-weight: 600;"></ion-input>
+            </div>
+          </div>
+
+          <!-- Campo Notas / Sensaciones -->
+          <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 8px 12px; margin-bottom: 20px;">
+            <label style="font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Notas u Observaciones (Opcional)</label>
+            <ion-textarea [(ngModel)]="newProgressPhoto.notes" rows="2" placeholder="Ej: Semana 3 de definición, mejor tono en abdomen..." style="color: #fff; font-size: 0.88rem;"></ion-textarea>
+          </div>
+
+          <button (click)="saveNewProgressPhoto()" class="btn-neon" 
+                  style="width: 100%; background: linear-gradient(135deg, #00d2ff 0%, #0088cc 100%); color: #000; border-color: #00d2ff; box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); font-weight: 900; font-size: 1rem; padding: 14px;">
+            <ion-icon name="cloud-upload" style="font-size: 20px; margin-right: 6px;"></ion-icon> Guardar en mi Álbum Privado
+          </button>
+        </ion-content>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL: COMPARADOR ANTES VS DESPUÉS -->
+  <ion-modal [isOpen]="isCompareModalOpen" (didDismiss)="isCompareModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: #0c0e17; border: 1.5px solid #00ff88; border-radius: 24px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isCompareModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="text-align: center; margin-top: 15px; margin-bottom: 20px;">
+            <span style="font-size: 10px; font-weight: 800; background: rgba(0,255,136,0.15); color: #00ff88; padding: 3px 10px; border-radius: 10px; border: 1px solid #00ff88;">
+              TRANSFORMACIÓN REAL
+            </span>
+            <h2 style="color: #ffffff; font-weight: 900; font-size: 1.35rem; margin: 8px 0 4px 0;">Antes vs Después</h2>
+            <div style="font-size: 12px; color: #94a3b8;">
+              Diferencia de Peso: <strong style="color: #00ff88; font-size: 14px;">{{ getWeightDiff() }}</strong>
+            </div>
+          </div>
+
+          <!-- Comparación Lado a Lado -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px;">
+            
+            <!-- ANTES (Foto Inicial) -->
+            <div style="background: rgba(18, 22, 34, 0.95); border: 1.5px solid rgba(255,0,85,0.4); border-radius: 16px; overflow: hidden; text-align: center;">
+              <div style="padding: 6px; background: rgba(255,0,85,0.2); color: #ff0055; font-size: 11px; font-weight: 900; letter-spacing: 1px;">
+                ◀️ ANTES (INICIO)
+              </div>
+              <div style="width: 100%; height: 230px; background: #000; overflow: hidden;">
+                <img [src]="getBeforePhoto()?.frontImageUrl" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="padding: 8px;">
+                <div style="font-size: 11px; color: #94a3b8;">{{ getBeforePhoto()?.logDate }}</div>
+                <div style="font-size: 1rem; font-weight: 800; color: #ffffff;">{{ getBeforePhoto()?.recordedWeight || '--' }} kg</div>
+              </div>
+            </div>
+
+            <!-- DESPUÉS (Foto Actual) -->
+            <div style="background: rgba(18, 22, 34, 0.95); border: 1.5px solid rgba(0,255,136,0.4); border-radius: 16px; overflow: hidden; text-align: center;">
+              <div style="padding: 6px; background: rgba(0,255,136,0.2); color: #00ff88; font-size: 11px; font-weight: 900; letter-spacing: 1px;">
+                DESPUÉS (HOY) ▶️
+              </div>
+              <div style="width: 100%; height: 230px; background: #000; overflow: hidden;">
+                <img [src]="getAfterPhoto()?.frontImageUrl" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="padding: 8px;">
+                <div style="font-size: 11px; color: #94a3b8;">{{ getAfterPhoto()?.logDate }}</div>
+                <div style="font-size: 1rem; font-weight: 800; color: #00ff88;">{{ getAfterPhoto()?.recordedWeight || '--' }} kg</div>
+              </div>
+            </div>
+
+          </div>
+
+          <button (click)="isCompareModalOpen = false" class="btn-neon outline" style="width: 100%; border-color: #00ff88; color: #00ff88;">
+            Cerrar Comparador
+          </button>
+        </ion-content>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL: VISOR DE FOTO DETALLADA -->
+  <ion-modal [isOpen]="isViewPhotoModalOpen" (didDismiss)="isViewPhotoModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: #0c0e17; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 24px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: #fff; z-index: 100; cursor: pointer; text-shadow: 0 0 10px #000;" (click)="isViewPhotoModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="text-align: center; margin-top: 10px; margin-bottom: 15px;">
+            <h3 style="color: #fff; font-weight: 800; margin: 0 0 4px 0;">Registro del {{ selectedPhotoForView?.logDate }}</h3>
+            <span *ngIf="selectedPhotoForView?.recordedWeight" style="font-size: 1.1rem; font-weight: 900; color: #00ff88;">
+              ⚖️ {{ selectedPhotoForView?.recordedWeight }} kg
+            </span>
+          </div>
+
+          <div style="width: 100%; max-height: 55vh; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <img [src]="selectedPhotoForView?.frontImageUrl" style="max-height: 55vh; width: 100%; object-fit: contain;">
+          </div>
+
+          <div *ngIf="selectedPhotoForView?.aiFeedbackNotes" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 20px; color: #cbd5e1; font-size: 0.85rem; border-left: 3px solid #00d2ff;">
+            <strong>Notas:</strong> {{ selectedPhotoForView?.aiFeedbackNotes }}
+          </div>
+
+          <button (click)="confirmDeleteProgress(selectedPhotoForView)" 
+                  style="width: 100%; background: rgba(255, 42, 42, 0.15); border: 1.5px solid #ff2a2a; color: #ff2a2a; padding: 12px; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <ion-icon name="trash" style="font-size: 18px;"></ion-icon> Eliminar Foto de Progreso
+          </button>
+        </ion-content>
+      </div>
+    </ng-template>
+  </ion-modal>
 
   <!-- MODAL DE ESCÁNER CORPORAL -->
   <ion-modal [isOpen]="isBodyModalOpen" (didDismiss)="isBodyModalOpen = false" class="custom-modal">

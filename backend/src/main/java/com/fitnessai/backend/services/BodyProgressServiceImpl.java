@@ -32,8 +32,18 @@ public class BodyProgressServiceImpl implements BodyProgressService {
 
     @Override
     public List<BodyProgressLogResponseDto> getProgressByUser(Long userId) {
-        return repository.findByUserId(userId).stream()
+        return repository.findByUserIdOrderByLogDateDesc(userId).stream()
                 .map(BodyProgressMapper::toResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteBodyProgress(Long id, Long authUserId, String role) {
+        BodyProgressLog log = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro no encontrado con ID: " + id));
+        if (!"ROLE_ADMIN".equals(role) && !log.getUser().getId().equals(authUserId)) {
+            throw new RuntimeException("No tienes permisos para eliminar este registro.");
+        }
+        repository.delete(log);
     }
 }

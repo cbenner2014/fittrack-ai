@@ -33,6 +33,9 @@ public class User {
     @Builder.Default
     private Role role = Role.ROLE_USER;
 
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
     @Column(name = "initial_weight")
     private Double initialWeight;
 
