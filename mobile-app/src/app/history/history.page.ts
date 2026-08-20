@@ -233,6 +233,16 @@ export class HistoryPage implements OnInit {
   showTechnique: boolean = false;
   showProTips: boolean = false;
 
+  // 1. CRONÓMETRO DE DESCANSO FLOTANTE ENTRE SERIES
+  restTimerActive: boolean = false;
+  restTimeRemaining: number = 90; // segundos
+  restTotalTime: number = 90;
+  restTimerInterval: any = null;
+  isRestTimerVisible: boolean = false;
+
+  // 5. MODAL DE COMPARTIR ENTRENAMIENTO / LOGRO
+  isShareModalOpen: boolean = false;
+
   openMachineDetails(machine: any) {
     this.selectedMachine = machine;
     this.showWeightInput = false;
@@ -264,6 +274,107 @@ export class HistoryPage implements OnInit {
       this.inputWeight = 50;
       this.weightUnit = 'kg';
     }
+  }
+
+  // MÉTODOS DEL CRONÓMETRO DE DESCANSO
+  startRestTimer(seconds: number = 90) {
+    this.clearRestTimer();
+    this.restTotalTime = seconds;
+    this.restTimeRemaining = seconds;
+    this.restTimerActive = true;
+    this.isRestTimerVisible = true;
+
+    this.restTimerInterval = setInterval(() => {
+      if (this.restTimeRemaining > 0) {
+        this.restTimeRemaining--;
+      } else {
+        this.onRestTimerComplete();
+      }
+    }, 1000);
+  }
+
+  addRestTime(extraSeconds: number = 30) {
+    this.restTimeRemaining += extraSeconds;
+    this.restTotalTime += extraSeconds;
+  }
+
+  stopRestTimer() {
+    this.clearRestTimer();
+    this.isRestTimerVisible = false;
+  }
+
+  clearRestTimer() {
+    if (this.restTimerInterval) {
+      clearInterval(this.restTimerInterval);
+      this.restTimerInterval = null;
+    }
+    this.restTimerActive = false;
+  }
+
+  async onRestTimerComplete() {
+    this.clearRestTimer();
+    this.isRestTimerVisible = false;
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([200, 100, 200]); } catch (e) {}
+    }
+    const toast = await this.toastCtrl.create({
+      message: '🔔 ¡Descanso completado! A por la siguiente serie 💪',
+      duration: 3000,
+      position: 'middle',
+      icon: 'timer-outline'
+    });
+    toast.present();
+  }
+
+  formatTimer(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  // 2. DETECCIÓN DE RÉCORD PERSONAL (PR)
+  getMaxWeight(machine: any): number {
+    const history = this.parseWeightHistory(machine);
+    let max = 0;
+    for (const item of history) {
+      const match = (item.weight || '').match(/(\d+(?:\.\d+)?)\s*(kg|lbs)/i);
+      if (match) {
+        const val = parseFloat(match[1]);
+        if (val > max) max = val;
+      }
+    }
+    return max;
+  }
+
+  isPersonalRecord(record: any, machine: any): boolean {
+    const max = this.getMaxWeight(machine);
+    if (max <= 0) return false;
+    const match = (record.weight || '').match(/(\d+(?:\.\d+)?)\s*(kg|lbs)/i);
+    if (!match) return false;
+    return parseFloat(match[1]) === max;
+  }
+
+  // 3. RECOMENDACIÓN INTELIGENTE DE SOBRECARGA IA
+  getAiProgressionSuggestion(machine: any): string {
+    const history = this.parseWeightHistory(machine);
+    if (history.length === 0) {
+      return '🎯 Calibra hoy 3-4 series con peso moderado y técnica estricta.';
+    }
+    const last = history[0];
+    const weightMatch = (last.weight || '').match(/(\d+(?:\.\d+)?)\s*(kg|lbs)/i);
+    const repsMatch = (last.weight || '').match(/(\d+)\s*reps/i);
+    const setsMatch = (last.weight || '').match(/(\d+)\s*series/i);
+
+    const lastWeight = weightMatch ? parseFloat(weightMatch[1]) : 0;
+    const unit = weightMatch ? weightMatch[2].toLowerCase() : 'kg';
+    const lastReps = repsMatch ? parseInt(repsMatch[1]) : 12;
+    const lastSets = setsMatch ? parseInt(setsMatch[1]) : 4;
+
+    if (lastWeight > 0) {
+      const targetWeight = lastWeight + (unit === 'kg' ? 2.5 : 5);
+      return `💡 Última sesión: ${lastWeight}${unit} (${lastSets}x${lastReps}). Hoy busca ${targetWeight}${unit} para ${Math.max(6, lastReps - 2)} reps o mantén ${lastWeight}${unit} para +2 reps.`;
+    }
+    return `💡 Meta de hoy: Busca aumentar 1 o 2 repeticiones respecto a tu última sesión.`;
   }
 
   incrementSets() { this.inputSets++; }
@@ -354,7 +465,11 @@ export class HistoryPage implements OnInit {
   async saveMachineWeight(machine: any) {
     if (!machine) return;
 
-    const formattedWeightString = `${this.inputSets} series x ${this.inputReps} reps / ${this.inputWeight || 0} ${this.weightUnit}`;
+    const previousMax = this.getMaxWeight(machine);
+    const currentWeight = this.inputWeight || 0;
+    const isNewPR = previousMax > 0 && currentWeight > previousMax;
+
+    const formattedWeightString = `${this.inputSets} series x ${this.inputReps} reps / ${currentWeight} ${this.weightUnit}`;
 
     const history = this.parseWeightHistory(machine);
     const now = new Date();
@@ -377,18 +492,37 @@ export class HistoryPage implements OnInit {
     this.http.put(`/api/v1/machine-logs/${machine.id}/weight`, { weightLog: jsonString }).subscribe({
       next: async () => {
         this.loadHistory();
-        const toast = await this.toastCtrl.create({
-          message: `¡${formattedWeightString} guardado! 💪`,
-          duration: 2000,
-          position: 'middle',
-          icon: 'trending-up-outline'
-        });
-        toast.present();
+        this.showHistorySection = true; // Desplegar automáticamente para ver el avance
+
+        // Iniciar cronómetro de descanso automático de 90 segundos
+        this.startRestTimer(90);
+
+        if (isNewPR) {
+          const toast = await this.toastCtrl.create({
+            message: `🏆 ¡NUEVO RÉCORD PERSONAL! Superaste tu marca con ${currentWeight}${this.weightUnit} 🚀`,
+            duration: 3500,
+            position: 'middle',
+            icon: 'trophy-outline'
+          });
+          toast.present();
+        } else {
+          const toast = await this.toastCtrl.create({
+            message: `¡${formattedWeightString} guardado! Iniciando 90s de descanso ⏱️`,
+            duration: 2200,
+            position: 'middle',
+            icon: 'trending-up-outline'
+          });
+          toast.present();
+        }
       },
       error: async (err) => {
         console.error('Error guardando peso:', err);
       }
     });
+  }
+
+  openShareModal() {
+    this.isShareModalOpen = true;
   }
 
   async deleteWeightRecord(machine: any, index: number) {

@@ -248,6 +248,12 @@
               </div>
             </div>
 
+            <!-- Sugerencia Inteligente IA de Sobrecarga -->
+            <div style="background: rgba(0, 210, 255, 0.06); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 12px; padding: 8px 12px; margin-bottom: 12px; font-size: 0.76rem; color: #7dd3fc; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px;">
+              <ion-icon name="sparkles" style="font-size: 15px; color: #00d2ff; flex-shrink: 0; margin-top: 1px;"></ion-icon>
+              <span>{{ getAiProgressionSuggestion(selectedMachine) }}</span>
+            </div>
+
             <!-- 1. ACORDEÓN COMPACTO: Anotar Nueva Carga -->
             <div style="background: rgba(157, 0, 255, 0.05); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: all 0.25s ease;">
               <div (click)="showWeightInput = !showWeightInput" 
@@ -335,10 +341,13 @@
                   <div *ngFor="let record of parseWeightHistory(selectedMachine); let i = index; let first = first; let last = last"
                        style="background: rgba(0,0,0,0.4); padding: 9px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00ff88;">
                     <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
-                        📅 {{ record.displayDate }}
-                        <span *ngIf="first" style="color: #00ff88; margin-left: 4px; font-weight: 700;">(Última Serie ⭐)</span>
-                        <span *ngIf="last && !first" style="color: #c084fc; margin-left: 4px; font-weight: 700;">(Serie Inicial 🏁)</span>
+                      <div style="font-size: 10px; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                        <span>📅 {{ record.displayDate }}</span>
+                        <span *ngIf="isPersonalRecord(record, selectedMachine)" style="background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-size: 9px; font-weight: 900; padding: 1px 6px; border-radius: 6px; box-shadow: 0 0 8px rgba(255,215,0,0.6);">
+                          🏆 PR
+                        </span>
+                        <span *ngIf="first && !isPersonalRecord(record, selectedMachine)" style="color: #00ff88; font-weight: 700;">(Última Serie ⭐)</span>
+                        <span *ngIf="last && !first" style="color: #c084fc; font-weight: 700;">(Serie Inicial 🏁)</span>
                       </div>
                       <div style="font-size: 14px; color: #ffffff; font-weight: 800; margin-top: 2px;">
                         {{ record.weight }}
@@ -416,13 +425,16 @@
           </div>
         </ion-content>
         
-        <!-- Footer Actions -->
-        <div style="padding: 16px 20px 24px; background: rgba(10, 8, 16, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.06);">
-          <div style="display: flex; gap: 12px; width: 100%;">
-            <button (click)="deleteMachine(selectedMachine?.id)" style="flex: 1; padding: 13px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #f87171; border-radius: 28px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <ion-icon name="trash-outline"></ion-icon> Eliminar
+        <!-- Footer Actions con Botón de Compartir Logro -->
+        <div style="padding: 14px 16px 20px; background: rgba(10, 8, 16, 0.8); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <button (click)="deleteMachine(selectedMachine?.id)" style="padding: 11px 14px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #f87171; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <ion-icon name="trash-outline"></ion-icon>
             </button>
-            <button (click)="isMachineModalOpen = false" style="flex: 1.2; padding: 13px; background: linear-gradient(135deg, #9d00ff 0%, #7928ca 100%); border: none; color: #ffffff; border-radius: 28px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 0 20px rgba(157, 0, 255, 0.35);">
+            <button (click)="openShareModal()" style="flex: 1; padding: 11px; background: rgba(0, 210, 255, 0.12); border: 1.5px solid rgba(0, 210, 255, 0.4); color: #00d2ff; border-radius: 20px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <ion-icon name="share-social-outline" style="font-size: 16px;"></ion-icon> Compartir
+            </button>
+            <button (click)="isMachineModalOpen = false" style="flex: 1.2; padding: 11px; background: linear-gradient(135deg, #9d00ff 0%, #7928ca 100%); border: none; color: #ffffff; border-radius: 20px; font-weight: 800; font-size: 12.5px; cursor: pointer; box-shadow: 0 0 16px rgba(157, 0, 255, 0.35);">
               Cerrar
             </button>
           </div>
@@ -430,6 +442,84 @@
       </div>
     </ng-template>
   </ion-modal>
+
+  <!-- ==================== MODAL PARA COMPARTIR LOGRO / HISTORIA ==================== -->
+  <ion-modal [isOpen]="isShareModalOpen" (didDismiss)="isShareModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: #0c0d14; border: 1.5px solid #00d2ff; border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 0 40px rgba(0, 210, 255, 0.3);">
+        <ion-icon name="close-circle-outline" style="position: absolute; top: 16px; right: 16px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isShareModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="padding: 20px 10px; text-align: center;">
+            <div style="font-size: 10px; font-weight: 800; color: #00d2ff; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">
+              ⚡ FITTRACK AI • WORKOUT STORY
+            </div>
+
+            <!-- Tarjeta Visual Compartible -->
+            <div style="background: linear-gradient(145deg, #161828 0%, #0c0d16 100%); border: 2px solid rgba(0, 255, 136, 0.4); border-radius: 20px; padding: 18px; margin: 12px 0 18px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 25px rgba(0,255,136,0.2); position: relative; overflow: hidden;">
+              <!-- Badge Neon -->
+              <div style="position: absolute; top: 12px; right: -25px; background: #00ff88; color: #000; font-weight: 900; font-size: 9px; padding: 4px 28px; transform: rotate(45deg); letter-spacing: 1px; box-shadow: 0 2px 10px rgba(0,255,136,0.5);">
+                RECORD
+              </div>
+
+              <img [src]="selectedMachine?.imageUrl" style="width: 100%; height: 160px; object-fit: cover; border-radius: 14px; border: 1.5px solid #9d00ff; margin-bottom: 12px;" />
+              
+              <h3 style="margin: 0 0 4px 0; color: #ffffff; font-size: 1.25rem; font-weight: 900;">
+                {{ selectedMachine?.name || selectedMachine?.machineName }}
+              </h3>
+              <div style="color: #00ff88; font-size: 0.8rem; font-weight: 700; margin-bottom: 14px;">
+                🎯 {{ selectedMachine?.targetMuscles || selectedMachine?.targetMuscle }}
+              </div>
+
+              <!-- Estadística de Carga Destacada -->
+              <div style="background: rgba(0, 255, 136, 0.08); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+                <div style="font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Carga Lograda Hoy</div>
+                <div style="font-size: 1.6rem; font-weight: 900; color: #00ff88; margin-top: 2px;">
+                  {{ getLatestWeight(selectedMachine) || 'Completado' }}
+                </div>
+              </div>
+
+              <div style="font-size: 10px; color: #64748b; font-weight: 600;">
+                🔥 Registrado con IA • app.dabecode.com
+              </div>
+            </div>
+
+            <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 16px 0;">
+              📸 ¡Toma una captura de pantalla y súbela a tus historias de Instagram o compártela con tus amigos!
+            </p>
+          </div>
+        </ion-content>
+
+        <div style="padding: 14px 16px 20px; background: rgba(10, 8, 16, 0.8); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+          <button (click)="isShareModalOpen = false" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #00d2ff 0%, #0077ff 100%); color: #000000; border: none; border-radius: 20px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ==================== CRONÓMETRO FLOTANTE DE DESCANSO ==================== -->
+  <div *ngIf="isRestTimerVisible" 
+       style="position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 360px; z-index: 999999; background: #111524; border: 2px solid #00ff88; border-radius: 22px; padding: 10px 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.95), 0 0 30px rgba(0,255,136,0.35); display: flex; align-items: center; justify-content: space-between; animation: toastPop 0.3s ease;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #00ff88; display: flex; align-items: center; justify-content: center; background: rgba(0,255,136,0.15); box-shadow: 0 0 12px rgba(0,255,136,0.5);">
+        <ion-icon name="timer-outline" style="color: #00ff88; font-size: 20px;"></ion-icon>
+      </div>
+      <div>
+        <div style="font-size: 9.5px; color: #00ff88; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Descanso Activo</div>
+        <div style="font-size: 18px; font-weight: 900; color: #ffffff; line-height: 1.1;">{{ formatTimer(restTimeRemaining) }}</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 6px; align-items: center;">
+      <button (click)="addRestTime(30)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #ffffff; padding: 6px 9px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        +30s
+      </button>
+      <button (click)="stopRestTimer()" style="background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        Listo
+      </button>
+    </div>
+  </div>
 
   <!-- ==================== MODAL DE BIBLIOTECA DE MÁQUINAS ==================== -->
   <ion-modal [isOpen]="isLibraryModalOpen" (didDismiss)="isLibraryModalOpen = false" class="custom-modal">
