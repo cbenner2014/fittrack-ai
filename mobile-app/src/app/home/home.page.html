@@ -319,6 +319,24 @@
               <div [innerHTML]="machineResult?.usageInstructions" style="color: #e2e8f0; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;"></div>
             </div>
 
+            <!-- Programar en mi Rutina Semanal (Días) -->
+            <div style="background: rgba(157, 0, 255, 0.08); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; padding: 14px; margin-bottom: 14px; text-align: left;">
+              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <ion-icon name="calendar-outline"></ion-icon> Programar en mi Rutina Semanal
+              </div>
+              <p style="margin: 0 0 10px 0; font-size: 0.78rem; color: #94a3b8;">Elige qué días entrenas con esta máquina para que aparezca automáticamente:</p>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button *ngFor="let day of availableWeekDays" (click)="toggleRoutineDay(day)"
+                        [style.background]="isRoutineDaySelected(day) ? 'linear-gradient(135deg, #9d00ff, #7928ca)' : 'rgba(255, 255, 255, 0.05)'"
+                        [style.color]="isRoutineDaySelected(day) ? '#ffffff' : '#94a3b8'"
+                        [style.border]="isRoutineDaySelected(day) ? '1px solid #c084fc' : '1px solid rgba(255, 255, 255, 0.1)'"
+                        [style.box-shadow]="isRoutineDaySelected(day) ? '0 0 10px rgba(157, 0, 255, 0.4)' : 'none'"
+                        style="padding: 6px 10px; border-radius: 14px; font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                  {{ day }}
+                </button>
+              </div>
+            </div>
+
             <!-- Pro Tip (si existe) -->
             <div *ngIf="machineResult?.tips" style="background: rgba(255, 215, 0, 0.06); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;">
               <div style="font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">

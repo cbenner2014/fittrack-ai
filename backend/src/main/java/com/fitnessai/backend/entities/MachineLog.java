@@ -25,6 +25,12 @@ public class MachineLog {
 
     private String imageUrl;
 
+    @Column(length = 500)
+    private String weightLog;
+
+    @Column(length = 200)
+    private String routineDays; // ej: "Lunes,Jueves" o "L,J"
+
     private String logDate; // yyyy-MM-dd
     private LocalDateTime createdAt;
 

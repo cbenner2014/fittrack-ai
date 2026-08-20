@@ -8,5 +8,7 @@ import java.util.List;
 public interface MachineLogService {
     MachineLogResponseDto logMachine(Long authUserId, MachineLogRequestDto request);
     List<MachineLogResponseDto> getMachineLogsByUser(Long userId);
+    MachineLogResponseDto updateMachineWeight(Long authUserId, Long id, String weightLog);
+    MachineLogResponseDto updateMachineRoutineDays(Long authUserId, Long id, String routineDays);
     void deleteMachineLog(Long authUserId, Long id);
 }

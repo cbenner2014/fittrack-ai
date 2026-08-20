@@ -15,6 +15,8 @@ public class MachineLogMapper {
         entity.setInstructions(dto.getInstructions());
         entity.setTips(dto.getTips());
         entity.setImageUrl(dto.getImageUrl());
+        entity.setWeightLog(dto.getWeightLog());
+        entity.setRoutineDays(dto.getRoutineDays());
         entity.setLogDate(dto.getLogDate());
         return entity;
     }
@@ -29,6 +31,8 @@ public class MachineLogMapper {
         dto.setInstructions(entity.getInstructions());
         dto.setTips(entity.getTips());
         dto.setImageUrl(entity.getImageUrl());
+        dto.setWeightLog(entity.getWeightLog());
+        dto.setRoutineDays(entity.getRoutineDays());
         dto.setLogDate(entity.getLogDate());
         dto.setCreatedAt(entity.getCreatedAt());
         return dto;

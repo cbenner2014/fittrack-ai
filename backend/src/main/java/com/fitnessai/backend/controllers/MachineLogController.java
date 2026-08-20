@@ -30,6 +30,24 @@ public class MachineLogController {
         return ResponseEntity.ok(service.getMachineLogsByUser(userId));
     }
 
+    @PutMapping("/{id}/weight")
+    public ResponseEntity<MachineLogResponseDto> updateMachineWeight(
+            @RequestAttribute("userId") Long authUserId,
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> payload) {
+        String weightLog = payload.get("weightLog");
+        return ResponseEntity.ok(service.updateMachineWeight(authUserId, id, weightLog));
+    }
+
+    @PutMapping("/{id}/routine-days")
+    public ResponseEntity<MachineLogResponseDto> updateMachineRoutineDays(
+            @RequestAttribute("userId") Long authUserId,
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> payload) {
+        String routineDays = payload.get("routineDays");
+        return ResponseEntity.ok(service.updateMachineRoutineDays(authUserId, id, routineDays));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMachineLog(
             @RequestAttribute("userId") Long authUserId,

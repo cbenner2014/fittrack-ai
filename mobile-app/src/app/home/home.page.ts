@@ -58,6 +58,10 @@ export class HomePage {
     level: 1
   };
 
+  // DÍAS DE RUTINA PARA MÁQUINAS
+  availableWeekDays: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  selectedRoutineDays: string[] = [];
+
   selectedDate: Date = new Date();
   weekDays: any[] = [];
 
@@ -880,6 +884,19 @@ export class HomePage {
     this.isMachineModalOpen = true;
   }
 
+  toggleRoutineDay(day: string) {
+    const idx = this.selectedRoutineDays.indexOf(day);
+    if (idx > -1) {
+      this.selectedRoutineDays.splice(idx, 1);
+    } else {
+      this.selectedRoutineDays.push(day);
+    }
+  }
+
+  isRoutineDaySelected(day: string): boolean {
+    return this.selectedRoutineDays.includes(day);
+  }
+
   async saveMachineToHistory() {
     if (!this.machineResult) return;
     
@@ -896,6 +913,8 @@ export class HomePage {
       instructions: this.machineResult.usageInstructions,
       tips: this.machineResult.tips || '',
       imageUrl: this.machineResult.imageUrl || 'assets/machine-placeholder.png',
+      weightLog: this.machineResult.weightLog || '',
+      routineDays: this.selectedRoutineDays.join(','),
       logDate: new Date().toISOString().split('T')[0]
     };
 
@@ -904,12 +923,13 @@ export class HomePage {
         await loading.dismiss();
         this.isMachineModalOpen = false;
         this.machineResult = null;
+        this.selectedRoutineDays = [];
         this.loadMachineHistory(); // Recargar de la base de datos
         this.evaluateQuests(); // Evaluar misiones
       },
       error: async (err) => {
         await loading.dismiss();
-        alert('Error al guardar la mÃ¡quina en la nube');
+        alert('Error al guardar la máquina en la nube');
       }
     });
   }

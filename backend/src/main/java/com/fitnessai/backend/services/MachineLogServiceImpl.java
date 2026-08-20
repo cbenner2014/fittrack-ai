@@ -36,6 +36,36 @@ public class MachineLogServiceImpl implements MachineLogService {
     }
 
     @Override
+    public MachineLogResponseDto updateMachineWeight(Long authUserId, Long id, String weightLog) {
+        MachineLog log = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro de máquina no encontrado con ID: " + id));
+
+        // Verificación estricta de propiedad (Anti-BOLA)
+        if (!log.getUserId().equals(authUserId)) {
+            throw new RuntimeException("Acceso Denegado: No tienes permisos para actualizar este registro.");
+        }
+
+        log.setWeightLog(weightLog);
+        MachineLog updated = repository.save(log);
+        return MachineLogMapper.toResponseDto(updated);
+    }
+
+    @Override
+    public MachineLogResponseDto updateMachineRoutineDays(Long authUserId, Long id, String routineDays) {
+        MachineLog log = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro de máquina no encontrado con ID: " + id));
+
+        // Verificación estricta de propiedad (Anti-BOLA)
+        if (!log.getUserId().equals(authUserId)) {
+            throw new RuntimeException("Acceso Denegado: No tienes permisos para actualizar este registro.");
+        }
+
+        log.setRoutineDays(routineDays);
+        MachineLog updated = repository.save(log);
+        return MachineLogMapper.toResponseDto(updated);
+    }
+
+    @Override
     public void deleteMachineLog(Long authUserId, Long id) {
         MachineLog log = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registro de máquina no encontrado con ID: " + id));

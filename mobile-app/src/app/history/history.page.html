@@ -1,92 +1,401 @@
 <ion-header class="ion-no-border">
   <ion-toolbar style="--background: transparent;">
-    <ion-title style="color: white; font-weight: bold;">Historial</ion-title>
+    <ion-title style="color: white; font-weight: 800; font-size: 1.3rem;">Historial</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div style="padding: 15px;">
     <!-- Calendario Semanal Horizontal -->
-    <div class="calendar-strip" style="display: flex; justify-content: space-between; padding: 15px 10px; margin-bottom: 20px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+    <div class="calendar-strip" style="display: flex; justify-content: space-between; padding: 14px 10px; margin-bottom: 18px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.06);">
       <div class="day-item" *ngFor="let day of weekDays" (click)="selectDate(day)" 
            style="display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1;">
-        <div [ngStyle]="{'background': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#00ff88' : 'transparent', 'color': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#000' : '#aaa', 'border-radius': '50%', 'width': '32px', 'height': '32px', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center', 'font-weight': 'bold', 'font-size': '0.85rem', 'margin-bottom': '8px'}">
+        <div [ngStyle]="{'background': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#00ff88' : 'transparent', 'color': selectedDate.toISOString().split('T')[0] === day.fullDateString ? '#000' : '#888', 'border-radius': '50%', 'width': '32px', 'height': '32px', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center', 'font-weight': '800', 'font-size': '0.85rem', 'margin-bottom': '6px'}">
           {{ day.dayName }}
         </div>
-        <span style="color: white; font-weight: 600; font-size: 1rem; margin-bottom: 8px;">{{ day.dayNumber }}</span>
-        <div class="dot" [ngStyle]="{'background': day.hasData ? '#00ff88' : 'transparent', 'width': '6px', 'height': '6px', 'border-radius': '50%'}"></div>
+        <span style="color: white; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">{{ day.dayNumber }}</span>
+        <div class="dot" [ngStyle]="{'background': day.hasData ? '#00ff88' : 'transparent', 'width': '6px', 'height': '6px', 'border-radius': '50%', 'box-shadow': day.hasData ? '0 0 6px #00ff88' : 'none'}"></div>
       </div>
     </div>
 
-    <!-- Pestañas internas -->
-    <ion-segment [(ngModel)]="currentTab" style="margin-bottom: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; --background: rgba(0,0,0,0.2);">
-      <ion-segment-button value="diet" style="--color-checked: #ff9d00; --indicator-color: transparent; color: white;">
-        <ion-label>Dieta</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="gym" style="--color-checked: #9d00ff; --indicator-color: transparent; color: white;">
-        <ion-label>Entrenamiento</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <!-- Pestañas Internas con Gran Diferenciación Visual -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08);">
+      
+      <!-- Pestaña DIETA -->
+      <button (click)="currentTab = 'diet'" 
+              [style.background]="currentTab === 'diet' ? 'linear-gradient(135deg, #ff9d00 0%, #ff5500 100%)' : 'transparent'"
+              [style.color]="currentTab === 'diet' ? '#000000' : '#888888'"
+              [style.font-weight]="currentTab === 'diet' ? '800' : '600'"
+              [style.box-shadow]="currentTab === 'diet' ? '0 0 16px rgba(255, 157, 0, 0.4)' : 'none'"
+              style="flex: 1; border: none; padding: 10px 14px; border-radius: 24px; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s ease;">
+        <ion-icon [name]="currentTab === 'diet' ? 'restaurant' : 'restaurant-outline'" style="font-size: 17px;"></ion-icon>
+        <span>DIETA</span>
+      </button>
 
-    <!-- TAB: DIETA -->
+      <!-- Pestaña ENTRENAMIENTO -->
+      <button (click)="currentTab = 'gym'" 
+              [style.background]="currentTab === 'gym' ? 'linear-gradient(135deg, #9d00ff 0%, #7928ca 100%)' : 'transparent'"
+              [style.color]="currentTab === 'gym' ? '#ffffff' : '#888888'"
+              [style.font-weight]="currentTab === 'gym' ? '800' : '600'"
+              [style.box-shadow]="currentTab === 'gym' ? '0 0 16px rgba(157, 0, 255, 0.45)' : 'none'"
+              style="flex: 1; border: none; padding: 10px 14px; border-radius: 24px; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s ease;">
+        <ion-icon [name]="currentTab === 'gym' ? 'barbell' : 'barbell-outline'" style="font-size: 17px;"></ion-icon>
+        <span>ENTRENAMIENTO</span>
+      </button>
+
+    </div>
+
+    <!-- ==================== TAB: DIETA (BURBUJAS COMPACTAS) ==================== -->
     <div *ngIf="currentTab === 'diet'">
-      <div *ngIf="!todaysMeals || todaysMeals.length === 0" style="text-align: center; color: #888; margin-top: 40px;">
-        <ion-icon name="restaurant-outline" style="font-size: 40px; margin-bottom: 10px;"></ion-icon>
-        <p>No hay comidas registradas este día.</p>
+      <div *ngIf="!todaysMeals || todaysMeals.length === 0" style="text-align: center; color: #888; margin-top: 40px; padding: 20px;">
+        <ion-icon name="restaurant-outline" style="font-size: 44px; margin-bottom: 10px; color: #ff9d00; opacity: 0.6;"></ion-icon>
+        <p style="font-size: 0.95rem; margin: 0;">No hay comidas registradas este día.</p>
       </div>
 
       <div *ngIf="todaysMeals && todaysMeals.length > 0">
-        <div *ngFor="let category of [{id:'BREAKFAST', name:'Desayuno'}, {id:'LUNCH', name:'Almuerzo'}, {id:'DINNER', name:'Cena'}, {id:'SNACK', name:'Snacks'}]">
-          <div *ngIf="getMealsByType(category.id).length > 0" class="meal-category-group" style="margin-bottom: 25px;">
-            <div class="category-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-              <h3 style="color: white; margin: 0 0 5px 0; font-weight: bold; font-size: 1.2rem;">{{ category.name }}</h3>
-              <p style="margin: 0; color: #aaa; font-size: 0.85rem;">
-                {{ getMealTypeMacros(category.id).cals }} kcal | {{ getMealTypeMacros(category.id).p }}P | {{ getMealTypeMacros(category.id).c }}C | {{ getMealTypeMacros(category.id).f }}G
-              </p>
+        <!-- Lista de Burbujas Compactas de Comida -->
+        <div class="glass-card food-bubble-card" *ngFor="let meal of todaysMeals" (click)="openFoodDetails(meal)"
+             style="margin-bottom: 12px; padding: 12px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 157, 0, 0.2); border-radius: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease;">
+          
+          <!-- Foto en Burbuja Redonda -->
+          <div style="position: relative; width: 56px; height: 56px; flex-shrink: 0;">
+            <img [src]="meal.imageUrl" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid #ff9d00; background: #1a1a24;" />
+            <div style="position: absolute; bottom: -2px; right: -2px; background: #ff9d00; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 6px rgba(255,157,0,0.6);">
+              <ion-icon name="restaurant" style="font-size: 11px; color: #000;"></ion-icon>
             </div>
-            <div class="glass-card meal-item" *ngFor="let meal of getMealsByType(category.id)" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 12px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
-              <div class="meal-img-container" style="width: 55px; height: 55px; border-radius: 50%; overflow: hidden; border: 2px solid #333; flex-shrink: 0;">
-                 <img [src]="meal.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
-              </div>
-              <div style="flex: 1; overflow: hidden;">
-                <h4 style="margin: 0 0 4px 0; color: white; font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ formatFoodName(meal.detectedFoods) }}</h4>
-                <p style="margin: 0; color: #888; font-size: 0.85rem;">
-                  {{ meal.totalCalories }} kcal | {{ meal.totalProtein }}P | {{ meal.totalCarbs }}C | {{ meal.totalFats }}G
-                </p>
-              </div>
+          </div>
+          
+          <!-- Datos del Plato -->
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ formatFoodName(meal.detectedFoods) }}
+              </h4>
+              <ion-icon name="chevron-forward-outline" style="color: #ff9d00; font-size: 18px; flex-shrink: 0; margin-left: 6px;"></ion-icon>
+            </div>
+            
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="background: rgba(255, 157, 0, 0.15); color: #ffb84d; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
+                {{ getMealTypeName(meal.mealType) }}
+              </span>
+              <span style="background: rgba(0, 255, 136, 0.12); color: #00ff88; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
+                🔥 {{ meal.totalCalories }} kcal
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: ENTRENAMIENTO -->
+    <!-- ==================== TAB: ENTRENAMIENTO (BURBUJAS COMPACTAS & RUTINA) ==================== -->
     <div *ngIf="currentTab === 'gym'">
-      <div *ngIf="!machineHistory || machineHistory.length === 0" style="text-align: center; color: #888; margin-top: 40px;">
-        <ion-icon name="barbell-outline" style="font-size: 40px; margin-bottom: 10px;"></ion-icon>
-        <p>No hay entrenamientos este día.</p>
+      
+      <!-- Barra Superior con Botón de Biblioteca Rápida -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #a855f7; text-transform: uppercase; letter-spacing: 0.5px;">
+          Rutina del Día
+        </div>
+        <button (click)="isLibraryModalOpen = true" 
+                style="background: rgba(157, 0, 255, 0.15); border: 1px solid rgba(157, 0, 255, 0.4); color: #c084fc; padding: 6px 12px; border-radius: 18px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <ion-icon name="bookmarks-outline"></ion-icon> + Biblioteca
+        </button>
+      </div>
+
+      <div *ngIf="!machineHistory || machineHistory.length === 0" style="text-align: center; color: #888; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px dashed rgba(255,255,255,0.1);">
+        <ion-icon name="barbell-outline" style="font-size: 44px; margin-bottom: 10px; color: #9d00ff; opacity: 0.6;"></ion-icon>
+        <p style="font-size: 0.92rem; margin: 0 0 12px 0; color: #e2e8f0;">No hay máquinas asignadas a este día.</p>
+        <button (click)="isLibraryModalOpen = true" style="background: linear-gradient(135deg, #9d00ff, #7928ca); color: white; border: none; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+          Elegir de mi Biblioteca
+        </button>
       </div>
 
       <div *ngIf="machineHistory && machineHistory.length > 0">
-        <div class="glass-card meal-item" *ngFor="let machine of machineHistory; let i = index" style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px;">
+        <!-- Lista de Burbujas Compactas de Máquinas -->
+        <div class="glass-card machine-bubble-card" *ngFor="let machine of machineHistory" (click)="openMachineDetails(machine)"
+             style="margin-bottom: 12px; padding: 12px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease;">
           
-          <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-            <img [src]="machine.imageUrl" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid var(--neon-purple);" />
-            <div style="flex: 1;">
-              <h4 style="margin: 0; color: white; font-weight: bold; font-size: 1.1rem;">{{ machine.name }}</h4>
-              <p style="margin: 5px 0 0; color: #aaa; font-size: 0.9rem;">Músculos: {{ machine.targetMuscles }}</p>
+          <!-- Foto en Burbuja con borde Neón Púrpura -->
+          <div style="position: relative; width: 56px; height: 56px; flex-shrink: 0;">
+            <img [src]="machine.imageUrl" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; border: 2px solid #9d00ff; background: #1a1a24;" />
+            <div style="position: absolute; bottom: -2px; right: -2px; background: #9d00ff; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 6px #9d00ff;">
+              <ion-icon name="barbell" style="font-size: 11px; color: #fff;"></ion-icon>
             </div>
-            <ion-icon name="barbell" style="color: var(--neon-purple); font-size: 24px;"></ion-icon>
           </div>
-
-          <!-- SECCIÓN PARA ANOTAR PESO -->
-          <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
-            <ion-input [(ngModel)]="machine.weightLog" placeholder="Ej: 4 series x 15kg" style="color: white; --padding-start: 10px; font-size: 0.9rem; border-bottom: 1px solid rgba(157, 0, 255, 0.5);"></ion-input>
-            <button class="btn-neon outline" (click)="saveMachineWeight(i, machine)" style="padding: 5px 15px; font-size: 0.8rem; border-color: var(--neon-purple); color: var(--neon-purple); border-radius: 15px;">Guardar</button>
+          
+          <!-- Datos de la Máquina -->
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h4 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ machine.name || machine.machineName || 'Máquina de Ejercicio' }}
+              </h4>
+              <ion-icon name="chevron-forward-outline" style="color: #c084fc; font-size: 18px; flex-shrink: 0; margin-left: 6px;"></ion-icon>
+            </div>
+            
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="background: rgba(0, 255, 136, 0.12); color: #00ff88; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                🎯 {{ machine.targetMuscles || machine.targetMuscle || 'General' }}
+              </span>
+              
+              <span *ngIf="machine.weightLog" style="background: rgba(157, 0, 255, 0.2); color: #d8b4fe; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(157,0,255,0.4);">
+                ⚡ {{ machine.weightLog }}
+              </span>
+              <span *ngIf="!machine.weightLog" style="background: rgba(255, 255, 255, 0.06); color: #94a3b8; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem;">
+                + Registrar carga
+              </span>
+            </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ==================== MODAL DE DETALLES DE COMIDA ==================== -->
+  <ion-modal [isOpen]="isFoodModalOpen" (didDismiss)="isFoodModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass food-modal-theme" style="display: flex; flex-direction: column; height: 100%; background: rgba(18, 20, 26, 0.98); border: 1px solid rgba(255, 157, 0, 0.4); border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 0 35px rgba(255, 157, 0, 0.2);">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 16px; right: 16px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isFoodModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="padding-top: 15px; text-align: center;">
+            <!-- Imagen Grande de la Comida -->
+            <div *ngIf="selectedFood?.imageUrl" style="width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 14px; border: 1.5px solid rgba(255, 157, 0, 0.4); background: #000;">
+              <img [src]="selectedFood.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+
+            <div style="font-size: 11px; font-weight: 700; color: #ff9d00; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">
+              DETALLE NUTRICIONAL
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">
+              {{ formatFoodName(selectedFood?.detectedFoods) }}
+            </h2>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; font-weight: 600;">
+              Registrado como: <span style="color: #ff9d00;">{{ getMealTypeName(selectedFood?.mealType) }}</span>
+            </div>
+
+            <!-- Matriz de Macros 2x2 -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+              <!-- Calorías -->
+              <div style="background: rgba(255, 157, 0, 0.08); border: 1px solid rgba(255, 157, 0, 0.3); border-radius: 14px; padding: 12px; text-align: center;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">Calorías</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #ff9d00; margin-top: 2px;">{{ selectedFood?.totalCalories || 0 }}</div>
+                <div style="font-size: 10px; color: #64748b;">kcal totales</div>
+              </div>
+
+              <!-- Proteínas -->
+              <div style="background: rgba(0, 255, 136, 0.08); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 14px; padding: 12px; text-align: center;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">Proteína</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #00ff88; margin-top: 2px;">{{ selectedFood?.totalProtein || 0 }}g</div>
+                <div style="font-size: 10px; color: #64748b;">construcción</div>
+              </div>
+
+              <!-- Carbos -->
+              <div style="background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 14px; padding: 12px; text-align: center;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">Carbos</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #00d2ff; margin-top: 2px;">{{ selectedFood?.totalCarbs || 0 }}g</div>
+                <div style="font-size: 10px; color: #64748b;">energía</div>
+              </div>
+
+              <!-- Grasas -->
+              <div style="background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.3); border-radius: 14px; padding: 12px; text-align: center;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px;">Grasas</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #ff0055; margin-top: 2px;">{{ selectedFood?.totalFats || 0 }}g</div>
+                <div style="font-size: 10px; color: #64748b;">saludables</div>
+              </div>
+            </div>
+          </div>
+        </ion-content>
+        
+        <!-- Footer Actions Comida -->
+        <div style="padding: 16px 20px 24px; background: rgba(10, 12, 16, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <button (click)="deleteFood(selectedFood?.id)" style="flex: 1; padding: 13px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #f87171; border-radius: 28px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <ion-icon name="trash-outline"></ion-icon> Eliminar
+            </button>
+            <button (click)="isFoodModalOpen = false" style="flex: 1.2; padding: 13px; background: linear-gradient(135deg, #ff9d00 0%, #ff5500 100%); border: none; color: #000000; border-radius: 28px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 0 20px rgba(255, 157, 0, 0.35);">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ==================== MODAL DE DETALLES DE MÁQUINA ==================== -->
+  <ion-modal [isOpen]="isMachineModalOpen" (didDismiss)="isMachineModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass machine-modal-theme" style="display: flex; flex-direction: column; height: 100%; background: rgba(18, 16, 26, 0.98); border: 1px solid rgba(157, 0, 255, 0.4); border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 0 35px rgba(157, 0, 255, 0.2);">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 16px; right: 16px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isMachineModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="padding-top: 15px;">
+            <!-- Imagen Grande de la Máquina -->
+            <div *ngIf="selectedMachine?.imageUrl" style="width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 14px; border: 1.5px solid rgba(157, 0, 255, 0.4); background: #000;">
+              <img [src]="selectedMachine.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+
+            <div style="font-size: 11px; font-weight: 700; color: #00ff88; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 4px;">
+              DETALLE DE ENTRENAMIENTO
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #ffffff; text-align: center; margin: 0 0 12px 0; line-height: 1.3;">
+              {{ selectedMachine?.name || selectedMachine?.machineName }}
+            </h2>
+            
+            <!-- Grupo Muscular Badge -->
+            <div style="display: flex; justify-content: center; margin-bottom: 18px;">
+              <div style="background: rgba(0, 255, 136, 0.12); border: 1px solid rgba(0, 255, 136, 0.3); color: #00ff88; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-align: center; max-width: 90%;">
+                <ion-icon name="fitness-outline" style="font-size: 16px; flex-shrink: 0;"></ion-icon> 
+                <span>{{ selectedMachine?.targetMuscles || selectedMachine?.targetMuscle }}</span>
+              </div>
+            </div>
+
+            <!-- Sección de Registro de Carga / Series Editable dentro del Modal -->
+            <div style="background: rgba(157, 0, 255, 0.1); border: 1px solid rgba(157, 0, 255, 0.3); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
+              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <ion-icon name="speedometer-outline"></ion-icon> Anotar Carga de Hoy
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <ion-input [(ngModel)]="selectedMachine.weightLog" placeholder="Ej: 4 series x 50kg / 12 reps" style="background: rgba(0,0,0,0.4); color: white; --padding-start: 12px; border-radius: 10px; border: 1px solid rgba(157,0,255,0.4); font-size: 0.9rem; flex: 1;"></ion-input>
+                <button (click)="saveMachineWeight(selectedMachine)" style="background: linear-gradient(135deg, #9d00ff, #7928ca); color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 12px rgba(157,0,255,0.4);">
+                  Guardar
+                </button>
+              </div>
+            </div>
+
+            <!-- Evolución y Sobrecarga Progresiva (Historial de Sesiones) -->
+            <div *ngIf="getMachineProgressHistory(selectedMachine).length > 0" 
+                 style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
+              <div style="font-size: 11px; font-weight: 700; color: #00ff88; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <ion-icon name="trending-up-outline" style="font-size: 16px;"></ion-icon> Tu Evolución y Sobrecarga Progresiva
+                </span>
+                <span style="font-size: 10px; background: rgba(0, 255, 136, 0.15); color: #00ff88; padding: 2px 8px; border-radius: 10px; font-weight: 700;">
+                  {{ getMachineProgressHistory(selectedMachine).length }} sesiones
+                </span>
+              </div>
+
+              <!-- Lista Cronológica de Registros de Carga -->
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div *ngFor="let record of getMachineProgressHistory(selectedMachine); let first = first; let last = last"
+                     style="background: rgba(0,0,0,0.4); padding: 9px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00ff88;">
+                  <div>
+                    <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
+                      📅 {{ formatSessionDate(record.logDate) }}
+                      <span *ngIf="first" style="color: #00ff88; margin-left: 4px; font-weight: 700;">(Última Sesión ⭐)</span>
+                      <span *ngIf="last && !first" style="color: #c084fc; margin-left: 4px; font-weight: 700;">(Primera Vez 🏁)</span>
+                    </div>
+                    <div style="font-size: 13.5px; color: #ffffff; font-weight: 800; margin-top: 2px;">
+                      {{ record.weightLog }}
+                    </div>
+                  </div>
+                  <ion-icon [name]="first ? 'flame' : 'checkmark-circle-outline'" [style.color]="first ? '#ff9d00' : '#00ff88'" style="font-size: 18px;"></ion-icon>
+                </div>
+              </div>
+            </div>
+
+            <!-- Programar en mi Rutina Semanal (Días) Editable -->
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(157, 0, 255, 0.25); border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left;">
+              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <ion-icon name="calendar-outline"></ion-icon> Días de Rutina Semanal
+                </span>
+                <button (click)="saveRoutineDays(selectedMachine)" style="background: #9d00ff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                  Guardar Días
+                </button>
+              </div>
+              <p style="margin: 0 0 10px 0; font-size: 0.76rem; color: #94a3b8;">Toca los días que realizas esta máquina para que aparezca en tu historial:</p>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <button *ngFor="let day of availableWeekDays" (click)="toggleMachineRoutineDay(day)"
+                        [style.background]="isMachineRoutineDayActive(day) ? 'linear-gradient(135deg, #9d00ff, #7928ca)' : 'rgba(255, 255, 255, 0.05)'"
+                        [style.color]="isMachineRoutineDayActive(day) ? '#ffffff' : '#94a3b8'"
+                        [style.border]="isMachineRoutineDayActive(day) ? '1px solid #c084fc' : '1px solid rgba(255, 255, 255, 0.1)'"
+                        style="padding: 5px 9px; border-radius: 12px; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                  {{ day }}
+                </button>
+              </div>
+            </div>
+            
+            <!-- Instrucciones de Uso Card -->
+            <div *ngIf="selectedMachine?.instructions || selectedMachine?.usageInstructions" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(157, 0, 255, 0.25); border-left: 4px solid #9d00ff; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;">
+              <div style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <ion-icon name="list-outline"></ion-icon> Técnica y Ejecución Correcta
+              </div>
+              <div [innerHTML]="selectedMachine?.instructions || selectedMachine?.usageInstructions" style="color: #e2e8f0; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;"></div>
+            </div>
+
+            <!-- Pro Tip (si existe) -->
+            <div *ngIf="selectedMachine?.tips" style="background: rgba(255, 215, 0, 0.06); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                💡 Tip del Entrenador
+              </div>
+              <p style="margin: 0; font-size: 0.84rem; color: #fde68a; line-height: 1.4;">{{ selectedMachine.tips }}</p>
+            </div>
+          </div>
+        </ion-content>
+        
+        <!-- Footer Actions -->
+        <div style="padding: 16px 20px 24px; background: rgba(10, 8, 16, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <button (click)="deleteMachine(selectedMachine?.id)" style="flex: 1; padding: 13px; background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #f87171; border-radius: 28px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <ion-icon name="trash-outline"></ion-icon> Eliminar
+            </button>
+            <button (click)="isMachineModalOpen = false" style="flex: 1.2; padding: 13px; background: linear-gradient(135deg, #9d00ff 0%, #7928ca 100%); border: none; color: #ffffff; border-radius: 28px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 0 20px rgba(157, 0, 255, 0.35);">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- ==================== MODAL DE BIBLIOTECA DE MÁQUINAS ==================== -->
+  <ion-modal [isOpen]="isLibraryModalOpen" (didDismiss)="isLibraryModalOpen = false" class="custom-modal">
+    <ng-template>
+      <div class="modal-wrapper-glass" style="display: flex; flex-direction: column; height: 100%; background: rgba(18, 16, 26, 0.98); border: 1px solid rgba(157, 0, 255, 0.4); border-radius: 24px; overflow: hidden; position: relative;">
+        <ion-icon name="close-circle-outline" class="close-icon" style="position: absolute; top: 16px; right: 16px; font-size: 28px; color: #64748b; z-index: 100; cursor: pointer;" (click)="isLibraryModalOpen = false"></ion-icon>
+        
+        <ion-content class="ion-padding" style="--background: transparent;">
+          <div style="padding-top: 15px;">
+            <div style="font-size: 11px; font-weight: 700; color: #00ff88; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 4px;">
+              TU CATÁLOGO PERSONAL
+            </div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: #ffffff; text-align: center; margin: 0 0 6px 0;">
+              Biblioteca de Máquinas
+            </h2>
+            <p style="text-align: center; font-size: 0.84rem; color: #94a3b8; margin-bottom: 18px;">
+              Selecciona una máquina escaneada anteriormente para agregarla a tu entrenamiento de hoy:
+            </p>
+
+            <div *ngIf="uniqueMachineLibrary.length === 0" style="text-align: center; padding: 30px 15px; color: #888;">
+              <ion-icon name="barbell-outline" style="font-size: 40px; color: #9d00ff;"></ion-icon>
+              <p>Aún no has escaneado máquinas.</p>
+            </div>
+
+            <!-- Lista de Máquinas en la Biblioteca -->
+            <div *ngFor="let lib of uniqueMachineLibrary"
+                 style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(157, 0, 255, 0.2); border-radius: 16px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+              <img [src]="lib.imageUrl" style="width: 52px; height: 52px; object-fit: cover; border-radius: 12px; border: 1.5px solid #9d00ff;" />
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="margin: 0 0 3px 0; color: #ffffff; font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  {{ lib.name }}
+                </h4>
+                <div style="font-size: 0.75rem; color: #00ff88; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  🎯 {{ lib.targetMuscles }}
+                </div>
+              </div>
+              <button (click)="addFromLibraryToToday(lib)" style="background: linear-gradient(135deg, #9d00ff, #7928ca); color: #ffffff; border: none; padding: 8px 14px; border-radius: 18px; font-weight: 700; font-size: 0.78rem; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 10px rgba(157,0,255,0.4);">
+                + Agregar
+              </button>
+            </div>
+          </div>
+        </ion-content>
+
+        <div style="padding: 16px 20px 24px; background: rgba(10, 8, 16, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+          <button (click)="isLibraryModalOpen = false" style="width: 100%; padding: 13px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; border-radius: 28px; font-weight: 700; font-size: 13.5px; cursor: pointer;">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

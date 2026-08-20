@@ -12,6 +12,8 @@ public class MachineLogResponseDto {
     private String instructions;
     private String tips;
     private String imageUrl;
+    private String weightLog;
+    private String routineDays;
     private String logDate;
     private LocalDateTime createdAt;
 }
