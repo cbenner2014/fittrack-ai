@@ -166,23 +166,37 @@
       </div>
     </div>
 
-    <div class="glass-card coach-card" (click)="askCoach()">
-      <div class="coach-info">
-        <h3>Tu Entrenador Virtual</h3>
-        <p>Genera tu plan semanal personalizado en segundos con IA.</p>
+    <!-- SECCIÓN DE ASISTENTES IA: Entrenador y Chat SOS en 2 Columnas -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; margin-bottom: 10px;">
+      
+      <!-- 1. Entrenador Virtual -->
+      <div class="glass-card coach-card" (click)="askCoach()" 
+           style="margin: 0; padding: 16px 14px; border-radius: 18px; border: 1.5px solid rgba(0, 255, 136, 0.4); background: linear-gradient(145deg, rgba(0, 255, 136, 0.12), rgba(10, 20, 15, 0.95)); cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15); transition: transform 0.2s ease;">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <ion-icon name="hardware-chip-outline" style="font-size: 28px; color: #00ff88; filter: drop-shadow(0 0 6px rgba(0,255,136,0.6));"></ion-icon>
+            <span style="font-size: 9px; font-weight: 800; background: rgba(0,255,136,0.2); color: #00ff88; padding: 2px 7px; border-radius: 6px;">PLAN IA</span>
+          </div>
+          <h3 style="margin: 0 0 4px 0; color: #fff; font-size: 0.95rem; font-weight: 800;">Entrenador IA</h3>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.76rem; line-height: 1.3;">Plan semanal y rutina personalizada.</p>
+        </div>
       </div>
-      <ion-icon name="hardware-chip-outline" class="coach-icon"></ion-icon>
+
+      <!-- 2. SOS Chat Nutricional -->
+      <div class="glass-card chat-card" (click)="isChatModalOpen = true" 
+           style="margin: 0; padding: 16px 14px; border-radius: 18px; border: 1.5px solid rgba(255, 0, 85, 0.5); background: linear-gradient(145deg, rgba(255, 0, 85, 0.14), rgba(25, 10, 15, 0.95)); cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 20px rgba(255, 0, 85, 0.2); transition: transform 0.2s ease;">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <ion-icon name="chatbubbles-outline" style="font-size: 28px; color: #ff0055; filter: drop-shadow(0 0 6px rgba(255,0,85,0.6));"></ion-icon>
+            <span style="font-size: 9px; font-weight: 800; background: rgba(255,0,85,0.2); color: #ff0055; padding: 2px 7px; border-radius: 6px;">EN VIVO</span>
+          </div>
+          <h3 style="margin: 0 0 4px 0; color: #fff; font-size: 0.95rem; font-weight: 800;">SOS Nutrición</h3>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.76rem; line-height: 1.3;">¿Qué pedir o comer? Pregúntale a la IA.</p>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <!-- El historial fue movido a su propia pestaña -->
-  
-  <!-- BOTÓN FLOTANTE CHAT DE EMERGENCIA -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 70px; margin-right: 10px;">
-    <ion-fab-button (click)="isChatModalOpen = true" style="--background: #ff0055; --box-shadow: 0 0 20px rgba(255,0,85,0.6);">
-      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 
   <!-- MODAL DE CHAT DE EMERGENCIA -->
   <ion-modal [isOpen]="isChatModalOpen" (didDismiss)="isChatModalOpen = false" class="custom-modal">
