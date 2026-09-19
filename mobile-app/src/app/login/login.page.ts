@@ -88,9 +88,19 @@ export class LoginPage {
       },
       error: async (err) => {
         await loading.dismiss();
+        let errorTitle = 'Acceso Denegado';
+        let errorMsg = 'El correo o la contraseña son incorrectos.';
+
+        if (err.status === 0) {
+          errorTitle = 'Error de Conexión';
+          errorMsg = 'No se pudo conectar con el servidor (https://app.dabecode.com). Verifica tu conexión a internet.';
+        } else if (err.error && err.error.message) {
+          errorMsg = err.error.message;
+        }
+
         const alert = await this.alertCtrl.create({
-          header: 'Acceso Denegado',
-          message: 'El correo o la contraseña son incorrectos.',
+          header: errorTitle,
+          message: errorMsg,
           buttons: ['Intentar de nuevo']
         });
         await alert.present();
@@ -145,9 +155,19 @@ export class LoginPage {
       },
       error: async (err) => {
         await loading.dismiss();
+        let errorTitle = 'Error al registrar';
+        let errorMsg = 'Hubo un problema. Intenta con otro correo.';
+
+        if (err.status === 0) {
+          errorTitle = 'Error de Conexión';
+          errorMsg = 'No se pudo conectar con el servidor (https://app.dabecode.com). Verifica tu conexión a internet.';
+        } else if (err.error && err.error.message) {
+          errorMsg = err.error.message;
+        }
+
         const alert = await this.alertCtrl.create({
-          header: 'Error al registrar',
-          message: 'Hubo un problema. Intenta con otro correo.',
+          header: errorTitle,
+          message: errorMsg,
           buttons: ['OK']
         });
         await alert.present();
