@@ -15,24 +15,33 @@ import { Router } from '@angular/router';
 })
 export class AuthInterceptor implements HttpInterceptor {
 
+  private readonly baseUrl = 'https://app.dabecode.com';
+
   constructor(private injector: Injector) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    
-    // Obtener el token del localStorage
     const token = localStorage.getItem('token');
 
-    // Control de Seguridad Anti-Fuga: Solo inyectar el Bearer Token a rutas internas de nuestra API (/api/...)
-    // Nunca enviar el token a servidores externos de terceros (mapas, CDNs, etc.)
-    const isApiUrl = request.url.startsWith('/api') || request.url.startsWith('http://localhost') || request.url.includes('app.dabecode.com/api');
-
-    if (token && isApiUrl) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+    let url = request.url;
+    // Si la ruta es relativa y empieza con /api, le anteponemos el servidor de producción
+    if (url.startsWith('/api')) {
+      url = `${this.baseUrl}${url}`;
+    } else if (url.startsWith('http://localhost:8080/api')) {
+      url = url.replace('http://localhost:8080', this.baseUrl);
     }
+
+    const isApiUrl = url.includes('/api/') || url.includes('app.dabecode.com');
+
+    // Clonar request con la URL absoluta y el token de autenticación
+    const headersConfig: { [key: string]: string } = {};
+    if (token && isApiUrl) {
+      headersConfig['Authorization'] = `Bearer ${token}`;
+    }
+
+    request = request.clone({
+      url,
+      setHeaders: headersConfig
+    });
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
